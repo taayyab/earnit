@@ -6,6 +6,12 @@ import {
   Heart,
   Users,
   RefreshCw,
+  Shield,
+  FileText,
+  Upload,
+  ClipboardList,
+  History,
+  AlertCircle,
 } from "lucide-react"
 import { apiClient } from "../api/client"
 import { PageHeader } from "../components/layout/page-header"
@@ -26,44 +32,121 @@ interface ApiEndpoint {
   name: string
   description: string
   icon: typeof Code
-  category: "facilities" | "appeals" | "health" | "eligibility"
-  isMock: boolean
+  category: "verification" | "benefits" | "appeals" | "health" | "other"
+  isLive: boolean
 }
 
 const apiEndpoints: ApiEndpoint[] = [
+  // Veteran Verification
+  {
+    id: "veteran-confirmation",
+    name: "Veteran Confirmation",
+    description: "Verify veteran status after ID.me authentication",
+    icon: Shield,
+    category: "verification",
+    isLive: true,
+  },
+  {
+    id: "service-history",
+    name: "Service History",
+    description: "Military service history including branches and dates",
+    icon: History,
+    category: "verification",
+    isLive: true,
+  },
+  // Benefits
+  {
+    id: "benefits-reference",
+    name: "Benefits Reference Data",
+    description: "Disability codes, contention types, and reference data",
+    icon: ClipboardList,
+    category: "benefits",
+    isLive: true,
+  },
+  {
+    id: "benefits-claims",
+    name: "Benefits Claims",
+    description: "Check status of existing disability compensation claims",
+    icon: FileText,
+    category: "benefits",
+    isLive: true,
+  },
+  {
+    id: "benefits-intake",
+    name: "Benefits Intake",
+    description: "Submit claim documents to VA for processing",
+    icon: Upload,
+    category: "benefits",
+    isLive: false,
+  },
+  {
+    id: "forms",
+    name: "VA Forms",
+    description: "Search and retrieve VA form metadata",
+    icon: FileText,
+    category: "benefits",
+    isLive: true,
+  },
+  // Facilities
   {
     id: "facilities",
     name: "VA Facilities",
-    description: "Search VA health facilities and cemeteries",
+    description: "Find nearby VA medical centers and clinics",
     icon: Building2,
-    category: "facilities",
-    isMock: true,
+    category: "other",
+    isLive: true,
+  },
+  // Appeals
+  {
+    id: "appealable-issues",
+    name: "Appealable Issues",
+    description: "Identify which claim decisions can be appealed",
+    icon: AlertCircle,
+    category: "appeals",
+    isLive: false,
   },
   {
-    id: "appeals",
+    id: "appeals-status",
     name: "Appeals Status",
-    description: "Check status of pending appeals",
+    description: "Track status of active appeals",
     icon: Scale,
     category: "appeals",
-    isMock: true,
+    isLive: false,
   },
   {
-    id: "health",
+    id: "legacy-appeals",
+    name: "Legacy Appeals",
+    description: "Access legacy appeals filed before AMA",
+    icon: Scale,
+    category: "appeals",
+    isLive: false,
+  },
+  // Health
+  {
+    id: "patient-health",
     name: "Patient Health",
-    description: "Access patient health records (FHIR)",
+    description: "Access veteran health records via FHIR",
     icon: Heart,
     category: "health",
-    isMock: true,
+    isLive: false,
   },
   {
     id: "community-care",
     name: "Community Care Eligibility",
-    description: "Check eligibility for community care",
+    description: "Check eligibility for community care outside VA",
     icon: Users,
-    category: "eligibility",
-    isMock: true,
+    category: "health",
+    isLive: false,
   },
 ]
+
+const categoryLabels: Record<string, string> = {
+  verification: "Veteran Verification",
+  benefits: "Benefits & Claims",
+  appeals: "Appeals",
+  health: "Health",
+  other: "Other Services",
+}
 
 export function Playground() {
   const [apiStates, setApiStates] = useState<Record<string, ApiState>>({})
@@ -77,13 +160,37 @@ export function Playground() {
     let result: { mode: "live" | "mock" }
 
     switch (endpointId) {
+      case "veteran-confirmation":
+        result = await apiClient.getVeteranConfirmation()
+        break
+      case "service-history":
+        result = await apiClient.getServiceHistory()
+        break
+      case "benefits-reference":
+        result = await apiClient.getBenefitsReference("disabilities")
+        break
+      case "benefits-claims":
+        result = await apiClient.getBenefitsClaims()
+        break
+      case "benefits-intake":
+        result = await apiClient.submitBenefitsIntake()
+        break
+      case "forms":
+        result = await apiClient.getForms()
+        break
       case "facilities":
         result = await apiClient.getFacilities()
         break
-      case "appeals":
+      case "appealable-issues":
+        result = await apiClient.getAppealableIssues()
+        break
+      case "appeals-status":
         result = await apiClient.getAppealsStatus()
         break
-      case "health":
+      case "legacy-appeals":
+        result = await apiClient.getLegacyAppeals()
+        break
+      case "patient-health":
         result = await apiClient.getPatientHealth()
         break
       case "community-care":
@@ -99,79 +206,92 @@ export function Playground() {
     }))
   }
 
+  const categories = [...new Set(apiEndpoints.map((e) => e.category))]
+
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <PageHeader
         title="API Playground"
-        description="Test VA Lighthouse API endpoints with mock data"
+        description="Test all 12 VA Lighthouse API endpoints"
       >
         <Badge variant="mock" className="text-sm px-3 py-1">
           Developer Mode
         </Badge>
       </PageHeader>
 
-      {/* Warning Alert */}
-      <Alert variant="warning" className="mb-6">
-        <AlertTitle>Mock Data Only</AlertTitle>
+      {/* Info Alert */}
+      <Alert variant="info" className="mb-6">
+        <AlertTitle>Live vs Mock APIs</AlertTitle>
         <AlertDescription>
-          All API calls on this page return mock data for testing purposes.
-          This allows you to explore the API structure without making real network requests.
-          Use the Profile and Claims pages for live VA sandbox testing.
+          APIs marked <Badge variant="live" className="mx-1">LIVE</Badge> will call the real VA sandbox when credentials are configured.
+          APIs marked <Badge variant="mock" className="mx-1">MOCK</Badge> return simulated data to prevent test pollution or due to authorization restrictions.
         </AlertDescription>
       </Alert>
 
-      {/* API Endpoints Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        {apiEndpoints.map((endpoint) => {
-          const Icon = endpoint.icon
-          const state = apiStates[endpoint.id]
-          const isLoading = state?.loading
+      {/* API Endpoints by Category */}
+      {categories.map((category) => (
+        <div key={category} className="mb-8">
+          <h2 className="text-lg font-semibold text-slate-800 mb-4">
+            {categoryLabels[category]}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {apiEndpoints
+              .filter((e) => e.category === category)
+              .map((endpoint) => {
+                const Icon = endpoint.icon
+                const state = apiStates[endpoint.id]
+                const isLoading = state?.loading
 
-          return (
-            <Card key={endpoint.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-amber-50">
-                      <Icon className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">{endpoint.name}</CardTitle>
-                      <CardDescription className="text-sm">
+                return (
+                  <Card key={endpoint.id} className="overflow-hidden">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${endpoint.isLive ? "bg-green-50" : "bg-amber-50"}`}>
+                            <Icon className={`h-5 w-5 ${endpoint.isLive ? "text-green-600" : "text-amber-600"}`} />
+                          </div>
+                          <div>
+                            <CardTitle className="text-sm">{endpoint.name}</CardTitle>
+                          </div>
+                        </div>
+                        <Badge variant={endpoint.isLive ? "live" : "mock"}>
+                          {endpoint.isLive ? "LIVE" : "MOCK"}
+                        </Badge>
+                      </div>
+                      <CardDescription className="text-xs mt-2">
                         {endpoint.description}
                       </CardDescription>
-                    </div>
-                  </div>
-                  <Badge variant="mock">MOCK</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  onClick={() => handleApiCall(endpoint.id)}
-                  disabled={isLoading}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {isLoading ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                      Calling API...
-                    </>
-                  ) : (
-                    <>
-                      <Code className="h-4 w-4" />
-                      Test Endpoint
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <Button
+                        onClick={() => handleApiCall(endpoint.id)}
+                        disabled={isLoading}
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                      >
+                        {isLoading ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                            <span>Calling...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Code className="h-4 w-4" />
+                            <span>Test</span>
+                          </>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+          </div>
+        </div>
+      ))}
 
       {/* API Responses */}
-      <div className="space-y-4">
+      <div className="space-y-4 mt-8">
         <h2 className="text-xl font-semibold text-slate-800 mb-4">
           API Responses
         </h2>

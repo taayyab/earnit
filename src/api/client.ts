@@ -25,6 +25,7 @@ async function request(endpoint: string, options: RequestInit = {}): Promise<Api
 }
 
 export const apiClient = {
+  // Veteran Verification APIs
   getVeteranConfirmation(): Promise<ApiResponse> {
     return request("/va/veteran-confirmation")
   },
@@ -33,6 +34,7 @@ export const apiClient = {
     return request("/va/service-history")
   },
 
+  // Benefits APIs
   getBenefitsReference(endpoint: string = "disabilities"): Promise<ApiResponse> {
     return request(`/va/benefits-reference/${endpoint}`)
   },
@@ -45,14 +47,31 @@ export const apiClient = {
     return request("/va/benefits-intake", { method: "POST" })
   },
 
+  // Forms API
+  getForms(formName?: string): Promise<ApiResponse> {
+    const endpoint = formName ? `/va/forms/${formName}` : "/va/forms"
+    return request(endpoint)
+  },
+
+  // Facilities API
   getFacilities(): Promise<ApiResponse> {
     return request("/va/facilities")
+  },
+
+  // Appeals APIs
+  getAppealableIssues(): Promise<ApiResponse> {
+    return request("/va/appealable-issues")
   },
 
   getAppealsStatus(): Promise<ApiResponse> {
     return request("/va/appeals-status")
   },
 
+  getLegacyAppeals(): Promise<ApiResponse> {
+    return request("/va/legacy-appeals")
+  },
+
+  // Health APIs
   getPatientHealth(): Promise<ApiResponse> {
     return request("/va/patient-health")
   },
@@ -61,10 +80,12 @@ export const apiClient = {
     return request("/va/community-care-eligibility")
   },
 
+  // Consent Management
   revokeConsent(): Promise<ApiResponse> {
     return request("/va/revoke-consent", { method: "POST" })
   },
 
+  // Auth
   getLoginUrl(): string {
     return `${API_BASE}/auth/login`
   },
