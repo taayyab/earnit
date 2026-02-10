@@ -1,24 +1,63 @@
+# Dependencies
+node_modules
+package-lock.json
+
+# Build
+dist
+dist-ssr
+build
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.example
+
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Testing
+coverage
+.nyc_output
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__
+__mocks__
+cypress/videos
+cypress/screenshots
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# Documentation
+*.md
+!README.md
+docs
+storybook-static
+
+# IDE
+.vscode
 .idea
+*.sublime-*
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+
+# Temp
+tmp
+temp
+*.tmp
+*.temp
+.cache
+.parcel-cache
+
+# Debug
+*.pem
+*.map
