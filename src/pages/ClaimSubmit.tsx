@@ -15,13 +15,13 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
-import { submitApi, claimsApi } from "../lib/api"
-import type { SubmissionReadiness, SubmissionPackage, SubmissionResult, Claim } from "../lib/api"
+import { submitApi } from "../lib/api"
+import type { SubmissionReadiness, SubmissionPackage, SubmissionResult } from "../lib/api"
 
 export function ClaimSubmit() {
   const { id: claimId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [claim, setClaim] = useState<Claim | null>(null)
+
   const [readiness, setReadiness] = useState<SubmissionReadiness | null>(null)
   const [packagePreview, setPackagePreview] = useState<SubmissionPackage | null>(null)
   const [loading, setLoading] = useState(true)
@@ -41,15 +41,12 @@ export function ClaimSubmit() {
       setLoading(true)
       setError(null)
 
-      const [claimRes, readinessRes, packageRes] = await Promise.all([
-        claimsApi.get(claimId).catch(() => ({ success: false, claim: null })),
+      const [readinessRes, packageRes] = await Promise.all([
         submitApi.getReadiness(claimId).catch(() => ({ success: false, readiness: null })),
         submitApi.previewPackage(claimId).catch(() => ({ success: false, package: null })),
       ])
 
-      if (claimRes.claim) {
-        setClaim(claimRes.claim)
-      }
+
 
       if (readinessRes.readiness) {
         setReadiness(readinessRes.readiness)

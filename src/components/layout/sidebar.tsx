@@ -7,7 +7,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Shield,
   HelpCircle,
   Users,
   MessageSquare,

@@ -16,7 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
 import { documentsApi, claimsApi } from "../lib/api"
-import type { Document, DocumentType, Claim } from "../lib/api"
+import type { Document, DocumentType } from "../lib/api"
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return "0 Bytes"
@@ -35,7 +35,7 @@ const getFileIcon = (fileType: string) => {
 export function ClaimDocuments() {
   const { id: claimId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [claim, setClaim] = useState<Claim | null>(null)
+
   const [documents, setDocuments] = useState<Document[]>([])
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,15 +59,12 @@ export function ClaimDocuments() {
       setLoading(true)
       setError(null)
 
-      const [claimRes, docsRes, typesRes] = await Promise.all([
-        claimsApi.get(claimId).catch(() => ({ success: false, claim: null })),
+      const [docsRes, typesRes] = await Promise.all([
         documentsApi.listByClaim(claimId).catch(() => ({ success: false, documents: [], count: 0 })),
         documentsApi.getTypes().catch(() => ({ success: false, documentTypes: [] })),
       ])
 
-      if (claimRes.claim) {
-        setClaim(claimRes.claim)
-      }
+
       setDocuments(docsRes.documents || [])
       setDocumentTypes(typesRes.documentTypes || [])
     } catch (err) {
@@ -255,11 +252,10 @@ export function ClaimDocuments() {
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
-              dragActive
-                ? "border-[#D4A574] bg-[#D4A574]/10"
-                : "border-slate-300 hover:border-[#D4A574]/50"
-            }`}
+            className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${dragActive
+              ? "border-[#D4A574] bg-[#D4A574]/10"
+              : "border-slate-300 hover:border-[#D4A574]/50"
+              }`}
           >
             {uploading ? (
               <div className="space-y-4">
@@ -323,9 +319,8 @@ export function ClaimDocuments() {
               return (
                 <div
                   key={item.type}
-                  className={`flex items-center gap-3 p-3 rounded-lg ${
-                    hasDoc ? "bg-green-50 border border-green-200" : "bg-slate-50"
-                  }`}
+                  className={`flex items-center gap-3 p-3 rounded-lg ${hasDoc ? "bg-green-50 border border-green-200" : "bg-slate-50"
+                    }`}
                 >
                   {hasDoc ? (
                     <CheckCircle2 className="h-5 w-5 text-green-500" />

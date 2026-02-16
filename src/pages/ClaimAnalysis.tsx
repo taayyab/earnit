@@ -15,13 +15,13 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
-import { aiApi, claimsApi } from "../lib/api"
-import type { ExtractedCondition, Claim } from "../lib/api"
+import { aiApi } from "../lib/api"
+import type { ExtractedCondition } from "../lib/api"
 
 export function ClaimAnalysis() {
   const { id: claimId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [claim, setClaim] = useState<Claim | null>(null)
+
   const [conditions, setConditions] = useState<ExtractedCondition[]>([])
   const [analyzing, setAnalyzing] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -44,14 +44,9 @@ export function ClaimAnalysis() {
       setLoading(true)
       setError(null)
 
-      const [claimRes, analysisRes] = await Promise.all([
-        claimsApi.get(claimId).catch(() => ({ success: false, claim: null })),
+      const [analysisRes] = await Promise.all([
         aiApi.getAnalysis(claimId).catch(() => ({ success: false, analysis: null })),
       ])
-
-      if (claimRes.claim) {
-        setClaim(claimRes.claim)
-      }
 
       if (analysisRes.analysis) {
         setConditions(analysisRes.analysis.conditions || [])

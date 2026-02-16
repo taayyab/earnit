@@ -17,12 +17,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
 import { formsApi, aiApi } from "../lib/api"
-import type { AvailableForm, FormGenerationResult, ExtractedCondition } from "../lib/api"
+import type { FormGenerationResult, ExtractedCondition } from "../lib/api"
 
 export function ClaimForms() {
   const { id: claimId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [availableForms, setAvailableForms] = useState<AvailableForm[]>([])
+
   const [conditions, setConditions] = useState<ExtractedCondition[]>([])
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState<string | null>(null)
@@ -42,14 +42,11 @@ export function ClaimForms() {
       setLoading(true)
       setError(null)
 
-      const [formsRes, analysisRes] = await Promise.all([
-        formsApi.listAvailable(claimId).catch(() => ({ success: false, forms: [], conditionCount: 0 })),
+      const [analysisRes] = await Promise.all([
         aiApi.getAnalysis(claimId).catch(() => ({ success: false, analysis: null })),
       ])
 
-      if (formsRes.forms) {
-        setAvailableForms(formsRes.forms)
-      }
+
 
       if (analysisRes.analysis?.conditions) {
         setConditions(analysisRes.analysis.conditions)
@@ -126,18 +123,7 @@ export function ClaimForms() {
     }
   }
 
-  const getFormIcon = (type: string) => {
-    switch (type) {
-      case "526ez":
-        return <FileText className="h-5 w-5 text-blue-600" />
-      case "nexus":
-        return <Stethoscope className="h-5 w-5 text-green-600" />
-      case "dbq":
-        return <ClipboardList className="h-5 w-5 text-purple-600" />
-      default:
-        return <FileText className="h-5 w-5 text-slate-600" />
-    }
-  }
+
 
   if (loading) {
     return (
