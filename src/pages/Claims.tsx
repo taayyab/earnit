@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Plus,
   Filter,
@@ -8,8 +9,11 @@ import {
   RefreshCw,
   FileText,
   Send,
+  Loader2,
 } from "lucide-react"
 import { apiClient } from "../api/client"
+import { claimsApi } from "../lib/api"
+import type { Claim } from "../lib/api"
 import { PageHeader } from "../components/layout/page-header"
 import { ClaimCard } from "../components/claim-card"
 import { ApiResponseCard } from "../components/api-response-card"
@@ -26,45 +30,12 @@ interface ApiState {
   response: unknown
 }
 
-// Demo claims data
-const demoClaims = [
-  {
-    id: "CLM-2026-001",
-    title: "Initial Disability Claim",
-    status: "in_review" as const,
-    submissionDate: "Jan 15, 2026",
-    lastUpdated: "Feb 8, 2026",
-    conditions: ["PTSD", "Tinnitus", "Sleep Apnea"],
-  },
-  {
-    id: "CLM-2025-047",
-    title: "Supplemental Claim - Knee Condition",
-    status: "pending" as const,
-    lastUpdated: "Feb 5, 2026",
-    conditions: ["Left Knee Strain"],
-  },
-  {
-    id: "CLM-2025-032",
-    title: "Hearing Loss Claim",
-    status: "approved" as const,
-    submissionDate: "Oct 10, 2025",
-    lastUpdated: "Dec 20, 2025",
-    conditions: ["Bilateral Hearing Loss"],
-    rating: 10,
-  },
-  {
-    id: "CLM-2025-015",
-    title: "Back Condition Appeal",
-    status: "denied" as const,
-    submissionDate: "Aug 5, 2025",
-    lastUpdated: "Nov 15, 2025",
-    conditions: ["Lumbar Spine Strain"],
-  },
-]
-
 export function Claims() {
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("")
   const [showApiSection, setShowApiSection] = useState(false)
+  const [claims, setClaims] = useState<Claim[]>([])
+  const [loadingClaims, setLoadingClaims] = useState(true)
 
   const [benefitsClaims, setBenefitsClaims] = useState<ApiState>({
     loading: false,
@@ -78,6 +49,29 @@ export function Claims() {
     response: null,
   })
 
+  const userId = localStorage.getItem("userId")
+
+  useEffect(() => {
+    if (userId) {
+      loadClaims()
+    }
+  }, [userId])
+
+  const loadClaims = async () => {
+    if (!userId) return
+    try {
+      setLoadingClaims(true)
+      const res = await claimsApi.list(userId)
+      if (res.claims) {
+        setClaims(res.claims)
+      }
+    } catch (err) {
+      console.error("Error loading claims:", err)
+    } finally {
+      setLoadingClaims(false)
+    }
+  }
+
   const handleBenefitsClaims = async () => {
     setBenefitsClaims({ loading: true, mode: null, response: null })
     const result = await apiClient.getBenefitsClaims()
@@ -90,20 +84,41 @@ export function Claims() {
     setBenefitsIntake({ loading: false, mode: result.mode, response: result })
   }
 
-  const filteredClaims = demoClaims.filter(
+  const filteredClaims = claims.filter(
     (claim) =>
-      claim.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       claim.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      claim.conditions.some((c) =>
-        c.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      claim.claimType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (claim.conditions && claim.conditions.some((c) =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase())
+      ))
   )
 
   const stats = {
-    total: demoClaims.length,
-    pending: demoClaims.filter((c) => c.status === "pending" || c.status === "in_review").length,
-    approved: demoClaims.filter((c) => c.status === "approved").length,
-    denied: demoClaims.filter((c) => c.status === "denied").length,
+    total: claims.length,
+    pending: claims.filter((c) => c.status === "draft" || c.status === "in_progress" || c.status === "in_review").length,
+    approved: claims.filter((c) => c.status === "approved").length,
+    denied: claims.filter((c) => c.status === "denied").length,
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  }
+
+  const getClaimTitle = (claim: Claim) => {
+    if (claim.claimType === "original") return "Initial Disability Claim"
+    if (claim.claimType === "increase") return "Claim for Increase"
+    if (claim.claimType === "secondary") return "Secondary Condition Claim"
+    return "Disability Claim"
+  }
+
+  const getStatusForCard = (status: string): "pending" | "in_review" | "approved" | "denied" => {
+    if (status === "draft" || status === "in_progress") return "pending"
+    if (status === "in_review" || status === "submitted") return "in_review"
+    return status as "approved" | "denied"
   }
 
   return (
@@ -157,12 +172,25 @@ export function Claims() {
 
       {/* Claims List */}
       <div className="space-y-4 mb-8">
-        {filteredClaims.length > 0 ? (
+        {loadingClaims ? (
+          <Card>
+            <CardContent className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-[#D4A574]" />
+              <span className="ml-3 text-slate-500">Loading your claims...</span>
+            </CardContent>
+          </Card>
+        ) : filteredClaims.length > 0 ? (
           filteredClaims.map((claim) => (
             <ClaimCard
               key={claim.id}
-              {...claim}
-              onClick={() => console.log(`View claim ${claim.id}`)}
+              id={claim.id.slice(0, 8).toUpperCase()}
+              title={getClaimTitle(claim)}
+              status={getStatusForCard(claim.status)}
+              submissionDate={claim.submittedAt ? formatDate(claim.submittedAt) : undefined}
+              lastUpdated={formatDate(claim.updatedAt)}
+              conditions={claim.conditions?.map(c => c.name) || []}
+              rating={claim.estimatedRating}
+              onClick={() => navigate(`/claims/${claim.id}`)}
             />
           ))
         ) : (
@@ -178,7 +206,10 @@ export function Claims() {
                   : "Start your first claim to get the benefits you've earned"}
               </p>
               {!searchQuery && (
-                <Button className="bg-blue-600 hover:bg-blue-700">
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => navigate("/dashboard")}
+                >
                   <Plus className="h-4 w-4" />
                   Start Your First Claim
                 </Button>

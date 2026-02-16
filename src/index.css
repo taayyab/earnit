@@ -1,7 +1,21 @@
-/* Inter Font Import - Must be first */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
+/* Karla Font Import - Must be first */
+@import url("https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+
+/* Global font */
+:root {
+  --font-sans:
+    "Karla", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+h2 {
+  font-family: "Chivo", var(--font-sans);
+}
 
 /* ========================================
    EarnedIT Design System
@@ -11,7 +25,7 @@
 /* ========================================
    Tailwind v4 Theme Configuration
    ======================================== */
-@theme {
+/* @theme {
   --color-navy: #1e3a5f;
   --color-patriot: #2563eb;
   --color-gold: #f59e0b;
@@ -19,24 +33,24 @@
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-info: #3b82f6;
-}
+} */
 
 /* ========================================
    CSS Custom Properties for Components
    ======================================== */
-:root {
-  /* Primary Colors */
+/* :root {
+  Primary Colors
   --color-navy: #1e3a5f;
   --color-patriot-blue: #2563eb;
   --color-gold: #f59e0b;
 
-  /* Semantic Colors */
+  Semantic Colors
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-info: #3b82f6;
 
-  /* Neutral Colors */
+  Neutral Colors
   --color-slate-50: #f8fafc;
   --color-slate-100: #f1f5f9;
   --color-slate-200: #e2e8f0;
@@ -48,39 +62,41 @@
   --color-slate-800: #1e293b;
   --color-slate-900: #0f172a;
 
-  /* Functional Colors */
+  Functional Colors
   --color-background: #f8fafc;
   --color-surface: #ffffff;
   --color-text: #1e293b;
   --color-text-muted: #64748b;
 
-  /* Border Radius */
+  Border Radius
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* Shadows */
+  Shadows
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
 
-  /* Animation Durations */
+  Animation Durations
   --duration-fast: 150ms;
   --duration-normal: 250ms;
   --duration-slow: 400ms;
 
-  /* Font Family */
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-}
+  Font Family
+  --font-sans:
+    "Open Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+} */
 
 /* ========================================
    Base Styles
    ======================================== */
-* {
+/* * {
   box-sizing: border-box;
 }
 
@@ -103,12 +119,17 @@ body {
 
 #root {
   min-height: 100vh;
-}
+} */
 
 /* ========================================
    Typography
    ======================================== */
-h1, h2, h3, h4, h5, h6 {
+/* h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin: 0;
   font-weight: 600;
   line-height: 1.25;
@@ -139,24 +160,24 @@ h4 {
 p {
   margin: 0;
   line-height: 1.5;
-}
+} */
 
 /* ========================================
    Focus States (Accessibility)
    ======================================== */
-:focus-visible {
+/* :focus-visible {
   outline: 2px solid var(--color-patriot-blue);
   outline-offset: 2px;
 }
 
 :focus:not(:focus-visible) {
   outline: none;
-}
+} */
 
 /* ========================================
    Reduced Motion Support
    ======================================== */
-@media (prefers-reduced-motion: reduce) {
+/* @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
@@ -165,12 +186,12 @@ p {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
+} */
 
 /* ========================================
    Scrollbar Styling
    ======================================== */
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
@@ -186,19 +207,19 @@ p {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-slate-400);
-}
+} */
 
 /* ========================================
    Screen reader only
    ======================================== */
-.sr-only {
+/* .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
   padding: 0;
-  margin: -1px;
+  margin: 0;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
-}
+} */

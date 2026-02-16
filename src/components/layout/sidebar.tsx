@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom";
 import {
   Home,
   FileText,
@@ -9,43 +9,108 @@ import {
   ChevronRight,
   Shield,
   HelpCircle,
-} from "lucide-react"
-import { cn } from "../../lib/utils"
-import { Button } from "../ui/button"
+  Users,
+  MessageSquare,
+  Calendar,
+  Briefcase,
+  CheckCircle,
+  DollarSign,
+  BarChart3,
+  Settings,
+  UserPlus,
+} from "lucide-react";
+import { cn } from "../../lib/utils";
+import { Button } from "../ui/button";
 
 interface SidebarProps {
-  collapsed: boolean
-  onToggle: () => void
-  onLogout: () => void
+  collapsed: boolean;
+  onToggle: () => void;
+  onLogout: () => void;
 }
 
-const mainNavItems = [
-  { path: "/dashboard", label: "Dashboard", icon: Home },
-  { path: "/claims", label: "My Claims", icon: FileText },
-  { path: "/profile", label: "Profile", icon: User },
-]
+type UserRole = "veteran" | "advocate" | "agent" | "partner_admin";
+
+const getNavItemsForRole = (role: UserRole) => {
+  switch (role) {
+    case "veteran":
+      return [
+        { path: "/dashboard", label: "Dashboard", icon: Home },
+        { path: "/claims", label: "My Claims", icon: FileText },
+        { path: "/profile", label: "Profile", icon: User },
+      ];
+    case "advocate":
+      return [
+        { path: "/advocate/dashboard", label: "Dashboard", icon: Home },
+        { path: "/advocate/veterans", label: "My Veterans", icon: Users },
+        { path: "/advocate/messages", label: "Messages", icon: MessageSquare },
+        { path: "/advocate/schedule", label: "Schedule", icon: Calendar },
+        { path: "/profile", label: "Profile", icon: User },
+      ];
+    case "agent":
+      return [
+        { path: "/agent/dashboard", label: "Dashboard", icon: Home },
+        { path: "/agent/cases", label: "Active Cases", icon: Briefcase },
+        { path: "/agent/clients", label: "Clients", icon: Users },
+        { path: "/agent/qa", label: "QA Review", icon: CheckCircle },
+        { path: "/agent/billing", label: "Fee Agreements", icon: DollarSign },
+        { path: "/profile", label: "Profile", icon: User },
+      ];
+    case "partner_admin":
+      return [
+        { path: "/partner/dashboard", label: "Dashboard", icon: Home },
+        { path: "/partner/team", label: "Team", icon: Users },
+        { path: "/partner/analytics", label: "Analytics", icon: BarChart3 },
+        { path: "/partner/settings", label: "Settings", icon: Settings },
+        { path: "/partner/invite", label: "Invite Members", icon: UserPlus },
+      ];
+    default:
+      return [
+        { path: "/dashboard", label: "Dashboard", icon: Home },
+        { path: "/claims", label: "My Claims", icon: FileText },
+        { path: "/profile", label: "Profile", icon: User },
+      ];
+  }
+};
 
 const devNavItems = [
   { path: "/playground", label: "API Playground", icon: Code },
-]
+];
 
 export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
-  const location = useLocation()
+  const location = useLocation();
+  const userRole = (localStorage.getItem("userRole") as UserRole) || "veteran";
+  const mainNavItems = getNavItemsForRole(userRole);
+
+  const getDashboardPath = () => {
+    switch (userRole) {
+      case "advocate":
+        return "/advocate/dashboard";
+      case "agent":
+        return "/agent/dashboard";
+      case "partner_admin":
+        return "/partner/dashboard";
+      default:
+        return "/dashboard";
+    }
+  };
 
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col h-screen bg-white border-r border-slate-200 transition-all duration-300",
-        collapsed ? "w-16" : "w-64"
+        "hidden lg:flex flex-col h-screen bg-white border-r border-slate-200 transition-all duration-300 flex-shrink-0 sticky top-0",
+        collapsed ? "w-16" : "w-64",
       )}
     >
-      {/* Logo */}
       <div className="flex items-center h-16 px-4 border-b border-slate-200">
         <Link
-          to="/dashboard"
+          to={getDashboardPath()}
           className="flex items-center gap-2 text-slate-800 hover:opacity-80 transition-opacity"
         >
-          <Shield className="h-8 w-8 text-amber-500 shrink-0" />
+          <img
+            src="/earnedit_logo.webp"
+            alt="EarnedIT"
+            className="h-10 w-10 object-contain shrink-0"
+          />
           {!collapsed && (
             <span className="text-xl font-bold tracking-tight">
               Earned<span className="text-amber-500">IT</span>
@@ -54,7 +119,6 @@ export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
         </Link>
       </div>
 
-      {/* Main Navigation */}
       <nav className="flex-1 p-3 space-y-1">
         <div className="mb-4">
           {!collapsed && (
@@ -63,8 +127,8 @@ export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
             </p>
           )}
           {mainNavItems.map((item) => {
-            const Icon = item.icon
-            const isActive = location.pathname === item.path
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
@@ -74,14 +138,14 @@ export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
                   isActive
                     ? "bg-blue-50 text-blue-600"
                     : "text-slate-500 hover:text-slate-800 hover:bg-slate-100",
-                  collapsed && "justify-center"
+                  collapsed && "justify-center",
                 )}
                 title={collapsed ? item.label : undefined}
               >
                 <Icon className="h-5 w-5 shrink-0 flex-none" />
                 {!collapsed && <span>{item.label}</span>}
               </Link>
-            )
+            );
           })}
         </div>
 
@@ -92,8 +156,8 @@ export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
             </p>
           )}
           {devNavItems.map((item) => {
-            const Icon = item.icon
-            const isActive = location.pathname === item.path
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
@@ -103,14 +167,14 @@ export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
                   isActive
                     ? "bg-amber-50 text-amber-600"
                     : "text-slate-500 hover:text-slate-800 hover:bg-slate-100",
-                  collapsed && "justify-center"
+                  collapsed && "justify-center",
                 )}
                 title={collapsed ? item.label : undefined}
               >
                 <Icon className="h-5 w-5 shrink-0 flex-none" />
                 {!collapsed && <span>{item.label}</span>}
               </Link>
-            )
+            );
           })}
         </div>
       </nav>
@@ -121,7 +185,7 @@ export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
           to="/help"
           className={cn(
             "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors",
-            collapsed && "justify-center"
+            collapsed && "justify-center",
           )}
           title={collapsed ? "Help" : undefined}
         >
@@ -132,7 +196,7 @@ export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
           onClick={onLogout}
           className={cn(
             "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors w-full",
-            collapsed && "justify-center"
+            collapsed && "justify-center",
           )}
           title={collapsed ? "Logout" : undefined}
         >
@@ -147,10 +211,7 @@ export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
           variant="ghost"
           size="sm"
           onClick={onToggle}
-          className={cn(
-            "w-full justify-center",
-            collapsed && "px-2"
-          )}
+          className={cn("w-full justify-center", collapsed && "px-2")}
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -163,5 +224,5 @@ export function Sidebar({ collapsed, onToggle, onLogout }: SidebarProps) {
         </Button>
       </div>
     </aside>
-  )
+  );
 }

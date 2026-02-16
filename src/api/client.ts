@@ -89,4 +89,34 @@ export const apiClient = {
   getLoginUrl(): string {
     return `${API_BASE}/auth/login`
   },
+
+  async demoLogin(accountId: string): Promise<{
+    status: "success" | "error"
+    data?: {
+      user: {
+        id: string
+        email: string
+        firstName: string
+        lastName: string
+        role: "veteran" | "advocate" | "agent" | "partner_admin"
+      }
+      isDemo: boolean
+      expiresIn: number
+    }
+    code?: string
+    message?: string
+  }> {
+    const response = await fetch(`${API_BASE}/auth/demo-login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ accountId }),
+    })
+    return response.json()
+  },
+
+  async logout(): Promise<ApiResponse> {
+    return request("/auth/logout", { method: "POST" })
+  },
 }

@@ -1,5 +1,5 @@
-import { Link, useLocation } from "react-router-dom"
-import { useState } from "react"
+import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 import {
   Home,
   FileText,
@@ -9,12 +9,12 @@ import {
   Menu,
   X,
   Shield,
-} from "lucide-react"
-import { Button } from "../ui/button"
-import { cn } from "../../lib/utils"
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { cn } from "../../lib/utils";
 
 interface HeaderProps {
-  onLogout: () => void
+  onLogout: () => void;
 }
 
 const navItems = [
@@ -22,11 +22,11 @@ const navItems = [
   { path: "/claims", label: "Claims", icon: FileText },
   { path: "/profile", label: "Profile", icon: User },
   { path: "/playground", label: "API Playground", icon: Code },
-]
+];
 
 export function Header({ onLogout }: HeaderProps) {
-  const location = useLocation()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-slate-800">
@@ -36,7 +36,11 @@ export function Header({ onLogout }: HeaderProps) {
           to="/dashboard"
           className="flex items-center gap-2 text-white hover:opacity-90 transition-opacity"
         >
-          <Shield className="h-8 w-8 text-amber-500" />
+          <img
+            src="/earnedit_logo.webp"
+            alt="EarnedIT"
+            className="h-10 w-10 object-contain"
+          />
           <span className="text-xl font-bold tracking-tight">
             Earned<span className="text-amber-500">IT</span>
           </span>
@@ -45,8 +49,8 @@ export function Header({ onLogout }: HeaderProps) {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
           {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = location.pathname === item.path
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
@@ -55,13 +59,13 @@ export function Header({ onLogout }: HeaderProps) {
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                   isActive
                     ? "bg-white/10 text-white"
-                    : "text-white/70 hover:text-white hover:bg-white/5"
+                    : "text-white/70 hover:text-white hover:bg-white/5",
                 )}
               >
                 <Icon className="h-4 w-4" />
                 {item.label}
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -97,8 +101,8 @@ export function Header({ onLogout }: HeaderProps) {
         <div className="md:hidden border-t border-white/10 bg-slate-800">
           <nav className="flex flex-col p-4 gap-1">
             {navItems.map((item) => {
-              const Icon = item.icon
-              const isActive = location.pathname === item.path
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
@@ -108,19 +112,19 @@ export function Header({ onLogout }: HeaderProps) {
                     "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors",
                     isActive
                       ? "bg-white/10 text-white"
-                      : "text-white/70 hover:text-white hover:bg-white/5"
+                      : "text-white/70 hover:text-white hover:bg-white/5",
                   )}
                 >
                   <Icon className="h-5 w-5" />
                   {item.label}
                 </Link>
-              )
+              );
             })}
             <div className="mt-2 pt-2 border-t border-white/10">
               <button
                 onClick={() => {
-                  setMobileMenuOpen(false)
-                  onLogout()
+                  setMobileMenuOpen(false);
+                  onLogout();
                 }}
                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-white/70 hover:text-white hover:bg-white/5 w-full"
               >
@@ -132,5 +136,5 @@ export function Header({ onLogout }: HeaderProps) {
         </div>
       )}
     </header>
-  )
+  );
 }
