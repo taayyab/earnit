@@ -254,12 +254,7 @@ export interface Message {
 }
 
 // API Response types
-interface ApiResponse<T> {
-  success: boolean;
-  error?: string;
-  message?: string;
-  data?: T;
-}
+
 
 // Generic fetch wrapper
 async function apiFetch<T>(

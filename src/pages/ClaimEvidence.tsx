@@ -16,8 +16,8 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
-import { evidenceApi, documentsApi, aiApi } from "../lib/api"
-import type { EvidenceLink, EvidenceSuggestion, ConditionWithEvidence, Document, ExtractedCondition } from "../lib/api"
+import { evidenceApi, documentsApi } from "../lib/api"
+import type { EvidenceSuggestion, ConditionWithEvidence, Document } from "../lib/api"
 
 const documentTypeLabels: Record<string, string> = {
   dd214: "DD-214",
@@ -44,7 +44,7 @@ export function ClaimEvidence() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [expandedConditions, setExpandedConditions] = useState<Set<string>>(new Set())
-  const [linkingCondition, setLinkingCondition] = useState<string | null>(null)
+
 
   useEffect(() => {
     loadData()
@@ -57,7 +57,7 @@ export function ClaimEvidence() {
       setLoading(true)
       setError(null)
 
-      const userId = localStorage.getItem("userId") || ""
+
 
       const [evidenceRes, docsRes] = await Promise.all([
         evidenceApi.getByClaim(claimId).catch(() => ({ success: false, conditionsWithEvidence: [], evidenceLinks: [] })),
@@ -285,7 +285,7 @@ export function ClaimEvidence() {
           {suggestions.length > 0 && (
             <div className="mt-4 space-y-2">
               <h4 className="text-sm font-medium text-slate-700 mb-2">Suggested Links:</h4>
-              {suggestions.slice(0, 5).map((suggestion, idx) => (
+              {suggestions.slice(0, 5).map((suggestion) => (
                 <div
                   key={`${suggestion.conditionId}-${suggestion.documentId}`}
                   className="flex items-center justify-between p-3 bg-white rounded-lg border border-amber-200"

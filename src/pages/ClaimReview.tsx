@@ -16,8 +16,8 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
-import { qaApi, claimsApi } from "../lib/api"
-import type { QAResult, QACheck, QAIssue, Claim } from "../lib/api"
+import { qaApi } from "../lib/api"
+import type { QAResult } from "../lib/api"
 
 const getSeverityIcon = (severity: string) => {
   switch (severity) {
@@ -48,7 +48,7 @@ const getSeverityBg = (severity: string) => {
 export function ClaimReview() {
   const { id: claimId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [claim, setClaim] = useState<Claim | null>(null)
+
   const [qaResult, setQaResult] = useState<QAResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [validating, setValidating] = useState(false)
@@ -67,14 +67,11 @@ export function ClaimReview() {
       setLoading(true)
       setError(null)
 
-      const [claimRes, qaRes] = await Promise.all([
-        claimsApi.get(claimId).catch(() => ({ success: false, claim: null })),
+      const [qaRes] = await Promise.all([
         qaApi.getResults(claimId).catch(() => ({ success: false, qa: null })),
       ])
 
-      if (claimRes.claim) {
-        setClaim(claimRes.claim)
-      }
+
 
       if (qaRes.qa) {
         setQaResult(qaRes.qa)

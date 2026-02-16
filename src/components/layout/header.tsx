@@ -8,7 +8,6 @@ import {
   LogOut,
   Menu,
   X,
-  Shield,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";

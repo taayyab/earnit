@@ -19,8 +19,8 @@ import {
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
-import { submitApi, claimsApi } from "../lib/api"
-import type { Claim } from "../lib/api"
+import { submitApi } from "../lib/api"
+
 
 interface TrackingStatus {
   claimId: string
@@ -42,7 +42,7 @@ interface TimelineEvent {
 export function ClaimTrack() {
   const { id: claimId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [claim, setClaim] = useState<Claim | null>(null)
+
   const [trackingStatus, setTrackingStatus] = useState<TrackingStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -59,14 +59,11 @@ export function ClaimTrack() {
       setLoading(true)
       setError(null)
 
-      const [claimRes, statusRes] = await Promise.all([
-        claimsApi.get(claimId).catch(() => ({ success: false, claim: null })),
+      const [statusRes] = await Promise.all([
         submitApi.getStatus(claimId).catch(() => ({ success: false, status: null })),
       ])
 
-      if (claimRes.claim) {
-        setClaim(claimRes.claim)
-      }
+
 
       if (statusRes.status) {
         setTrackingStatus(statusRes.status)
@@ -358,19 +355,17 @@ export function ClaimTrack() {
               <div key={event.id} className="relative pl-8 pb-8 last:pb-0">
                 {/* Vertical line */}
                 {index < timeline.length - 1 && (
-                  <div className={`absolute left-3 top-6 bottom-0 w-0.5 ${
-                    event.status === "completed" ? "bg-green-300" : "bg-slate-200"
-                  }`} />
+                  <div className={`absolute left-3 top-6 bottom-0 w-0.5 ${event.status === "completed" ? "bg-green-300" : "bg-slate-200"
+                    }`} />
                 )}
 
                 {/* Status indicator */}
-                <div className={`absolute left-0 top-0 w-6 h-6 rounded-full flex items-center justify-center ${
-                  event.status === "completed"
-                    ? "bg-green-500"
-                    : event.status === "current"
+                <div className={`absolute left-0 top-0 w-6 h-6 rounded-full flex items-center justify-center ${event.status === "completed"
+                  ? "bg-green-500"
+                  : event.status === "current"
                     ? "bg-blue-500 ring-4 ring-blue-100"
                     : "bg-slate-200"
-                }`}>
+                  }`}>
                   {event.status === "completed" ? (
                     <CheckCircle2 className="h-4 w-4 text-white" />
                   ) : event.status === "current" ? (
@@ -383,9 +378,8 @@ export function ClaimTrack() {
                 {/* Content */}
                 <div className={`${event.status === "pending" ? "opacity-50" : ""}`}>
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className={`font-semibold ${
-                      event.status === "current" ? "text-blue-800" : "text-slate-800"
-                    }`}>
+                    <h4 className={`font-semibold ${event.status === "current" ? "text-blue-800" : "text-slate-800"
+                      }`}>
                       {event.title}
                     </h4>
                     {event.status === "current" && (

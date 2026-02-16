@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import {
-  FileText,
   Upload,
   Brain,
   CheckCircle2,
@@ -26,7 +25,7 @@ import { Textarea } from "../components/ui/textarea"
 import { claimsApi, advocatesApi, messagesApi } from "../lib/api"
 import type { Claim, Advocate } from "../lib/api"
 
-// 6-Stage Claim Tracker per documentation
+
 const CLAIM_STAGES = [
   { key: "intake", label: "Intake", description: "Document upload & collection", icon: Upload },
   { key: "analysis", label: "Analysis", description: "AI condition discovery", icon: Brain },
@@ -254,18 +253,18 @@ export function ClaimDetail() {
               const Icon = stage.icon
               const isComplete = index < currentStageIndex
               const isCurrent = index === currentStageIndex
-              const isFuture = index > currentStageIndex
+
+
 
               return (
                 <div key={stage.key} className="text-center">
                   <div
-                    className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2 transition-all ${
-                      isComplete
-                        ? "bg-green-500 text-white"
-                        : isCurrent
+                    className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2 transition-all ${isComplete
+                      ? "bg-green-500 text-white"
+                      : isCurrent
                         ? "bg-[#D4A574] text-white ring-4 ring-[#D4A574]/30"
                         : "bg-slate-200 text-slate-400"
-                    }`}
+                      }`}
                   >
                     {isComplete ? (
                       <CheckCircle2 className="h-5 w-5" />
@@ -274,9 +273,8 @@ export function ClaimDetail() {
                     )}
                   </div>
                   <p
-                    className={`text-xs font-medium ${
-                      isCurrent ? "text-[#D4A574]" : isComplete ? "text-green-600" : "text-slate-400"
-                    }`}
+                    className={`text-xs font-medium ${isCurrent ? "text-[#D4A574]" : isComplete ? "text-green-600" : "text-slate-400"
+                      }`}
                   >
                     {stage.label}
                   </p>
@@ -541,8 +539,8 @@ export function ClaimDetail() {
                     {claim.claimType === "original"
                       ? "Initial Claim"
                       : claim.claimType === "increase"
-                      ? "Claim for Increase"
-                      : claim.claimType}
+                        ? "Claim for Increase"
+                        : claim.claimType}
                   </p>
                 </div>
                 <div className="border-t border-slate-200 pt-4">
@@ -669,7 +667,7 @@ export function ClaimDetail() {
                   </label>
                   <Textarea
                     value={messageContent}
-                    onChange={(e) => setMessageContent(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessageContent(e.target.value)}
                     placeholder="Type your message here..."
                     rows={4}
                   />
