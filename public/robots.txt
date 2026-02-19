@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /agent/
+Disallow: /partner/
+
+Sitemap: https://earnedit.com/sitemap.xml

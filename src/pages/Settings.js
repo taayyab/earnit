@@ -1,0 +1,152 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import PageHeader from '../components/PageHeader';
+import EngagementPreferences from '../components/EngagementPreferences';
+import DataExportCard from '../components/settings/DataExportCard';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { useAuth } from '../lib/auth-context';
+import { Settings as SettingsIcon, MessageSquare, Bell, Shield, User, Download } from 'lucide-react';
+
+export default function Settings() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('engagement');
+
+  return (
+    <div className="min-h-screen bg-white">
+      <PageHeader title="Settings" subtitle="Manage your preferences and account settings" />
+      
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5">
+            <TabsTrigger value="engagement" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Communication</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              <span className="hidden sm:inline">Notifications</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Security</span>
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger value="data" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Data</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="mt-6">
+            <TabsContent value="engagement">
+              <EngagementPreferences onSaved={() => {}} />
+            </TabsContent>
+
+            <TabsContent value="notifications">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notification Preferences</CardTitle>
+                  <CardDescription>Choose how you want to be notified</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Email Notifications</p>
+                      <p className="text-sm text-muted-foreground">Receive updates via email</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="h-5 w-5" />
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Touchpoint Reminders</p>
+                      <p className="text-sm text-muted-foreground">Get reminded before scheduled meetings</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="h-5 w-5" />
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Claim Updates</p>
+                      <p className="text-sm text-muted-foreground">Be notified of claim status changes</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="h-5 w-5" />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="security">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Security Settings</CardTitle>
+                  <CardDescription>Manage your account security</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Two-Factor Authentication</p>
+                      <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+                    </div>
+                    <Button variant="outline" onClick={() => navigate('/mfa-setup')}>
+                      Configure
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Change Password</p>
+                      <p className="text-sm text-muted-foreground">Update your account password</p>
+                    </div>
+                    <Button variant="outline">
+                      Update
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Active Sessions</p>
+                      <p className="text-sm text-muted-foreground">View and manage your active sessions</p>
+                    </div>
+                    <Button variant="outline">
+                      View
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="profile">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Information</CardTitle>
+                  <CardDescription>Your account details</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="font-medium">{user?.email}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <p className="text-sm text-muted-foreground">Account Type</p>
+                    <p className="font-medium capitalize">{user?.role?.replace('_', ' ')}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <p className="text-sm text-muted-foreground">Veteran Status</p>
+                    <p className="font-medium">{user?.veteran_status ? 'Verified' : 'Pending Verification'}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="data">
+              <DataExportCard />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
