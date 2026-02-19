@@ -4,8 +4,8 @@
 
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL 
-  ? `${process.env.REACT_APP_BACKEND_URL}/api` 
+const API_URL = process.env.VITE_API_URL 
+  ? `${process.env.VITE_API_URL}/api` 
   : '/api';
 
 // Create axios instance with credentials for cookie-based auth
