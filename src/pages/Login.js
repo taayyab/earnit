@@ -22,7 +22,7 @@ export default function Login() {
   const [idmeAvailable, setIdmeAvailable] = useState(false);
   const [idmeChecked, setIdmeChecked] = useState(false);
   const [selectedDemoAccount, setSelectedDemoAccount] = useState(null);
-  const { login, isAuthenticated, user } = useAuth();
+  const { login, demoLogin: authDemoLogin, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -148,19 +148,14 @@ export default function Login() {
     setDemoLoading(true);
     setSelectedDemoAccount(accountType);
     setError('');
-    
+
     try {
-      const response = await authAPI.demoLogin(accountType);
-      const userData = response.data;
-      
-      localStorage.setItem('token', userData.access_token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('mfaVerified', 'true');
-      
+      await authDemoLogin(accountType);
+
       const account = demoAccounts.find(a => a.type === accountType);
       toast.success(`Welcome, ${account?.name}!`);
-      
-      window.location.href = account?.route || '/dashboard';
+
+      navigate(account?.route || '/dashboard', { replace: true });
     } catch (err) {
       setError('Failed to start demo. Please try again.');
       setDemoLoading(false);
