@@ -8,7 +8,7 @@ import { useDemoMode } from '../context/DemoModeContext';
 const PUBLIC_ROUTES = ['/', '/login', '/register', '/marketing', '/terms', '/privacy', '/faq', '/help', '/support', '/how-to-sign-up', '/legal/partner-tos', '/legal/hipaa-baa', '/partner/register', '/advocate/register', '/pitch-deck', '/executive-summary'];
 
 export default function DemoModeBanner() {
-  const [dismissed, setDismissed] = React.useState(false);
+  const [dismissed, setDismissed] = React.useState(() => localStorage.getItem('demo_banner_dismissed') === 'true');
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ export default function DemoModeBanner() {
   const { isDemoMode: isUrlDemoMode } = useDemoMode();
 
   const handleExitDemo = async () => {
+    localStorage.removeItem('demo_banner_dismissed');
     if (isUrlDemoMode) {
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('demo');
@@ -69,7 +70,7 @@ export default function DemoModeBanner() {
               Exit Demo
             </button>
             <button 
-              onClick={() => setDismissed(true)}
+              onClick={() => { setDismissed(true); localStorage.setItem('demo_banner_dismissed', 'true'); }}
               className="text-amber-600 hover:text-amber-800 text-sm font-medium"
             >
               Dismiss
