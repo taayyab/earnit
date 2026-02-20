@@ -16,78 +16,137 @@ import { AccessibilityReportButton } from './utils/accessibility-testing';
 import { ClaimStageGuard, RequireQAPass, RequireRDBApproval, RequireDenialLetter } from './components/ClaimStageGuard';
 import { CLAIM_STAGES } from './hooks/useClaimStage';
 
-const Onboarding = lazy(() => import('./pages/Onboarding'));
-const AdvocateMatching = lazy(() => import('./pages/AdvocateMatching'));
-const IntakeQuestionnaire = lazy(() => import('./pages/IntakeQuestionnaire'));
-const DocumentUpload = lazy(() => import('./pages/DocumentUpload'));
-const ClaimDetail = lazy(() => import('./pages/ClaimDetail'));
-const MentorDashboard = lazy(() => import('./pages/MentorDashboard'));
-const Messages = lazy(() => import('./pages/Messages'));
-const AgentDashboard = lazy(() => import('./pages/AgentDashboard'));
-const AgentCommandCenter = lazy(() => import('./pages/AgentCommandCenter'));
-const AgentEvidence = lazy(() => import('./pages/agent/AgentEvidence'));
-const AgentCommunications = lazy(() => import('./pages/agent/AgentCommunications'));
-const MetricsReports = lazy(() => import('./pages/agent/MetricsReports'));
-const AgentClaimDetail = lazy(() => import('./pages/agent/AgentClaimDetail'));
-const AgentClaimWizard = lazy(() => import('./pages/agent/AgentClaimWizard'));
-const AgentSchedule = lazy(() => import('./pages/agent/AgentSchedule'));
-const AgentOnboarding = lazy(() => import('./pages/agent/AgentOnboarding'));
-const TriageDashboard = lazy(() => import('./pages/agent/TriageDashboard'));
-const FormEditor = lazy(() => import('./pages/FormEditor'));
-const WraparoundServicesPage = lazy(() => import('./pages/WraparoundServicesPage'));
-const DocumentOnboarding = lazy(() => import('./pages/DocumentOnboarding'));
-const ClaimReview = lazy(() => import('./pages/ClaimReview'));
-const MFAVerification = lazy(() => import('./pages/MFAVerification'));
-const MFASetup = lazy(() => import('./pages/MFASetup'));
-const AppealsStatus = lazy(() => import('./pages/AppealsStatus'));
-const AppealDecisionWizard = lazy(() => import('./pages/AppealDecisionWizard'));
-const SupportCaseDashboard = lazy(() => import('./pages/SupportCaseDashboard'));
-const Settings = lazy(() => import('./pages/Settings'));
-const MarketingOnePager = lazy(() => import('./pages/MarketingOnePager'));
-const PitchDeck = lazy(() => import('./pages/PitchDeck'));
-const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary'));
-const InvestorLanding = lazy(() => import('./pages/InvestorLanding'));
-const CourseExample = lazy(() => import('./pages/CourseExample'));
-const FormsLibrary = lazy(() => import('./pages/FormsLibrary'));
-const DBQFormViewer = lazy(() => import('./pages/DBQFormViewer'));
-const EvidenceLibrary = lazy(() => import('./pages/EvidenceLibrary'));
-const TemplateEditor = lazy(() => import('./pages/TemplateEditor'));
-const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
-const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
-const PartnerTermsOfService = lazy(() => import('./pages/legal/PartnerTermsOfService'));
-const HIPAABusinessAssociateAgreement = lazy(() => import('./pages/legal/HIPAABusinessAssociateAgreement'));
-const VetAdvocateVolunteerAgreement = lazy(() => import('./pages/legal/VetAdvocateVolunteerAgreement'));
-const FAQ = lazy(() => import('./pages/support/FAQ'));
-const SignUp = lazy(() => import('./pages/support/SignUp'));
-const PartnerRegistration = lazy(() => import('./pages/partner/PartnerRegistration'));
-const PartnerDashboard = lazy(() => import('./pages/partner/PartnerDashboard'));
-const VetAdvocateRegistration = lazy(() => import('./pages/advocate/VetAdvocateRegistration'));
-const MyVeterans = lazy(() => import('./pages/advocate/MyVeterans'));
-const AdvocateCalendar = lazy(() => import('./pages/advocate/AdvocateCalendar'));
-const SupportCases = lazy(() => import('./pages/advocate/SupportCases'));
-const VeteranClientOnboarding = lazy(() => import('./pages/partner/VeteranClientOnboarding'));
-const OnboardingTemplateEditor = lazy(() => import('./pages/partner/OnboardingTemplateEditor'));
-const VeteranIntakeForm = lazy(() => import('./pages/public/VeteranIntakeForm'));
-const AccreditationReview = lazy(() => import('./pages/admin/AccreditationReview'));
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const AccreditationPending = lazy(() => import('./pages/AccreditationPending'));
-const VeteranClaimsDashboard = lazy(() => import('./pages/VeteranClaimsDashboard'));
-const FacilitySearch = lazy(() => import('./pages/FacilitySearch'));
-const DemoLogin = lazy(() => import('./pages/DemoLogin'));
-const ProviderRegistration = lazy(() => import('./pages/provider/ProviderRegistration'));
-const ProviderDashboard = lazy(() => import('./pages/provider/ProviderDashboard'));
-const ProviderServices = lazy(() => import('./pages/provider/ProviderServices'));
-const ProviderRequests = lazy(() => import('./pages/provider/ProviderRequests'));
-const ProviderVerification = lazy(() => import('./pages/admin/ProviderVerification'));
-const ProviderSearch = lazy(() => import('./pages/veteran/ProviderSearch'));
-const VeteranRequests = lazy(() => import('./pages/veteran/VeteranRequests'));
+// Retry wrapper for lazy imports — handles stale chunk 404s after redeployment
+function lazyWithRetry(importFn) {
+  return lazy(() =>
+    importFn().catch(() => {
+      // Chunk failed to load (likely stale deployment). Reload once.
+      const reloaded = sessionStorage.getItem('chunk_reload');
+      if (!reloaded) {
+        sessionStorage.setItem('chunk_reload', '1');
+        window.location.reload();
+        return new Promise(() => {}); // never resolves — page is reloading
+      }
+      sessionStorage.removeItem('chunk_reload');
+      return importFn(); // retry once more after flag set
+    })
+  );
+}
 
-const SSDIDashboard = lazy(() => import('./pages/ssdi/SSDIDashboard'));
-const SSDIStart = lazy(() => import('./pages/ssdi/SSDIStart'));
-const SSDIEducation = lazy(() => import('./pages/ssdi/SSDIEducation'));
-const SSDIConsent = lazy(() => import('./pages/ssdi/SSDIConsent'));
-const SSDIForms = lazy(() => import('./pages/ssdi/SSDIForms'));
-const SSDIApplicationDetail = lazy(() => import('./pages/ssdi/SSDIApplicationDetail'));
+// Error boundary for chunk load failures and other render crashes
+class ChunkErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error) {
+    // If it's a chunk load error, auto-reload
+    if (error?.name === 'ChunkLoadError' || error?.message?.includes('Loading chunk')) {
+      const reloaded = sessionStorage.getItem('chunk_reload');
+      if (!reloaded) {
+        sessionStorage.setItem('chunk_reload', '1');
+        window.location.reload();
+        return;
+      }
+      sessionStorage.removeItem('chunk_reload');
+    }
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center p-8">
+            <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
+            <p className="text-gray-600 mb-4">A new version may be available.</p>
+            <button
+              onClick={() => { sessionStorage.removeItem('chunk_reload'); window.location.reload(); }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const Onboarding = lazyWithRetry(() => import('./pages/Onboarding'));
+const AdvocateMatching = lazyWithRetry(() => import('./pages/AdvocateMatching'));
+const IntakeQuestionnaire = lazyWithRetry(() => import('./pages/IntakeQuestionnaire'));
+const DocumentUpload = lazyWithRetry(() => import('./pages/DocumentUpload'));
+const ClaimDetail = lazyWithRetry(() => import('./pages/ClaimDetail'));
+const MentorDashboard = lazyWithRetry(() => import('./pages/MentorDashboard'));
+const Messages = lazyWithRetry(() => import('./pages/Messages'));
+const AgentDashboard = lazyWithRetry(() => import('./pages/AgentDashboard'));
+const AgentCommandCenter = lazyWithRetry(() => import('./pages/AgentCommandCenter'));
+const AgentEvidence = lazyWithRetry(() => import('./pages/agent/AgentEvidence'));
+const AgentCommunications = lazyWithRetry(() => import('./pages/agent/AgentCommunications'));
+const MetricsReports = lazyWithRetry(() => import('./pages/agent/MetricsReports'));
+const AgentClaimDetail = lazyWithRetry(() => import('./pages/agent/AgentClaimDetail'));
+const AgentClaimWizard = lazyWithRetry(() => import('./pages/agent/AgentClaimWizard'));
+const AgentSchedule = lazyWithRetry(() => import('./pages/agent/AgentSchedule'));
+const AgentOnboarding = lazyWithRetry(() => import('./pages/agent/AgentOnboarding'));
+const TriageDashboard = lazyWithRetry(() => import('./pages/agent/TriageDashboard'));
+const FormEditor = lazyWithRetry(() => import('./pages/FormEditor'));
+const WraparoundServicesPage = lazyWithRetry(() => import('./pages/WraparoundServicesPage'));
+const DocumentOnboarding = lazyWithRetry(() => import('./pages/DocumentOnboarding'));
+const ClaimReview = lazyWithRetry(() => import('./pages/ClaimReview'));
+const MFAVerification = lazyWithRetry(() => import('./pages/MFAVerification'));
+const MFASetup = lazyWithRetry(() => import('./pages/MFASetup'));
+const AppealsStatus = lazyWithRetry(() => import('./pages/AppealsStatus'));
+const AppealDecisionWizard = lazyWithRetry(() => import('./pages/AppealDecisionWizard'));
+const SupportCaseDashboard = lazyWithRetry(() => import('./pages/SupportCaseDashboard'));
+const Settings = lazyWithRetry(() => import('./pages/Settings'));
+const MarketingOnePager = lazyWithRetry(() => import('./pages/MarketingOnePager'));
+const PitchDeck = lazyWithRetry(() => import('./pages/PitchDeck'));
+const ExecutiveSummary = lazyWithRetry(() => import('./pages/ExecutiveSummary'));
+const InvestorLanding = lazyWithRetry(() => import('./pages/InvestorLanding'));
+const CourseExample = lazyWithRetry(() => import('./pages/CourseExample'));
+const FormsLibrary = lazyWithRetry(() => import('./pages/FormsLibrary'));
+const DBQFormViewer = lazyWithRetry(() => import('./pages/DBQFormViewer'));
+const EvidenceLibrary = lazyWithRetry(() => import('./pages/EvidenceLibrary'));
+const TemplateEditor = lazyWithRetry(() => import('./pages/TemplateEditor'));
+const TermsOfService = lazyWithRetry(() => import('./pages/legal/TermsOfService'));
+const PrivacyPolicy = lazyWithRetry(() => import('./pages/legal/PrivacyPolicy'));
+const PartnerTermsOfService = lazyWithRetry(() => import('./pages/legal/PartnerTermsOfService'));
+const HIPAABusinessAssociateAgreement = lazyWithRetry(() => import('./pages/legal/HIPAABusinessAssociateAgreement'));
+const VetAdvocateVolunteerAgreement = lazyWithRetry(() => import('./pages/legal/VetAdvocateVolunteerAgreement'));
+const FAQ = lazyWithRetry(() => import('./pages/support/FAQ'));
+const SignUp = lazyWithRetry(() => import('./pages/support/SignUp'));
+const PartnerRegistration = lazyWithRetry(() => import('./pages/partner/PartnerRegistration'));
+const PartnerDashboard = lazyWithRetry(() => import('./pages/partner/PartnerDashboard'));
+const VetAdvocateRegistration = lazyWithRetry(() => import('./pages/advocate/VetAdvocateRegistration'));
+const MyVeterans = lazyWithRetry(() => import('./pages/advocate/MyVeterans'));
+const AdvocateCalendar = lazyWithRetry(() => import('./pages/advocate/AdvocateCalendar'));
+const SupportCases = lazyWithRetry(() => import('./pages/advocate/SupportCases'));
+const VeteranClientOnboarding = lazyWithRetry(() => import('./pages/partner/VeteranClientOnboarding'));
+const OnboardingTemplateEditor = lazyWithRetry(() => import('./pages/partner/OnboardingTemplateEditor'));
+const VeteranIntakeForm = lazyWithRetry(() => import('./pages/public/VeteranIntakeForm'));
+const AccreditationReview = lazyWithRetry(() => import('./pages/admin/AccreditationReview'));
+const AdminDashboard = lazyWithRetry(() => import('./pages/admin/AdminDashboard'));
+const AccreditationPending = lazyWithRetry(() => import('./pages/AccreditationPending'));
+const VeteranClaimsDashboard = lazyWithRetry(() => import('./pages/VeteranClaimsDashboard'));
+const FacilitySearch = lazyWithRetry(() => import('./pages/FacilitySearch'));
+const DemoLogin = lazyWithRetry(() => import('./pages/DemoLogin'));
+const ProviderRegistration = lazyWithRetry(() => import('./pages/provider/ProviderRegistration'));
+const ProviderDashboard = lazyWithRetry(() => import('./pages/provider/ProviderDashboard'));
+const ProviderServices = lazyWithRetry(() => import('./pages/provider/ProviderServices'));
+const ProviderRequests = lazyWithRetry(() => import('./pages/provider/ProviderRequests'));
+const ProviderVerification = lazyWithRetry(() => import('./pages/admin/ProviderVerification'));
+const ProviderSearch = lazyWithRetry(() => import('./pages/veteran/ProviderSearch'));
+const VeteranRequests = lazyWithRetry(() => import('./pages/veteran/VeteranRequests'));
+
+const SSDIDashboard = lazyWithRetry(() => import('./pages/ssdi/SSDIDashboard'));
+const SSDIStart = lazyWithRetry(() => import('./pages/ssdi/SSDIStart'));
+const SSDIEducation = lazyWithRetry(() => import('./pages/ssdi/SSDIEducation'));
+const SSDIConsent = lazyWithRetry(() => import('./pages/ssdi/SSDIConsent'));
+const SSDIForms = lazyWithRetry(() => import('./pages/ssdi/SSDIForms'));
+const SSDIApplicationDetail = lazyWithRetry(() => import('./pages/ssdi/SSDIApplicationDetail'));
 
 function PageLoader() {
   return (
@@ -187,6 +246,7 @@ function RoleRedirect({ children }) {
 
 function App() {
   return (
+    <ChunkErrorBoundary>
     <AuthProvider>
       <AriaLiveProvider>
       <Router>
@@ -659,6 +719,7 @@ function App() {
       </Router>
       </AriaLiveProvider>
     </AuthProvider>
+    </ChunkErrorBoundary>
   );
 }
 
