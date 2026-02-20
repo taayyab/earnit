@@ -164,6 +164,27 @@ function MFARoute({ children }) {
   return children;
 }
 
+function RoleRedirect({ children }) {
+  const { user } = useAuth();
+  if (!user) return children;
+
+  const roleRoutes = {
+    'advocate': '/mentor',
+    'veteran_advocate': '/mentor',
+    'peer_mentor': '/mentor',
+    'peer_supporter': '/mentor',
+    'agent': '/agent',
+    'claims_agent': '/agent',
+    'partner_admin': '/partner/dashboard',
+    'provider': '/provider/dashboard',
+  };
+
+  const redirect = roleRoutes[user.role];
+  if (redirect) return <Navigate to={redirect} replace />;
+
+  return children;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -295,7 +316,9 @@ function App() {
               path="/dashboard"
               element={
                 <PrivateRoute>
-                  <Dashboard />
+                  <RoleRedirect>
+                    <Dashboard />
+                  </RoleRedirect>
                 </PrivateRoute>
               }
             />
