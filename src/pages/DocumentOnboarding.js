@@ -1149,7 +1149,7 @@ export default function DocumentOnboarding() {
         onClose={() => setShowFeedback(false)}
       />
       
-      <CelebrationComponent />
+      {CelebrationComponent}
     </div>
   );
 }
