@@ -36,8 +36,11 @@ export default function Login() {
     'peer_mentor': '/mentor',
     'peer_supporter': '/mentor',
     'veteran_advocate': '/mentor',
+    'advocate': '/mentor',
     'claims_agent': '/agent',
-    'partner_admin': '/partner/dashboard'
+    'agent': '/agent',
+    'partner_admin': '/partner/dashboard',
+    'provider': '/provider/dashboard',
   };
 
   useEffect(() => {
@@ -154,8 +157,7 @@ export default function Login() {
 
       const account = demoAccounts.find(a => a.type === accountType);
       toast.success(`Welcome, ${account?.name}!`);
-
-      navigate(account?.route || '/dashboard', { replace: true });
+      // Navigation handled by the useEffect that watches isAuthenticated
     } catch (err) {
       setError('Failed to start demo. Please try again.');
       setDemoLoading(false);

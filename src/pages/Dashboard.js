@@ -138,7 +138,7 @@ export default function Dashboard() {
       try {
         const onboardingStatusRes = await api.get('/users/onboarding-status').catch(() => ({ data: { completed: true } }));
         if (!onboardingStatusRes.data.completed) {
-          navigate('/onboarding');
+          navigate('/onboarding', { replace: true });
           return;
         }
       } catch (err) {
