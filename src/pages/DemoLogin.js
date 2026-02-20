@@ -57,7 +57,7 @@ export default function DemoLogin() {
   useEffect(() => {
     if (isAuthenticated && user) {
       const account = DEMO_ACCOUNTS.find(a => a.id === selectedAccount);
-      navigate(`${account?.dashboard || '/dashboard'}?demo=true`);
+      navigate(`${account?.dashboard || '/dashboard'}?demo=true`, { replace: true });
     }
   }, [isAuthenticated, user, navigate, selectedAccount]);
 
@@ -74,7 +74,7 @@ export default function DemoLogin() {
       
       const account = DEMO_ACCOUNTS.find(a => a.id === accountType);
       setTimeout(() => {
-        navigate(`${account?.dashboard || '/dashboard'}?demo=true`);
+        navigate(`${account?.dashboard || '/dashboard'}?demo=true`, { replace: true });
       }, 1000);
     } catch (err) {
       console.error('Demo login failed:', err);
