@@ -42,7 +42,7 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigate(roleRoutes[user.role] || '/dashboard');
+      navigate(roleRoutes[user.role] || '/dashboard', { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 
@@ -73,10 +73,10 @@ export default function Login() {
           
           if (isNewUser) {
             toast.success('Welcome! Your ID.me account has been verified.');
-            navigate('/document-onboarding');
+            navigate('/document-onboarding', { replace: true });
           } else {
             toast.success('Signed in with ID.me');
-            navigate(roleRoutes[userData.role] || '/dashboard');
+            navigate(roleRoutes[userData.role] || '/dashboard', { replace: true });
           }
           
           window.location.reload();
@@ -177,11 +177,11 @@ export default function Login() {
       const userData = await login(email, password);
       
       if (userData.mfa_required) {
-        navigate('/mfa-verify');
+        navigate('/mfa-verify', { replace: true });
         return;
       }
-      
-      navigate(roleRoutes[userData.role] || '/dashboard');
+
+      navigate(roleRoutes[userData.role] || '/dashboard', { replace: true });
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
     } finally {
