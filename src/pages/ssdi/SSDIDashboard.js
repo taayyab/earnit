@@ -139,7 +139,7 @@ export default function SSDIDashboard() {
                           {statusConfig.label}
                         </Badge>
                         {app.expedited_eligible && (
-                          <Badge variant="outline" className="border-purple-300 text-purple-700">
+                          <Badge variant="outline" className="border-blue-200 text-[#1B3A5F]">
                             Expedited
                           </Badge>
                         )}

@@ -12,7 +12,7 @@ function StatusBreakdownChart({ data }) {
     in_review: 'bg-blue-500',
     evidence_needed: 'bg-yellow-500',
     qa_pending: 'bg-orange-500',
-    ready_to_submit: 'bg-purple-500',
+    ready_to_submit: 'bg-blue-500',
     submitted: 'bg-green-500',
     approved: 'bg-green-600',
     denied: 'bg-red-500',

@@ -82,7 +82,7 @@ const STATUS_CONFIG = {
 const TIER_CONFIG = {
   verified: { label: 'Verified', color: 'bg-green-500' },
   preferred: { label: 'Preferred', color: 'bg-blue-500' },
-  elite: { label: 'Elite', color: 'bg-purple-500' },
+  elite: { label: 'Elite', color: 'bg-blue-500' },
 };
 
 const CREDENTIAL_STATUS_CONFIG = {
@@ -476,9 +476,9 @@ export default function ProviderVerification() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">Queue Total</p>
-                  <p className="text-2xl font-bold text-purple-600">{queueStats?.total_queue || 0}</p>
+                  <p className="text-2xl font-bold text-[#1B3A5F]">{queueStats?.total_queue || 0}</p>
                 </div>
-                <Users className="h-8 w-8 text-purple-500 opacity-50" />
+                <Users className="h-8 w-8 text-[#1B3A5F] opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -600,7 +600,7 @@ export default function ProviderVerification() {
                                 <>
                                   <Button
                                     size="sm"
-                                    className="bg-green-600 hover:bg-green-700"
+                                    className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                                     onClick={() => openVerifyDialog(provider)}
                                     disabled={actionLoading}
                                   >
@@ -748,7 +748,7 @@ export default function ProviderVerification() {
                       providerDetails.provider?.verification_status === 'under_review') && (
                       <>
                         <Button
-                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          className="flex-1 bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                           onClick={() => openVerifyDialog(providerDetails.provider)}
                           disabled={actionLoading}
                         >
@@ -968,7 +968,7 @@ export default function ProviderVerification() {
                     </SelectItem>
                     <SelectItem value="elite">
                       <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-purple-500" />
+                        <div className="h-2 w-2 rounded-full bg-blue-500" />
                         Elite - Top-tier provider
                       </div>
                     </SelectItem>
@@ -989,7 +989,7 @@ export default function ProviderVerification() {
               <Button variant="outline" onClick={() => setVerifyDialogOpen(false)} disabled={actionLoading}>
                 Cancel
               </Button>
-              <Button className="bg-green-600 hover:bg-green-700" onClick={handleVerify} disabled={actionLoading}>
+              <Button className="bg-[#1B3A5F] hover:bg-[#2a4a6f]" onClick={handleVerify} disabled={actionLoading}>
                 {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
                 Verify Provider
               </Button>
@@ -1106,7 +1106,7 @@ export default function ProviderVerification() {
                 Cancel
               </Button>
               {credentialAction === 'verify' ? (
-                <Button className="bg-green-600 hover:bg-green-700" onClick={handleCredentialAction} disabled={actionLoading}>
+                <Button className="bg-[#1B3A5F] hover:bg-[#2a4a6f]" onClick={handleCredentialAction} disabled={actionLoading}>
                   {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
                   Verify Credential
                 </Button>

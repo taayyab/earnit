@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../lib/auth-context';
 import api from '../lib/api';
-import PageHeader from '../components/PageHeader';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Avatar } from '../components/ui/avatar';
-import { Lock, Shield, Send, Check, CheckCheck, Clock } from 'lucide-react';
+import { Skeleton } from '../components/ui/skeleton';
+import { Lock, Shield, Send, Check, CheckCheck, Clock, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
+import VeteranLayout from '../components/VeteranLayout';
 
 export default function Messages() {
   const { user } = useAuth();
+  const currentUserId = user?.id || user?.user_id;
   const [threads, setThreads] = useState([]);
   const [selectedThread, setSelectedThread] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -26,17 +28,53 @@ export default function Messages() {
 
   useEffect(() => {
     if (selectedThread) {
-      loadMessages(selectedThread.thread_id);
+      loadMessages(selectedThread);
     }
   }, [selectedThread]);
 
   const loadThreads = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/messages/threads');
-      setThreads(res.data.threads || []);
-      if (res.data.threads?.length > 0) {
-        setSelectedThread(res.data.threads[0]);
+      try {
+        const res = await api.get('/messages/threads');
+        const threadList = (res.data.threads || []).map((thread) => ({
+          ...thread,
+          source: 'threads',
+        }));
+        setThreads(threadList);
+        if (threadList.length > 0) {
+          setSelectedThread(threadList[0]);
+        }
+        return;
+      } catch {
+        if (!currentUserId) {
+          setThreads([]);
+          return;
+        }
+        const res = await api.get('/messages/inbox', { params: { userId: currentUserId } });
+        const inbox = res.data.messages || [];
+        const grouped = inbox.reduce((acc, msg) => {
+          const participantId = msg.senderId || msg.sender_id;
+          if (!participantId) return acc;
+          if (!acc[participantId]) {
+            acc[participantId] = {
+              thread_id: participantId,
+              participant_id: participantId,
+              source: 'legacy',
+              participant_name: msg.senderName || msg.sender_name || 'Unknown User',
+              last_message_at: msg.createdAt || msg.created_at,
+              last_message_preview: msg.content || '',
+              unread_count: 0,
+            };
+          }
+          acc[participantId].unread_count += (msg.isRead === false || msg.read === false) ? 1 : 0;
+          return acc;
+        }, {});
+        const threadList = Object.values(grouped).sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
+        setThreads(threadList);
+        if (threadList.length > 0) {
+          setSelectedThread(threadList[0]);
+        }
       }
     } catch (error) {
       console.error('Failed to load threads:', error);
@@ -46,10 +84,27 @@ export default function Messages() {
     }
   };
 
-  const loadMessages = async (threadId) => {
+  const loadMessages = async (thread) => {
     try {
-      const res = await api.get(`/messages/threads/${threadId}/messages`);
-      setMessages(res.data.messages || []);
+      if (thread?.source === 'threads') {
+        const res = await api.get(`/messages/threads/${thread.thread_id}/messages`);
+        setMessages(res.data.messages || []);
+        return;
+      }
+
+      const participantId = thread?.participant_id || thread?.thread_id;
+      if (!participantId || !currentUserId) {
+        setMessages([]);
+        return;
+      }
+      const res = await api.get('/messages/conversation', {
+        params: {
+          userId1: currentUserId,
+          userId2: participantId,
+        },
+      });
+      const conversation = (res.data.messages || []).slice().reverse();
+      setMessages(conversation);
     } catch (error) {
       console.error('Failed to load messages:', error);
       toast.error('Failed to load messages');
@@ -61,13 +116,25 @@ export default function Messages() {
 
     try {
       setSending(true);
-      await api.post(`/messages/threads/${selectedThread.thread_id}/messages`, {
-        content: newMessage,
-        contains_phi: false // In production, this would be auto-detected
-      });
+      if (selectedThread?.source === 'threads') {
+        await api.post(`/messages/threads/${selectedThread.thread_id}/messages`, {
+          content: newMessage,
+          contains_phi: false,
+        });
+      } else {
+        const participantId = selectedThread?.participant_id || selectedThread?.thread_id;
+        if (!participantId || !currentUserId) {
+          throw new Error('Missing sender/recipient for message send');
+        }
+        await api.post('/messages', {
+          senderId: currentUserId,
+          recipientId: participantId,
+          content: newMessage,
+        });
+      }
       
       setNewMessage('');
-      await loadMessages(selectedThread.thread_id);
+      await loadMessages(selectedThread);
       toast.success('Message sent');
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -90,34 +157,53 @@ export default function Messages() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white p-6">
-        <div className="mx-auto max-w-7xl">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 w-64 bg-white rounded" />
-            <div className="h-96 bg-white rounded" />
+      <VeteranLayout>
+        <div className="min-h-full bg-white">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-xl" />
+                  <Skeleton className="h-9 w-64" />
+                </div>
+                <Skeleton className="h-5 w-72" />
+              </div>
+              <Skeleton className="h-6 w-28 rounded-full" />
+              <div className="grid lg:grid-cols-3 gap-6 h-[calc(100vh-19rem)]">
+                <Skeleton className="h-full w-full rounded-xl" />
+                <Skeleton className="h-full w-full rounded-xl lg:col-span-2" />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </VeteranLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white" data-testid="messages-page">
-      <PageHeader 
-        title="Secure Messages"
-        subtitle="End-to-end encrypted communication"
-        showBackButton={false}
-        showHomeButton={true}
-      />
+    <VeteranLayout>
+      <div className="min-h-full bg-white" data-testid="messages-page">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#1B3A5F] to-[#2C5282] rounded-xl flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-white" />
+              </div>
+              Secure Messages
+            </h1>
+            <p className="text-slate-600 mt-1">
+              End-to-end encrypted communication
+            </p>
+          </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-4">
-          <Badge className="bg-[hsl(var(--phi-bg))] text-[hsl(var(--primary))] border-[hsl(var(--primary))]">
-            <Shield className="h-3 w-3 mr-1" />
-            HIPAA Secure
-          </Badge>
-        </div>
-        <div className="grid lg:grid-cols-3 gap-6 h-[calc(100vh-16rem)]">
+          <div className="mb-4">
+            <Badge className="bg-[hsl(var(--phi-bg))] text-[hsl(var(--primary))] border-[hsl(var(--primary))]">
+              <Shield className="h-3 w-3 mr-1" />
+              HIPAA Secure
+            </Badge>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-6 h-[calc(100vh-19rem)]">
           {/* Thread List */}
           <Card className="lg:col-span-1" data-testid="thread-list">
             <CardContent className="p-0">
@@ -205,10 +291,15 @@ export default function Messages() {
                       </div>
                     ) : (
                       messages.map((message) => {
-                        const isOwn = message.sender_id === user?.id;
+                        const senderId = message.sender_id || message.senderId;
+                        const isOwn = senderId === currentUserId;
+                        const messageId = message.message_id || message.id;
+                        const createdAt = message.created_at || message.createdAt;
+                        const isRead = message.read ?? message.isRead;
+                        const delivered = message.delivered ?? true;
                         return (
                           <div
-                            key={message.message_id}
+                            key={messageId}
                             className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                             data-testid="message-bubble"
                           >
@@ -230,13 +321,13 @@ export default function Messages() {
                               <p className="text-sm">{message.content}</p>
                               <div className="flex items-center gap-2 mt-1">
                                 <span className="text-xs opacity-70">
-                                  {formatTime(message.created_at)}
+                                  {formatTime(createdAt)}
                                 </span>
                                 {isOwn && (
                                   <span className="text-xs opacity-70">
-                                    {message.read ? (
+                                    {isRead ? (
                                       <CheckCheck className="h-3 w-3" />
-                                    ) : message.delivered ? (
+                                    ) : delivered ? (
                                       <Check className="h-3 w-3" />
                                     ) : (
                                       <Clock className="h-3 w-3" />
@@ -286,8 +377,9 @@ export default function Messages() {
               </CardContent>
             )}
           </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </VeteranLayout>
   );
 }

@@ -101,7 +101,7 @@ const FACILITY_TYPE_ICONS = {
 const FACILITY_TYPE_COLORS = {
   health: 'text-red-600 bg-red-50 border-red-200',
   benefits: 'text-blue-600 bg-blue-50 border-blue-200',
-  vet_center: 'text-purple-600 bg-purple-50 border-purple-200',
+  vet_center: 'text-[#1B3A5F] bg-blue-50 border-blue-200',
   cemetery: 'text-gray-600 bg-gray-50 border-gray-200'
 };
 

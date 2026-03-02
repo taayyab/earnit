@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PageHeader from '../components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -33,6 +32,7 @@ import {
 } from 'lucide-react';
 import api from '../lib/api';
 import { toast } from 'sonner';
+import VeteranLayout from '../components/VeteranLayout';
 
 const CATEGORY_ICONS = {
   mental_health: Brain,
@@ -54,10 +54,10 @@ const CATEGORY_ICONS = {
 };
 
 const CATEGORY_COLORS = {
-  mental_health: 'bg-purple-600',
-  musculoskeletal: 'bg-blue-600',
+  mental_health: 'bg-[#1B3A5F]',
+  musculoskeletal: 'bg-[#1B3A5F]',
   audio: 'bg-amber-600',
-  neurological: 'bg-indigo-600',
+  neurological: 'bg-[#1B3A5F]',
   respiratory: 'bg-cyan-600',
   cardiovascular: 'bg-red-600',
   gastrointestinal: 'bg-orange-600',
@@ -68,7 +68,7 @@ const CATEGORY_COLORS = {
   hematologic: 'bg-fuchsia-600',
   infectious: 'bg-lime-600',
   dental: 'bg-sky-600',
-  cancer: 'bg-violet-600',
+  cancer: 'bg-[#1B3A5F]',
   special: 'bg-slate-600'
 };
 
@@ -266,7 +266,7 @@ const VA_FORMS = [
   {
     category: 'Fully Developed Claim (FDC)',
     icon: FileCheck,
-    color: 'bg-purple-600',
+    color: 'bg-[#1B3A5F]',
     forms: [
       {
         id: 'FDC-Checklist',
@@ -457,6 +457,270 @@ export default function FormsLibrary() {
     }
   };
 
+  const handleDownloadTemplate = (template) => {
+    const TEMPLATE_CONTENT = {
+      'nexus-template': `MEDICAL NEXUS LETTER TEMPLATE
+==============================
+Date: _______________
+
+To Whom It May Concern / Department of Veterans Affairs:
+
+RE: Nexus Letter for [VETERAN NAME] – Service Connection for [CONDITION NAME]
+
+I, [DOCTOR'S FULL NAME], [CREDENTIALS], am a licensed [SPECIALTY] currently treating
+[VETERAN NAME] for [CONDITION NAME].
+
+I. CURRENT DIAGNOSIS
+--------------------
+[VETERAN NAME] has been diagnosed with [CONDITION NAME] (ICD-10: [CODE]).
+This condition has been present since approximately [DATE].
+
+II. MEDICAL OPINION
+-------------------
+It is my medical opinion that the above-mentioned condition is at least as likely as
+not (50% or greater probability) directly caused by, or aggravated by, the veteran's
+active military service.
+
+III. RATIONALE
+--------------
+This opinion is based on:
+  1. Review of the veteran's service treatment records dated [DATE RANGE]
+  2. Review of the veteran's current medical records
+  3. Personal examination and treatment of the veteran
+  4. The following medical literature: [CITATIONS IF APPLICABLE]
+
+[SPECIFIC REASONING LINKING CONDITION TO SERVICE EVENT/EXPOSURE]
+
+IV. CONCLUSION
+--------------
+Based on my clinical assessment and the evidence reviewed, I conclude that
+[CONDITION NAME] is at least as likely as not related to [VETERAN NAME]'s military
+service.
+
+Respectfully submitted,
+
+___________________________
+[DOCTOR'S FULL NAME], [CREDENTIALS]
+[PRACTICE/HOSPITAL NAME]
+[ADDRESS]
+[PHONE]
+[LICENSE NUMBER]
+[DATE]
+
+TIPS FOR SUCCESS:
+- The phrase "at least as likely as not" is the legal standard the VA requires.
+- Include specific reasoning linking the condition to service.
+- Have the treating physician customize and sign this letter.
+`,
+      'buddy-statement': `BUDDY STATEMENT / FELLOW SERVICE MEMBER STATEMENT TEMPLATE
+=============================================================
+VA Form 21-10210 equivalent – Lay/Witness Statement
+
+Date: _______________
+
+Department of Veterans Affairs
+[Regional Office Address]
+
+RE: Statement in Support of Claim for [VETERAN NAME]
+
+I, [YOUR FULL NAME], hereby submit this statement in support of the disability claim
+of [VETERAN NAME].
+
+I. MY RELATIONSHIP TO THE VETERAN
+-----------------------------------
+I served with [VETERAN NAME] in [UNIT/BRANCH] from [DATE] to [DATE].
+[OR: I am a friend/family member who has known the veteran since DATE.]
+
+II. WHAT I PERSONALLY WITNESSED DURING SERVICE
+------------------------------------------------
+[Describe specific incidents, events, or conditions you witnessed that are related
+to the veteran's disability claim. Be specific about dates, locations, and what
+you saw or experienced together.]
+
+Example: "During our deployment to [LOCATION] from [DATE] to [DATE], I personally
+witnessed [VETERAN NAME] sustain [INJURY/EXPOSURE] on [DATE]. At that time,
+[DESCRIBE WHAT YOU SAW]."
+
+III. OBSERVATIONS SINCE SERVICE
+---------------------------------
+Since leaving the service, I have observed the following changes in [VETERAN NAME]:
+[Describe behavioral changes, physical limitations, or symptoms you have personally
+observed that relate to the claimed condition.]
+
+IV. IMPACT ON DAILY LIFE
+--------------------------
+I have observed that [VETERAN NAME]'s condition affects their daily life in the
+following ways:
+  -
+  -
+  -
+
+I certify that the statements on this form are true and correct to the best of my
+knowledge and belief.
+
+___________________________        _______________
+[YOUR SIGNATURE]                   Date
+
+[YOUR PRINTED NAME]
+[YOUR ADDRESS]
+[YOUR PHONE]
+[YOUR SERVICE DATES AND BRANCH (if applicable)]
+
+TIPS FOR SUCCESS:
+- Describe only what you personally witnessed, not what you were told.
+- Be specific about dates, locations, and events.
+- Fellow service members' statements carry significant weight with the VA.
+`,
+      'personal-statement': `PERSONAL STATEMENT TEMPLATE
+============================
+(Statement in Support of Claim – VA Form 21-4138 equivalent)
+
+Date: _______________
+
+Department of Veterans Affairs
+
+RE: Personal Statement – [YOUR NAME] – Claim for [CONDITION(S)]
+
+I. MY IN-SERVICE EXPERIENCE
+-----------------------------
+During my service in [BRANCH] from [DATE] to [DATE], I was assigned to [UNIT].
+While serving, I experienced / was exposed to:
+
+[Describe the incident, event, or exposure that caused or contributed to your
+condition. Include:
+  - Date(s) and location(s)
+  - What happened
+  - Whether you sought medical attention at the time
+  - Names of witnesses if applicable]
+
+II. HOW MY CONDITION DEVELOPED
+--------------------------------
+After this experience, I began to notice:
+[Describe when symptoms started, how they progressed, and any treatment you sought.]
+
+III. MY CURRENT SYMPTOMS
+-------------------------
+Today, my condition causes the following symptoms on a regular basis:
+  - [SYMPTOM 1] – Frequency: [DAILY / WEEKLY / CONSTANT]
+  - [SYMPTOM 2] – Frequency:
+  - [SYMPTOM 3] – Frequency:
+
+IV. IMPACT ON DAILY LIFE
+--------------------------
+My condition affects my daily life in the following ways:
+
+Work: [Describe limitations at work – missed days, inability to stand/sit/concentrate, etc.]
+
+Family: [Describe impact on relationships and family responsibilities.]
+
+Social: [Describe withdrawal from activities, hobbies, or social life.]
+
+A typical day for me looks like: [Describe a realistic day highlighting how the
+condition affects your routine.]
+
+V. STATEMENT OF TRUTH
+-----------------------
+I certify that the information provided in this statement is true and accurate to
+the best of my knowledge.
+
+___________________________        _______________
+[YOUR SIGNATURE]                   Date
+
+[YOUR PRINTED NAME]
+[YOUR CONTACT INFORMATION]
+
+TIPS FOR SUCCESS:
+- Be specific and honest – avoid exaggerating or minimizing.
+- Describe how symptoms affect your ability to work and live normally.
+- Use the 5 "W"s: Who, What, Where, When, Why.
+`,
+      'evidence-checklist': `COMPLETE VA CLAIM EVIDENCE CHECKLIST
+======================================
+Use this checklist to ensure your claim is fully developed before submission.
+
+SECTION 1 – IDENTITY & SERVICE DOCUMENTS
+------------------------------------------
+[ ] DD-214 (Certificate of Release or Discharge from Active Duty)
+[ ] NGB Form 22 (if National Guard)
+[ ] All service branches listed with dates
+[ ] Reserve/Guard orders (if applicable)
+
+SECTION 2 – MEDICAL EVIDENCE
+------------------------------
+[ ] Service Treatment Records (STRs) – requested from National Personnel Records Center
+[ ] VA Medical Records (VAMC records from all facilities treated at)
+[ ] Private Medical Records for each claimed condition
+[ ] Current diagnosis from a licensed physician for each condition
+[ ] Disability Benefits Questionnaire (DBQ) completed by treating physician
+[ ] Nexus Letter for non-presumptive conditions (connecting condition to service)
+
+SECTION 3 – CLAIM FORMS
+-------------------------
+[ ] VA Form 21-0966 (Intent to File) – Submit FIRST to lock your effective date
+[ ] VA Form 21-526EZ (Application for Disability Compensation) – Primary claim form
+[ ] VA Form 21-4142 (Release of Medical Records) – One per private provider
+[ ] VA Form 21-4138 (Statement in Support of Claim) – For personal statements
+[ ] VA Form 21-0781 (PTSD Stressor Statement) – Required for PTSD claims
+[ ] VA Form 21-0781a (MST Statement) – If PTSD is based on personal assault
+[ ] VA Form 21-10210 (Lay/Witness Statement) – For buddy statements
+
+SECTION 4 – SUPPORTING STATEMENTS
+------------------------------------
+[ ] Personal Statement (describing in-service event and current impact)
+[ ] Buddy Statements from fellow service members
+[ ] Family member lay statements (describing observed symptoms)
+[ ] Employer statement (if condition affects work)
+
+SECTION 5 – SPECIALTY EVIDENCE (if applicable)
+------------------------------------------------
+[ ] Sleep study results (for sleep apnea)
+[ ] Audiometric test results (for hearing loss/tinnitus)
+[ ] Mental health evaluation (for PTSD, depression, anxiety)
+[ ] Imaging results (X-rays, MRI, CT scans)
+[ ] Surgical records
+
+SECTION 6 – FULLY DEVELOPED CLAIM (FDC) CHECKLIST
+----------------------------------------------------
+For faster processing, submit ALL of the following at once:
+[ ] All private medical records obtained upfront
+[ ] All DBQs completed before submission
+[ ] All supporting statements gathered
+[ ] Intent to File already on record
+[ ] 21-526EZ complete with all conditions listed
+
+SECTION 7 – BEFORE YOU SUBMIT
+-------------------------------
+[ ] All conditions listed – even those you're unsure qualify
+[ ] Effective date captured (Intent to File submitted)
+[ ] Each condition has at least: diagnosis + nexus + current symptoms documented
+[ ] DBQs include range-of-motion measurements where applicable
+[ ] All forms signed and dated
+
+TIPS FOR SUCCESS:
+- More evidence = stronger claim. Never wait for "perfect" – submit and supplement.
+- The VA will request C&P exams; keep a copy of every DBQ you submit.
+- Request a copy of your claim file (C-file) to see what the VA has on record.
+`,
+    };
+
+    const content = TEMPLATE_CONTENT[template.id];
+    if (!content) {
+      toast.error('Template content not available');
+      return;
+    }
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${template.name.replace(/\s+/g, '_')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`"${template.name}" downloaded`);
+  };
+
   const filteredForms = VA_FORMS.map(category => ({
     ...category,
     forms: category.forms.filter(form => 
@@ -473,10 +737,9 @@ export default function FormsLibrary() {
   );
 
   return (
-    <div className="min-h-screen bg-white">
-      <PageHeader />
-      
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+    <VeteranLayout>
+      <div className="min-h-full bg-white">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -551,7 +814,7 @@ export default function FormsLibrary() {
                               <Badge className="bg-red-100 text-red-700 text-xs">Required</Badge>
                             )}
                             {form.isGuide && (
-                              <Badge className="bg-purple-100 text-purple-700 text-xs">Guide</Badge>
+                              <Badge className="bg-blue-50 text-[#1B3A5F] text-xs">Guide</Badge>
                             )}
                           </div>
                           <p className="text-sm font-medium text-[#1B3A5F]">{form.title}</p>
@@ -592,7 +855,7 @@ export default function FormsLibrary() {
 
         <div className="mt-10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#1B3A5F] to-[#1B3A5F] rounded-lg flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -609,13 +872,13 @@ export default function FormsLibrary() {
                   t.description?.toLowerCase().includes(searchTerm.toLowerCase())
                 )
                 .map((template, idx) => (
-                <Card key={idx} className="border-2 border-purple-100 hover:border-purple-300 transition-colors">
+                <Card key={idx} className="border-2 border-blue-200 hover:border-blue-200 transition-colors">
                   <CardContent className="pt-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-semibold text-slate-900">{template.name}</h4>
-                          <Badge className="bg-purple-100 text-purple-700 text-xs capitalize">
+                          <Badge className="bg-blue-50 text-[#1B3A5F] text-xs capitalize">
                             {template.category?.replace('_', ' ')}
                           </Badge>
                           {template.va_form_number && (
@@ -627,7 +890,7 @@ export default function FormsLibrary() {
                       </div>
                       <Button 
                         size="sm" 
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-[#1B3A5F] hover:bg-[#1B3A5F]"
                         onClick={() => handleCreateFromTemplate(template.id, template.name)}
                         disabled={creatingInstance === template.id}
                       >
@@ -645,8 +908,8 @@ export default function FormsLibrary() {
                     <p className="text-sm text-slate-600 mb-3">{template.description}</p>
                     
                     {template.usage_tips && (
-                      <div className="bg-purple-50 border border-purple-100 rounded-lg p-3">
-                        <p className="text-xs text-purple-700">{template.usage_tips}</p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-xs text-[#1B3A5F]">{template.usage_tips}</p>
                       </div>
                     )}
                     
@@ -687,7 +950,11 @@ export default function FormsLibrary() {
                         </div>
                         <p className="text-sm font-medium text-amber-700">{template.title}</p>
                       </div>
-                      <Button size="sm" className="bg-amber-500 hover:bg-amber-600">
+                      <Button
+                        size="sm"
+                        className="bg-amber-500 hover:bg-amber-600"
+                        onClick={() => handleDownloadTemplate(template)}
+                      >
                         <Download className="w-4 h-4 mr-1" />
                         Get
                       </Button>
@@ -755,7 +1022,7 @@ export default function FormsLibrary() {
                 variant={selectedPriority === 1 ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedPriority(selectedPriority === 1 ? null : 1)}
-                className={selectedPriority === 1 ? "bg-green-600 hover:bg-green-700" : ""}
+                className={selectedPriority === 1 ? "bg-[#1B3A5F] hover:bg-[#2a4a6f]" : ""}
               >
                 <Filter className="w-4 h-4 mr-1" />
                 Most Common
@@ -832,7 +1099,7 @@ export default function FormsLibrary() {
                                   <Button
                                     size="sm"
                                     onClick={() => navigate(`/dbq/${dbq.id}`)}
-                                    className="bg-purple-600 hover:bg-purple-700"
+                                    className="bg-[#1B3A5F] hover:bg-[#1B3A5F]"
                                   >
                                     <Wand2 className="w-4 h-4 mr-1" />
                                     Auto-fill
@@ -922,7 +1189,8 @@ export default function FormsLibrary() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </VeteranLayout>
   );
 }

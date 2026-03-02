@@ -30,8 +30,8 @@ const CLAIM_TYPES = [
     name: 'MEB/IDES Claim',
     description: 'Medical Evaluation Board or Integrated Disability Evaluation System',
     icon: Shield,
-    color: 'bg-indigo-100 text-indigo-700',
-    borderColor: 'border-indigo-300',
+    color: 'bg-blue-50 text-[#1B3A5F]',
+    borderColor: 'border-blue-200',
     feeInfo: 'No fees for active duty members',
     feeEligible: false,
     isMebIdes: true
@@ -63,8 +63,8 @@ const CLAIM_TYPES = [
     name: 'Board Appeal',
     description: 'Appeal to the Board of Veterans\' Appeals',
     icon: Scale,
-    color: 'bg-purple-100 text-purple-700',
-    borderColor: 'border-purple-300',
+    color: 'bg-blue-50 text-[#1B3A5F]',
+    borderColor: 'border-blue-200',
     feeInfo: 'Fees may apply on past-due benefits only',
     feeEligible: true,
     requiresPriorDecision: true
@@ -226,17 +226,17 @@ export default function ClaimTypeSelector({
       )}
 
       {selectedType === 'meb_ides' && (
-        <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg" role="status">
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg" role="status">
           <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-indigo-600 flex-shrink-0" aria-hidden="true" />
+            <Shield className="w-5 h-5 text-[#1B3A5F] flex-shrink-0" aria-hidden="true" />
             <div>
-              <p className="font-medium text-indigo-900">MEB/IDES Claim Selected</p>
-              <p className="text-sm text-indigo-700 mt-1">
-                For active duty service members going through the Medical Evaluation Board or 
-                Integrated Disability Evaluation System. We'll help you track IDES milestones 
+              <p className="font-medium text-[#1B3A5F]">MEB/IDES Claim Selected</p>
+              <p className="text-sm text-[#1B3A5F] mt-1">
+                For active duty service members going through the Medical Evaluation Board or
+                Integrated Disability Evaluation System. We'll help you track IDES milestones
                 and ensure all required documentation is collected.
               </p>
-              <ul className="text-sm text-indigo-700 mt-2 space-y-1">
+              <ul className="text-sm text-[#1B3A5F] mt-2 space-y-1">
                 <li>- Physical Evaluation Board (PEB) findings tracking</li>
                 <li>- Line of Duty (LOD) determination documentation</li>
                 <li>- IDES timeline and milestone management</li>

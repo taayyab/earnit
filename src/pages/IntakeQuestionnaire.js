@@ -157,7 +157,7 @@ export default function IntakeQuestionnaire() {
         <PageHeader title="Claim Intake" />
         <div className="flex items-center justify-center py-20" role="status" aria-live="polite">
           <div className="text-center">
-            <RefreshCw className="h-12 w-12 animate-spin mx-auto text-blue-600 mb-4" aria-hidden="true" />
+            <RefreshCw className="h-12 w-12 animate-spin mx-auto text-[#1B3A5F] mb-4" aria-hidden="true" />
             <p className="text-lg text-slate-500">Loading your claim data...</p>
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function IntakeQuestionnaire() {
                         isComplete 
                           ? 'bg-green-500 text-white' 
                           : isActive 
-                            ? 'bg-blue-600 text-white' 
+                            ? 'bg-[#1B3A5F] text-white'
                             : 'bg-white text-gray-400'
                       }`} aria-hidden="true">
                         {isComplete ? (
@@ -221,7 +221,7 @@ export default function IntakeQuestionnaire() {
           <Card className="max-w-2xl mx-auto">
             <CardHeader className="text-center">
               <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
-                <Upload className="h-10 w-10 text-blue-600" />
+                <Upload className="h-10 w-10 text-[#1B3A5F]" />
               </div>
               <CardTitle className="text-2xl">Upload Your Documents First</CardTitle>
               <CardDescription className="text-base">
@@ -230,12 +230,12 @@ export default function IntakeQuestionnaire() {
             </CardHeader>
             <CardContent className="text-center space-y-6">
               {isMebClaim ? (
-                <div className="bg-indigo-50 p-6 rounded-lg text-left border border-indigo-200">
+                <div className="bg-blue-50 p-6 rounded-lg text-left border border-blue-200">
                   <div className="flex items-center gap-2 mb-3">
-                    <Shield className="h-5 w-5 text-indigo-600" aria-hidden="true" />
-                    <h4 className="font-medium text-indigo-900">MEB/IDES Required Documents:</h4>
+                    <Shield className="h-5 w-5 text-[#1B3A5F]" aria-hidden="true" />
+                    <h4 className="font-medium text-[#1B3A5F]">MEB/IDES Required Documents:</h4>
                   </div>
-                  <ul className="space-y-2 text-indigo-800">
+                  <ul className="space-y-2 text-[#1B3A5F]">
                     {MEB_EVIDENCE_REQUIREMENTS.map((doc, index) => (
                       <li key={index} className="flex items-center gap-2">
                         {doc.required ? (
@@ -247,7 +247,7 @@ export default function IntakeQuestionnaire() {
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-3 text-sm text-indigo-700">
+                  <p className="mt-3 text-sm text-[#1B3A5F]">
                     These documents are critical for your IDES timeline tracking and VA rating determination.
                   </p>
                 </div>
@@ -282,7 +282,7 @@ export default function IntakeQuestionnaire() {
               <Button
                 size="lg"
                 onClick={() => navigate(`/claim/${claimId}/documents`)}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
               >
                 <Upload className="h-5 w-5 mr-2" aria-hidden="true" />
                 Upload Documents
@@ -318,7 +318,7 @@ export default function IntakeQuestionnaire() {
                 size="lg"
                 onClick={triggerAnalysis}
                 disabled={loading || analysisTriggered}
-                className={aiUnavailable ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'}
+                className={aiUnavailable ? 'bg-gray-600 hover:bg-gray-700' : 'bg-[#1B3A5F] hover:bg-[#2a4a6f]'}
               >
                 {loading ? (
                   <>
@@ -353,7 +353,7 @@ export default function IntakeQuestionnaire() {
               </div>
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" aria-hidden="true" />
+                <AlertTriangle className="h-5 w-5 text-[#1B3A5F] mt-0.5" aria-hidden="true" />
                 <div>
                   <p className="font-medium text-blue-900">No typing required!</p>
                   <p className="text-sm text-blue-700">
@@ -417,7 +417,7 @@ export default function IntakeQuestionnaire() {
                 <Button
                   size="lg"
                   onClick={handleProceedToReview}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                 >
                   Proceed to Final Review
                   <ArrowRight className="h-5 w-5 ml-2" />

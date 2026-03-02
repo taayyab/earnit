@@ -4,8 +4,8 @@
 
 import axios from 'axios';
 
-const API_URL = process.env.VITE_API_URL 
-  ? `${process.env.VITE_API_URL}/api` 
+const API_URL = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}/api`
   : '/api';
 
 // Create axios instance with credentials for cookie-based auth
@@ -30,7 +30,21 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
+
+  // Send x-user-id header so backend requireAuth middleware can identify the user
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      const userId = userData.user_id || userData.id;
+      if (userId) {
+        config.headers['x-user-id'] = userId;
+      }
+    }
+  } catch (e) {
+    // ignore parse errors
+  }
+
   // Include CSRF token for non-GET requests
   if (config.method !== 'get') {
     const csrfToken = getCsrfToken();
@@ -38,7 +52,7 @@ api.interceptors.request.use((config) => {
       config.headers['x-csrftoken'] = csrfToken;
     }
   }
-  
+
   return config;
 });
 

@@ -169,7 +169,7 @@ export default function TemplateEditor() {
           {fieldDef.label}
           {fieldDef.required && <span className="text-red-500">*</span>}
           {hasAIValue && (
-            <Badge className="bg-purple-100 text-purple-700 border-0 text-xs">
+            <Badge className="bg-blue-50 text-[#1B3A5F] border-0 text-xs">
               <Sparkles className="h-3 w-3 mr-1" />
               AI Generated
             </Badge>
@@ -273,7 +273,7 @@ export default function TemplateEditor() {
                   {instance.template_category?.replace('_', ' ')}
                 </Badge>
                 {instance.ai_population_status === 'completed' && (
-                  <Badge className="bg-purple-100 text-purple-700 border-0 text-xs">
+                  <Badge className="bg-blue-50 text-[#1B3A5F] border-0 text-xs">
                     <Sparkles className="h-3 w-3 mr-1" />
                     AI Enhanced
                   </Badge>
@@ -294,7 +294,7 @@ export default function TemplateEditor() {
               size="sm"
               onClick={handlePopulateWithAI}
               disabled={populating}
-              className="text-purple-700 border-purple-300 hover:bg-purple-50"
+              className="text-[#1B3A5F] border-blue-200 hover:bg-blue-50"
             >
               {populating ? (
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -375,15 +375,15 @@ export default function TemplateEditor() {
         ) : (
           <div className="space-y-6">
             {instance.ai_confidence_score > 0 && (
-              <Card className="border-purple-200 bg-purple-50/50">
+              <Card className="border-blue-200 bg-blue-50/50">
                 <CardContent className="py-4">
                   <div className="flex items-start gap-3">
-                    <Sparkles className="h-5 w-5 text-purple-600 mt-0.5" />
+                    <Sparkles className="h-5 w-5 text-[#1B3A5F] mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-purple-800">
+                      <p className="text-sm font-medium text-[#1B3A5F]">
                         AI has pre-filled this template based on your records
                       </p>
-                      <p className="text-xs text-purple-600 mt-1">
+                      <p className="text-xs text-[#1B3A5F] mt-1">
                         Confidence: {Math.round(instance.ai_confidence_score * 100)}% - 
                         Please review and edit as needed
                       </p>

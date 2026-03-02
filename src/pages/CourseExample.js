@@ -56,8 +56,8 @@ export default function CourseExample() {
                   <p className="text-gray-600 text-xs">Federal law prohibits fees for filing original claims.</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2 p-2.5 bg-purple-50 rounded-lg border border-purple-100">
-                <FileText className="h-4 w-4 text-purple-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <div className="flex items-start gap-2 p-2.5 bg-blue-50 rounded-lg border border-blue-200">
+                <FileText className="h-4 w-4 text-[#1B3A5F] flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
                   <p className="font-semibold text-gray-900 text-xs">Evidence is Everything</p>
                   <p className="text-gray-600 text-xs">Strong documentation increases approval chances.</p>

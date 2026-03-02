@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EarnedIT — Veteran Dashboard QA Report</title>
+<style>
+  :root {
+    --navy: #1B3A5F;
+    --gold: #D4A574;
+    --red: #C41E3A;
+    --green: #10B981;
+    --amber: #F59E0B;
+    --slate: #64748B;
+    --bg: #F8FAFC;
+    --card: #FFFFFF;
+    --border: #E2E8F0;
+    --pass-bg: #ECFDF5;
+    --pass-border: #6EE7B7;
+    --fail-bg: #FEF2F2;
+    --fail-border: #FCA5A5;
+    --skip-bg: #FFFBEB;
+    --skip-border: #FDE68A;
+    --text: #0F172A;
+    --muted: #94A3B8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+
+  /* Header */
+  .header { background: var(--navy); color: white; padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .header p { font-size: 13px; opacity: 0.7; margin-top: 2px; }
+  .header-meta { text-align: right; font-size: 13px; opacity: 0.8; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+  .badge-navy { background: rgba(255,255,255,0.15); color: white; }
+
+  /* Summary bar */
+  .summary-bar { background: white; border-bottom: 1px solid var(--border); padding: 16px 40px; display: flex; align-items: center; gap: 32px; }
+  .stat { display: flex; flex-direction: column; align-items: center; }
+  .stat-num { font-size: 28px; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .stat-pass .stat-num { color: var(--green); }
+  .stat-fail .stat-num { color: var(--red); }
+  .stat-skip .stat-num { color: var(--amber); }
+  .stat-total .stat-num { color: var(--navy); }
+  .progress-bar-wrap { flex: 1; }
+  .progress-label { font-size: 12px; color: var(--slate); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-track { height: 10px; background: var(--border); border-radius: 99px; overflow: hidden; display: flex; }
+  .progress-pass { background: var(--green); transition: width 0.4s; }
+  .progress-fail { background: var(--red); transition: width 0.4s; }
+  .progress-skip { background: var(--amber); transition: width 0.4s; }
+
+  /* Toolbar */
+  .toolbar { padding: 16px 40px; display: flex; align-items: center; gap: 12px; background: white; border-bottom: 1px solid var(--border); }
+  .toolbar button { padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border); background: white; font-size: 13px; cursor: pointer; font-weight: 500; transition: all 0.15s; }
+  .toolbar button:hover { background: var(--bg); border-color: var(--navy); color: var(--navy); }
+  .toolbar button.active { background: var(--navy); color: white; border-color: var(--navy); }
+  .filter-sep { width: 1px; height: 24px; background: var(--border); }
+  .search-wrap { position: relative; margin-left: auto; }
+  .search-wrap input { padding: 7px 12px 7px 32px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; width: 220px; }
+  .search-wrap input:focus { border-color: var(--navy); }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; }
+
+  /* Main layout */
+  .content { padding: 24px 40px; max-width: 1400px; margin: 0 auto; }
+
+  /* Section */
+  .section { margin-bottom: 28px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; user-select: none; }
+  .section-header h2 { font-size: 15px; font-weight: 700; color: var(--navy); }
+  .section-count { font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); padding: 2px 8px; border-radius: 99px; }
+  .section-toggle { margin-left: auto; font-size: 18px; color: var(--muted); transition: transform 0.2s; }
+  .section-toggle.collapsed { transform: rotate(-90deg); }
+  .section-body { display: grid; gap: 8px; }
+  .section-body.hidden { display: none; }
+
+  /* Test row */
+  .test-row {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 28px 60px 1fr auto;
+    align-items: start;
+    gap: 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .test-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .test-row.status-pass { border-color: var(--pass-border); background: var(--pass-bg); }
+  .test-row.status-fail { border-color: var(--fail-border); background: var(--fail-bg); }
+  .test-row.status-skip { border-color: var(--skip-border); background: var(--skip-bg); }
+
+  .test-id { font-size: 11px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .priority { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-align: center; text-transform: uppercase; white-space: nowrap; }
+  .p0 { background: #FEE2E2; color: #991B1B; }
+  .p1 { background: #FEF3C7; color: #92400E; }
+  .p2 { background: #EFF6FF; color: #1E40AF; }
+
+  .test-body {}
+  .test-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .test-desc { font-size: 13px; color: var(--slate); }
+  .test-expected { font-size: 12px; color: #475569; background: #F1F5F9; border-left: 3px solid var(--border); padding: 5px 10px; border-radius: 0 6px 6px 0; margin-top: 6px; display: none; }
+  .test-row:hover .test-expected { display: block; }
+  .test-link { font-size: 12px; color: var(--navy); text-decoration: none; display: inline-flex; align-items: center; gap: 3px; margin-top: 4px; }
+  .test-link:hover { text-decoration: underline; }
+
+  .test-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .status-btn { border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-pass { background: #D1FAE5; color: #065F46; }
+  .btn-pass:hover, .test-row.status-pass .btn-pass { background: var(--green); color: white; }
+  .btn-fail { background: #FEE2E2; color: #991B1B; }
+  .btn-fail:hover, .test-row.status-fail .btn-fail { background: var(--red); color: white; }
+  .btn-skip { background: #FEF3C7; color: #92400E; }
+  .btn-skip:hover, .test-row.status-skip .btn-skip { background: var(--amber); color: white; }
+  .notes-input { width: 180px; font-size: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; outline: none; background: white; }
+  .notes-input:focus { border-color: var(--navy); }
+
+  /* Fixed issues banner */
+  .fixes-banner { background: linear-gradient(135deg, #1B3A5F 0%, #2C5282 100%); color: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+  .fixes-banner h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap-8px; }
+  .fixes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .fix-item { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; font-size: 12px; }
+  .fix-item strong { display: block; font-size: 11px; opacity: 0.7; text-transform: uppercase; margin-bottom: 2px; }
+
+  /* Export button */
+  .export-btn { background: var(--gold); color: white; border: none; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .export-btn:hover { opacity: 0.9; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header, .summary-bar, .toolbar, .content { padding-left: 16px; padding-right: 16px; }
+    .test-row { grid-template-columns: 28px 1fr; }
+    .test-id, .priority { display: none; }
+    .fixes-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🛡️ EarnedIT — Veteran Dashboard QA Report</h1>
+    <p>Frontend: localhost:3003 &nbsp;·&nbsp; Backend: localhost:4000 &nbsp;·&nbsp; Demo Claim: ef88c283-1853-417d-91fa-2ee06c9c27b1</p>
+  </div>
+  <div class="header-meta">
+    <div>Generated: <strong id="gen-date"></strong></div>
+    <div style="margin-top:6px;"><span class="badge badge-navy">v2.0 — Post-Fix</span></div>
+    <button class="export-btn" style="margin-top:10px;" onclick="exportReport()">⬇ Export Results</button>
+  </div>
+</div>
+
+<div class="summary-bar">
+  <div class="stat stat-pass"><span class="stat-num" id="count-pass">0</span><span class="stat-label">Pass</span></div>
+  <div class="stat stat-fail"><span class="stat-num" id="count-fail">0</span><span class="stat-label">Fail</span></div>
+  <div class="stat stat-skip"><span class="stat-num" id="count-skip">0</span><span class="stat-label">Skip</span></div>
+  <div class="stat stat-total"><span class="stat-num" id="count-total">0</span><span class="stat-label">Total</span></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label"><span>Test Progress</span><span id="pct-label">0% complete</span></div>
+    <div class="progress-track">
+      <div class="progress-pass" id="bar-pass" style="width:0%"></div>
+      <div class="progress-fail" id="bar-fail" style="width:0%"></div>
+      <div class="progress-skip" id="bar-skip" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="active" onclick="filterRows('all', this)">All Tests</button>
+  <button onclick="filterRows('untested', this)">Untested</button>
+  <div class="filter-sep"></div>
+  <button onclick="filterRows('pass', this)">✅ Pass</button>
+  <button onclick="filterRows('fail', this)">❌ Fail</button>
+  <button onclick="filterRows('skip', this)">⏭ Skip</button>
+  <div class="filter-sep"></div>
+  <button onclick="filterRows('p0', this)">P0 Critical</button>
+  <button onclick="filterRows('p1', this)">P1 High</button>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Search tests..." oninput="searchRows(this.value)" />
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- Fixed Issues Banner -->
+  <div class="fixes-banner">
+    <h3>✅ &nbsp;12 Defects Resolved Before This Test Run</h3>
+    <div class="fixes-grid">
+      <div class="fix-item"><strong>FAIL-01 · Backend</strong>/api/users/profile now returns profile data</div>
+      <div class="fix-item"><strong>FAIL-02 · Frontend</strong>BackPayAggregationCard URL fixed → /back-pay/*</div>
+      <div class="fix-item"><strong>FAIL-03 · Frontend</strong>hasAdvocate field name mismatch resolved</div>
+      <div class="fix-item"><strong>FAIL-04 · Frontend</strong>Demo users bypass onboarding redirect</div>
+      <div class="fix-item"><strong>FAIL-05 · Frontend</strong>Real-time claim ID matching fixed</div>
+      <div class="fix-item"><strong>FAIL-06 · Frontend</strong>Optional chaining added to conditions.slice()</div>
+      <div class="fix-item"><strong>FAIL-07 · Frontend</strong>NextStepCard uses path param for claimId</div>
+      <div class="fix-item"><strong>FAIL-08 · Frontend</strong>Route /claim/:id/status → /claim/:id</div>
+      <div class="fix-item"><strong>FAIL-09 · Frontend</strong>Summary field fallbacks added (|| 0)</div>
+      <div class="fix-item"><strong>FAIL-10 · Backend</strong>Demo users bypass onboarding status check</div>
+      <div class="fix-item"><strong>FAIL-11 · Backend</strong>Back pay now uses VA 2024 rate table</div>
+      <div class="fix-item"><strong>FAIL-12 · Backend</strong>Conditions API standardized with correct field names</div>
+    </div>
+  </div>
+
+  <!-- 1. Page Load & Auth -->
+  <div class="section" id="section-1">
+    <div class="section-header" onclick="toggleSection('section-1')">
+      <h2>1 — Page Load &amp; Authentication</h2>
+      <span class="section-count">7 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <!-- prettier-ignore -->
+      <!-- id | priority | name | description | expected | link -->
+      <div class="test-row" data-id="1.1" data-priority="p0" data-status="">
+        <span class="test-id">1.1</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Dashboard loads when onboarding complete</div>
+          <div class="test-desc">Login as demo user → navigate to <code>/dashboard</code></div>
+          <div class="test-expected">✅ Expected: Dashboard renders fully, no redirect to /onboarding or /login</div>
+          <a class="test-link" href="http://localhost:3003/dashboard" target="_blank">↗ Open /dashboard</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="1.2" data-priority="p0" data-status="">
+        <span class="test-id">1.2</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Demo user bypasses onboarding redirect</div>
+          <div class="test-desc">Login via /demo-login → navigates directly to dashboard without going through onboarding</div>
+          <div class="test-expected">✅ Expected: Dashboard loads immediately. is_demo=true users skip onboarding check.</div>
+          <a class="test-link" href="http://localhost:3003/demo-login" target="_blank">↗ Open /demo-login</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="1.3" data-priority="p0" data-status="">
+        <span class="test-id">1.3</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Unauthenticated user redirects to /login</div>
+          <div class="test-desc">Clear localStorage → navigate to /dashboard</div>
+          <div class="test-expected">✅ Expected: Redirected to /login, not allowed on dashboard</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="1.4" data-priority="p1" data-status="">
+        <span class="test-id">1.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Skeleton shows during data load</div>
+          <div class="test-desc">Throttle network to Slow 3G → load dashboard → observe loading state</div>
+          <div class="test-expected">✅ Expected: DashboardSkeleton visible until all 9 API calls resolve</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="1.5" data-priority="p1" data-status="">
+        <span class="test-id">1.5</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">All 9 API calls complete with no console errors</div>
+          <div class="test-desc">Open DevTools → Network tab → load dashboard → check all API responses</div>
+          <div class="test-expected">✅ Expected: /claims, /advocates/my-advocate, /conditions/dashboard/summary, /lifecycle/veteran/journey, /meetings/upcoming, /claims-intelligence/medication-opportunities, /onboarding-checklist, /surveys/pending, /users/profile all return 200</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="1.6" data-priority="p1" data-status="">
+        <span class="test-id">1.6</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">API failure degrades gracefully</div>
+          <div class="test-desc">Block /conditions/dashboard/summary in DevTools → reload dashboard</div>
+          <div class="test-expected">✅ Expected: Toast "Failed to load some dashboard data", rest of page still renders</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="1.7" data-priority="p1" data-status="">
+        <span class="test-id">1.7</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">No claims → empty state card visible</div>
+          <div class="test-desc">Use account with zero claims → load dashboard</div>
+          <div class="test-expected">✅ Expected: "Let AI Build Your Claim" empty state card shown; all claim-dependent cards hidden</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Header -->
+  <div class="section" id="section-2">
+    <div class="section-header" onclick="toggleSection('section-2')">
+      <h2>2 — Header &amp; Greeting</h2>
+      <span class="section-count">3 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="2.1" data-priority="p1" data-status="">
+        <span class="test-id">2.1</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Greeting shows user first name</div>
+          <div class="test-desc">Login as Marcus Johnson → check dashboard header</div>
+          <div class="test-expected">✅ Expected: "Welcome back, Marcus"</div>
+          <a class="test-link" href="http://localhost:3003/dashboard" target="_blank">↗ Open Dashboard</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="2.2" data-priority="p2" data-status="">
+        <span class="test-id">2.2</span><span class="priority p2">P2</span>
+        <div class="test-body">
+          <div class="test-name">No first_name → fallback to email or "Veteran"</div>
+          <div class="test-desc">Use account with no first_name set → check greeting</div>
+          <div class="test-expected">✅ Expected: Shows email prefix (e.g. "john" from john@example.com) or falls back to "Veteran"</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="2.3" data-priority="p2" data-status="">
+        <span class="test-id">2.3</span><span class="priority p2">P2</span>
+        <div class="test-body">
+          <div class="test-name">Click "Change" on representation badge → navigates to /settings</div>
+          <div class="test-desc">If representation_mode is set, click the "Change" button</div>
+          <div class="test-expected">✅ Expected: Navigates to /settings page</div>
+          <a class="test-link" href="http://localhost:3003/settings" target="_blank">↗ Open /settings</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Service Profile Card -->
+  <div class="section" id="section-3">
+    <div class="section-header" onclick="toggleSection('section-3')">
+      <h2>3 — Service Profile Card (Onboarding Data)</h2>
+      <span class="section-count">4 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="3.1" data-priority="p0" data-status="">
+        <span class="test-id">3.1</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">/api/users/profile returns data → card visible</div>
+          <div class="test-desc">Complete onboarding → go to dashboard → look for "Your Service Profile" card</div>
+          <div class="test-expected">✅ Expected: Card shows service branch, era, discharge status, claim type stat tiles and goals as navy badges</div>
+          <a class="test-link" href="http://localhost:4000/api/users/profile" target="_blank">↗ Test API directly</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="3.2" data-priority="p1" data-status="">
+        <span class="test-id">3.2</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Discharge status formatted correctly</div>
+          <div class="test-desc">Check service profile card for discharge status display</div>
+          <div class="test-expected">✅ Expected: "other_than_honorable" → "Other Than Honorable" (underscores removed, capitalized)</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="3.3" data-priority="p1" data-status="">
+        <span class="test-id">3.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Goals displayed as badges</div>
+          <div class="test-desc">Complete onboarding with goals selected → check service profile card</div>
+          <div class="test-expected">✅ Expected: Each goal shown as a navy-colored badge with human-readable text (underscores removed)</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="3.4" data-priority="p1" data-status="">
+        <span class="test-id">3.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">No veteran profile → card not rendered</div>
+          <div class="test-desc">New user who skipped onboarding → check dashboard</div>
+          <div class="test-expected">✅ Expected: "Your Service Profile" card not visible. No JS errors.</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Mission Banner -->
+  <div class="section" id="section-4">
+    <div class="section-header" onclick="toggleSection('section-4')">
+      <h2>4 — Your Next Mission Banner</h2>
+      <span class="section-count">5 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="4.1" data-priority="p0" data-status="">
+        <span class="test-id">4.1</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">No claims → "Start Your Claim" with navy background</div>
+          <div class="test-desc">Log in with a fresh account with no claims</div>
+          <div class="test-expected">✅ Expected: Mission banner says "Start Your Claim", navy background, button navigates to /document-onboarding</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="4.2" data-priority="p1" data-status="">
+        <span class="test-id">4.2</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Claim exists, no documents → "Upload Your Documents"</div>
+          <div class="test-desc">Account with claim in draft status, 0 documents</div>
+          <div class="test-expected">✅ Expected: Mission shows "Upload Your Documents", navy BG, action → /document-onboarding</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="4.3" data-priority="p1" data-status="">
+        <span class="test-id">4.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Incomplete conditions → "Complete Evidence Requirements" amber banner</div>
+          <div class="test-desc">Account with conditions where completion_percentage &lt; 100</div>
+          <div class="test-expected">✅ Expected: Amber background, shows count of incomplete conditions, action → /claim-review</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="4.4" data-priority="p1" data-status="">
+        <span class="test-id">4.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">All conditions complete → "Ready for Submission" green banner</div>
+          <div class="test-desc">Account with all conditions at 100% completion</div>
+          <div class="test-expected">✅ Expected: Green banner, "Review &amp; Submit" button → /claim-review</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="4.5" data-priority="p0" data-status="">
+        <span class="test-id">4.5</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Mission action button navigates correctly</div>
+          <div class="test-desc">Click the CTA button in the mission banner</div>
+          <div class="test-expected">✅ Expected: Navigates to the correct route for the current mission state (no 404s)</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Claim Progress -->
+  <div class="section" id="section-5">
+    <div class="section-header" onclick="toggleSection('section-5')">
+      <h2>5 — Claim Progress Tracker</h2>
+      <span class="section-count">4 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="5.1" data-priority="p1" data-status="">
+        <span class="test-id">5.1</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Claim progress card visible when claims exist</div>
+          <div class="test-desc">Demo user with active claim → check for progress card</div>
+          <div class="test-expected">✅ Expected: Progress bar + 6 step icons (Documents, AI Analysis, Conditions, Evidence, QA Review, Submit)</div>
+          <a class="test-link" href="http://localhost:3003/dashboard" target="_blank">↗ Open Dashboard</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="5.2" data-priority="p1" data-status="">
+        <span class="test-id">5.2</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Correct step icons turn green based on claim status</div>
+          <div class="test-desc">Claim with documents_count &gt; 0 and status = submitted</div>
+          <div class="test-expected">✅ Expected: Documents + Submit icons = green; uncompleted steps = grey</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="5.3" data-priority="p1" data-status="">
+        <span class="test-id">5.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Progress bar % matches claim status</div>
+          <div class="test-desc">Claim with status = qa_pending</div>
+          <div class="test-expected">✅ Expected: Progress bar shows 67%, "67% Complete" label</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="5.4" data-priority="p1" data-status="">
+        <span class="test-id">5.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">No claims → progress card hidden</div>
+          <div class="test-desc">Fresh account with no claims</div>
+          <div class="test-expected">✅ Expected: "Claim Progress" card not visible</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Financial Cards -->
+  <div class="section" id="section-6">
+    <div class="section-header" onclick="toggleSection('section-6')">
+      <h2>6 — Financial Cards (Back Pay, Forecast, Aggregation)</h2>
+      <span class="section-count">7 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="6.1" data-priority="p0" data-status="">
+        <span class="test-id">6.1</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Back Pay Estimation card loads</div>
+          <div class="test-desc">Dashboard with active claim → check Back Pay card</div>
+          <div class="test-expected">✅ Expected: Shows monthly amount, total back pay, confidence badge. No "Loading..." stuck state.</div>
+          <a class="test-link" href="http://localhost:4000/api/back-pay/estimate/ef88c283-1853-417d-91fa-2ee06c9c27b1" target="_blank">↗ Test API</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="6.2" data-priority="p1" data-status="">
+        <span class="test-id">6.2</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Click "View Full Breakdown" → navigates to back-pay page</div>
+          <div class="test-desc">Click button on Back Pay card</div>
+          <div class="test-expected">✅ Expected: Navigates to /back-pay-estimation/{claimId}</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="6.3" data-priority="p1" data-status="">
+        <span class="test-id">6.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Claim Forecast card — approval score color coding</div>
+          <div class="test-desc">Check Claim Forecast card for approval % color</div>
+          <div class="test-expected">✅ Expected: ≥80% = green, ≥60% = blue, ≥40% = amber, &lt;40% = red</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="6.4" data-priority="p1" data-status="">
+        <span class="test-id">6.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Click "View detailed breakdown" → expands forecast details</div>
+          <div class="test-desc">Click expand link on Claim Forecast card</div>
+          <div class="test-expected">✅ Expected: Fee breakdown, claim status checklist, and legal disclaimer expand inline</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="6.5" data-priority="p0" data-status="">
+        <span class="test-id">6.5</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Back Pay Aggregation card loads (URL fix)</div>
+          <div class="test-desc">Check that BackPayAggregationCard doesn't show error state</div>
+          <div class="test-expected">✅ Expected: Card loads with summary data. Previously returned 404 (fixed: /back-pay-aggregation → /back-pay)</div>
+          <a class="test-link" href="http://localhost:4000/api/back-pay/summary" target="_blank">↗ Test /back-pay/summary API</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="6.6" data-priority="p1" data-status="">
+        <span class="test-id">6.6</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Click "Run Full Analysis" → refreshes aggregation card</div>
+          <div class="test-desc">Click the refresh/analyze button on Back Pay Aggregation card</div>
+          <div class="test-expected">✅ Expected: Loading spinner appears, card refreshes with updated data</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="6.7" data-priority="p1" data-status="">
+        <span class="test-id">6.7</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">All 3 financial cards hidden with no claims</div>
+          <div class="test-desc">Fresh account with no claims</div>
+          <div class="test-expected">✅ Expected: Back Pay Estimation, Claim Forecast, and Back Pay Aggregation cards not rendered</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Advocate Card -->
+  <div class="section" id="section-7">
+    <div class="section-header" onclick="toggleSection('section-7')">
+      <h2>7 — Advocate Card (hasAdvocate Fix)</h2>
+      <span class="section-count">3 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="7.1" data-priority="p0" data-status="">
+        <span class="test-id">7.1</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Assigned advocate name shows in quick action card</div>
+          <div class="test-desc">Demo user has David Thompson as advocate → check dashboard quick actions</div>
+          <div class="test-expected">✅ Expected: Quick action card shows "Your Advocate" with name "David Thompson" (fixed: was always showing "Get Support")</div>
+          <a class="test-link" href="http://localhost:4000/api/advocates/my-advocate" target="_blank">↗ Test API</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="7.2" data-priority="p0" data-status="">
+        <span class="test-id">7.2</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">"Schedule Meeting" card visible when advocate assigned</div>
+          <div class="test-desc">Demo user → check quick actions grid for schedule meeting card</div>
+          <div class="test-expected">✅ Expected: 8th quick action card "Schedule Meeting" visible with advocate name</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="7.3" data-priority="p1" data-status="">
+        <span class="test-id">7.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">No advocate → "Get Support" card shown, no schedule meeting card</div>
+          <div class="test-desc">Account with no assigned advocate</div>
+          <div class="test-expected">✅ Expected: Quick action card shows "Get Support / Connect with a peer mentor". No schedule meeting card.</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Conditions -->
+  <div class="section" id="section-8">
+    <div class="section-header" onclick="toggleSection('section-8')">
+      <h2>8 — Your Conditions Section</h2>
+      <span class="section-count">5 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="8.1" data-priority="p0" data-status="">
+        <span class="test-id">8.1</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Conditions grid renders without crashing</div>
+          <div class="test-desc">Demo user with PTSD, Tinnitus, etc. → check "Your Conditions" section</div>
+          <div class="test-expected">✅ Expected: Grid of condition cards, no "Cannot read properties of undefined" TypeError. (Fixed: conditions.slice crash)</div>
+          <a class="test-link" href="http://localhost:4000/api/conditions/dashboard/summary" target="_blank">↗ Test API</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="8.2" data-priority="p1" data-status="">
+        <span class="test-id">8.2</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Condition names render correctly (condition_name field)</div>
+          <div class="test-desc">Check condition cards show proper names like "Post-Traumatic Stress Disorder (PTSD)"</div>
+          <div class="test-expected">✅ Expected: Human-readable condition names visible. (Fixed: API now maps name → condition_name)</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="8.3" data-priority="p1" data-status="">
+        <span class="test-id">8.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Evidence completion % color coding correct</div>
+          <div class="test-desc">Check completion % color on condition cards</div>
+          <div class="test-expected">✅ Expected: ≥80% = green text, ≥50% = amber text, &lt;50% = red text</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="8.4" data-priority="p1" data-status="">
+        <span class="test-id">8.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Click condition card → navigates to /claim-review</div>
+          <div class="test-desc">Click on any condition card in the grid</div>
+          <div class="test-expected">✅ Expected: Navigates to /claim-review</div>
+          <a class="test-link" href="http://localhost:3003/claim-review" target="_blank">↗ Open /claim-review</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="8.5" data-priority="p1" data-status="">
+        <span class="test-id">8.5</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">No conditions → section hidden</div>
+          <div class="test-desc">Account with claim but no conditions</div>
+          <div class="test-expected">✅ Expected: "Your Conditions" heading and grid not rendered</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Quick Actions -->
+  <div class="section" id="section-9">
+    <div class="section-header" onclick="toggleSection('section-9')">
+      <h2>9 — Quick Action Cards (8 Cards)</h2>
+      <span class="section-count">8 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="9.1" data-priority="p1" data-status="">
+        <span class="test-id">9.1</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">VA Forms Library card → /forms-library</div>
+          <div class="test-desc">Click "VA Forms Library" card</div>
+          <div class="test-expected">✅ Expected: Navigates to /forms-library</div>
+          <a class="test-link" href="http://localhost:3003/forms-library" target="_blank">↗ Open /forms-library</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="9.2" data-priority="p1" data-status="">
+        <span class="test-id">9.2</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Support Services card → /services</div>
+          <div class="test-desc">Click "Support Services" card</div>
+          <div class="test-expected">✅ Expected: Navigates to /services</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="9.3" data-priority="p1" data-status="">
+        <span class="test-id">9.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Appeal a Decision card → /appeal-wizard/:claimId</div>
+          <div class="test-desc">Click "Appeal a Decision" card</div>
+          <div class="test-expected">✅ Expected: Navigates to /appeal-wizard/{claimId} if claim exists, else /appeal-wizard</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="9.4" data-priority="p1" data-status="">
+        <span class="test-id">9.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Import VA Health Records card → opens modal</div>
+          <div class="test-desc">Click "Import VA Health Records" card</div>
+          <div class="test-expected">✅ Expected: VAHealthRecordsImport modal opens (not navigates)</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="9.5" data-priority="p1" data-status="">
+        <span class="test-id">9.5</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Evidence Library card → /evidence-library</div>
+          <div class="test-desc">Click "Evidence Library" card</div>
+          <div class="test-expected">✅ Expected: Navigates to /evidence-library</div>
+          <a class="test-link" href="http://localhost:3003/evidence-library" target="_blank">↗ Open /evidence-library</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="9.6" data-priority="p1" data-status="">
+        <span class="test-id">9.6</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">SSDI Benefits card → /ssdi</div>
+          <div class="test-desc">Click "SSDI Benefits" card</div>
+          <div class="test-expected">✅ Expected: Navigates to /ssdi</div>
+          <a class="test-link" href="http://localhost:3003/ssdi" target="_blank">↗ Open /ssdi</a>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="9.7" data-priority="p1" data-status="">
+        <span class="test-id">9.7</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Schedule Meeting card → opens meeting scheduler modal</div>
+          <div class="test-desc">Click "Schedule Meeting" card (only visible when advocate assigned)</div>
+          <div class="test-expected">✅ Expected: MeetingScheduler modal opens with advocate name pre-filled</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+
+      <div class="test-row" data-id="9.8" data-priority="p2" data-status="">
+        <span class="test-id">9.8</span><span class="priority p2">P2</span>
+        <div class="test-body">
+          <div class="test-name">All cards keyboard accessible (Enter/Space)</div>
+          <div class="test-desc">Tab to each quick action card → press Enter</div>
+          <div class="test-expected">✅ Expected: Same action as click fires. Focus ring visible.</div>
+        </div>
+        <div class="test-actions">
+          <div style="display:flex;gap:4px;">
+            <button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button>
+            <button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button>
+            <button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button>
+          </div>
+          <input class="notes-input" placeholder="Notes..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Sidebar Navigation -->
+  <div class="section" id="section-10">
+    <div class="section-header" onclick="toggleSection('section-10')">
+      <h2>10 — Sidebar Navigation</h2>
+      <span class="section-count">8 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="10.1" data-priority="p0" data-status="">
+        <span class="test-id">10.1</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Dashboard nav link → /dashboard (active highlighted)</div>
+          <div class="test-desc">Click Dashboard in sidebar</div>
+          <div class="test-expected">✅ Expected: Navigates to /dashboard, item has gold left border + white highlight</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="10.2" data-priority="p1" data-status="">
+        <span class="test-id">10.2</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">My Claims → /my-claims</div>
+          <div class="test-desc">Click My Claims in sidebar</div>
+          <div class="test-expected">✅ Expected: Navigates to /my-claims</div>
+          <a class="test-link" href="http://localhost:3003/my-claims" target="_blank">↗ Open /my-claims</a>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="10.3" data-priority="p1" data-status="">
+        <span class="test-id">10.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Evidence Library → /evidence-library</div>
+          <div class="test-desc">Click Evidence Library in sidebar</div>
+          <div class="test-expected">✅ Expected: Navigates to /evidence-library</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="10.4" data-priority="p1" data-status="">
+        <span class="test-id">10.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Messages → /messages</div>
+          <div class="test-desc">Click Messages in sidebar</div>
+          <div class="test-expected">✅ Expected: Navigates to /messages</div>
+          <a class="test-link" href="http://localhost:3003/messages" target="_blank">↗ Open /messages</a>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="10.5" data-priority="p1" data-status="">
+        <span class="test-id">10.5</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Peer Support → /advocates</div>
+          <div class="test-desc">Click Peer Support in sidebar</div>
+          <div class="test-expected">✅ Expected: Navigates to /advocates</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="10.6" data-priority="p1" data-status="">
+        <span class="test-id">10.6</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Settings → /settings</div>
+          <div class="test-desc">Click Settings in sidebar</div>
+          <div class="test-expected">✅ Expected: Navigates to /settings (route confirmed in App.js)</div>
+          <a class="test-link" href="http://localhost:3003/settings" target="_blank">↗ Open /settings</a>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="10.7" data-priority="p0" data-status="">
+        <span class="test-id">10.7</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Sign Out → clears auth → redirects to /login</div>
+          <div class="test-desc">Click "Sign Out" in sidebar</div>
+          <div class="test-expected">✅ Expected: localStorage cleared (token, user, mfaRequired, mfaVerified), redirected to /login</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="10.8" data-priority="p2" data-status="">
+        <span class="test-id">10.8</span><span class="priority p2">P2</span>
+        <div class="test-body">
+          <div class="test-name">Mobile hamburger → slide-out drawer opens</div>
+          <div class="test-desc">Resize browser to mobile width → click hamburger icon</div>
+          <div class="test-expected">✅ Expected: Drawer slides in with all nav items, closes on navigation</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. NextStepCard -->
+  <div class="section" id="section-11">
+    <div class="section-header" onclick="toggleSection('section-11')">
+      <h2>11 — Next Step Card (Route Fixes)</h2>
+      <span class="section-count">4 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="11.1" data-priority="p0" data-status="">
+        <span class="test-id">11.1</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">"Continue Uploading" button navigates to /claim/:id/documents</div>
+          <div class="test-desc">Claim in "documents" stage → click action button on Next Step card</div>
+          <div class="test-expected">✅ Expected: Navigates to /claim/ef88c283-.../documents (Fixed: was passing claimId as ?claim= query param which DocumentUpload couldn't read)</div>
+          <a class="test-link" href="http://localhost:3003/claim/ef88c283-1853-417d-91fa-2ee06c9c27b1/documents" target="_blank">↗ Test route directly</a>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="11.2" data-priority="p0" data-status="">
+        <span class="test-id">11.2</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">"Track Status" button navigates to /claim/:id (not /claim/:id/status)</div>
+          <div class="test-desc">Claim in "submitted" stage → click action button on Next Step card</div>
+          <div class="test-expected">✅ Expected: Navigates to /claim/{id} (Fixed: /claim/:id/status did not exist → caused 404)</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="11.3" data-priority="p1" data-status="">
+        <span class="test-id">11.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Progress bar % shows overall claim completion</div>
+          <div class="test-desc">Check the progress bar in the Next Step Card</div>
+          <div class="test-expected">✅ Expected: % value shown; progress bar fills proportionally</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="11.4" data-priority="p1" data-status="">
+        <span class="test-id">11.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Blockers show "Action Needed" panel</div>
+          <div class="test-desc">Journey data with blockers → check Next Step card</div>
+          <div class="test-expected">✅ Expected: Amber "Action Needed" box visible with blocker message</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. VA Status & Priority -->
+  <div class="section" id="section-12">
+    <div class="section-header" onclick="toggleSection('section-12')">
+      <h2>12 — VA Status Sync &amp; Priority Processing</h2>
+      <span class="section-count">5 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="12.1" data-priority="p1" data-status="">
+        <span class="test-id">12.1</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">VA Status card loads with current status</div>
+          <div class="test-desc">Check VA Status Sync card on dashboard</div>
+          <div class="test-expected">✅ Expected: Status badge visible (Received by VA), last updated timestamp shown</div>
+          <a class="test-link" href="http://localhost:4000/api/va/claim/ef88c283-1853-417d-91fa-2ee06c9c27b1/status" target="_blank">↗ Test API</a>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="12.2" data-priority="p1" data-status="">
+        <span class="test-id">12.2</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Click "Sync" → refreshes VA status</div>
+          <div class="test-desc">Click sync button on VA Status card</div>
+          <div class="test-expected">✅ Expected: Spinner appears, status refreshes, success toast "Status synced with VA"</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="12.3" data-priority="p1" data-status="">
+        <span class="test-id">12.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Priority Processing card shows eligible</div>
+          <div class="test-desc">Demo user is eligible for priority processing → check card</div>
+          <div class="test-expected">✅ Expected: Card shows eligible reasons (Financial hardship, Advanced age) with "Activate Priority Processing" button</div>
+          <a class="test-link" href="http://localhost:4000/api/priority-processing/eligibility/00000000-0000-0000-0000-000000000001" target="_blank">↗ Test API</a>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="12.4" data-priority="p1" data-status="">
+        <span class="test-id">12.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Click "Activate Priority Processing" → success toast</div>
+          <div class="test-desc">Click the activate button on Priority Processing card</div>
+          <div class="test-expected">✅ Expected: POST request sent, success toast appears, card updates to show active status</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="12.5" data-priority="p1" data-status="">
+        <span class="test-id">12.5</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Click "View on VA.gov" → opens external link</div>
+          <div class="test-desc">Click the VA.gov link on VA Status card</div>
+          <div class="test-expected">✅ Expected: Opens https://www.va.gov/track-claims/ in new tab</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. Document Upload -->
+  <div class="section" id="section-13">
+    <div class="section-header" onclick="toggleSection('section-13')">
+      <h2>13 — Document Upload Page</h2>
+      <span class="section-count">4 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="13.1" data-priority="p1" data-status="">
+        <span class="test-id">13.1</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Page takes full width</div>
+          <div class="test-desc">Navigate to document upload page</div>
+          <div class="test-expected">✅ Expected: Content uses full viewport width (w-full px-8), no max-w-7xl centering</div>
+          <a class="test-link" href="http://localhost:3003/claim/ef88c283-1853-417d-91fa-2ee06c9c27b1/documents" target="_blank">↗ Open /claim/:id/documents</a>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="13.2" data-priority="p1" data-status="">
+        <span class="test-id">13.2</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">claimId passed correctly as path param</div>
+          <div class="test-desc">Navigate to /claim/:id/documents → check upload associates with correct claim</div>
+          <div class="test-expected">✅ Expected: claimId extracted from URL params (not query string). Upload tied to correct claim ID.</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="13.3" data-priority="p1" data-status="">
+        <span class="test-id">13.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Drag & drop zone accepts PDF, JPEG, PNG, TIFF, TXT</div>
+          <div class="test-desc">Drag a PDF file onto the upload zone</div>
+          <div class="test-expected">✅ Expected: File accepted, upload progress shown. Supported: PDF, JPEG, PNG, TIFF, TXT up to 50MB</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="13.4" data-priority="p1" data-status="">
+        <span class="test-id">13.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Unsupported file type → error shown</div>
+          <div class="test-desc">Try to upload a .exe or .mp4 file</div>
+          <div class="test-expected">✅ Expected: Error message shown, file rejected</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14. Onboarding -->
+  <div class="section" id="section-14">
+    <div class="section-header" onclick="toggleSection('section-14')">
+      <h2>14 — Onboarding Flow</h2>
+      <span class="section-count">4 tests</span>
+      <span class="section-toggle">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="test-row" data-id="14.1" data-priority="p0" data-status="">
+        <span class="test-id">14.1</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">Required fields block Next on personal_info step</div>
+          <div class="test-desc">Navigate to /onboarding → click Next on personal_info step without filling required fields</div>
+          <div class="test-expected">✅ Expected: Red borders on empty required fields, inline error messages shown, cannot proceed</div>
+          <a class="test-link" href="http://localhost:3003/onboarding" target="_blank">↗ Open /onboarding</a>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="14.2" data-priority="p0" data-status="">
+        <span class="test-id">14.2</span><span class="priority p0">P0</span>
+        <div class="test-body">
+          <div class="test-name">"Go to Dashboard" saves data and navigates</div>
+          <div class="test-desc">Complete full onboarding flow → click "Go to Dashboard" on final step</div>
+          <div class="test-expected">✅ Expected: Data saved to veteran_profiles table, navigates to /dashboard (not /login)</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="14.3" data-priority="p1" data-status="">
+        <span class="test-id">14.3</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Onboarding full width layout</div>
+          <div class="test-desc">Check /onboarding page width</div>
+          <div class="test-expected">✅ Expected: Progress bar and content section both align to the same left/right edges (px-20 consistent)</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+
+      <div class="test-row" data-id="14.4" data-priority="p1" data-status="">
+        <span class="test-id">14.4</span><span class="priority p1">P1</span>
+        <div class="test-body">
+          <div class="test-name">Continue button visible below ASK DRILL float</div>
+          <div class="test-desc">Scroll to bottom of any onboarding step</div>
+          <div class="test-expected">✅ Expected: Continue/Next button not hidden behind the ASK DRILL floating button (mb-28 bottom spacing)</div>
+        </div>
+        <div class="test-actions"><div style="display:flex;gap:4px;"><button class="status-btn btn-pass" onclick="setStatus(this,'pass')">Pass</button><button class="status-btn btn-fail" onclick="setStatus(this,'fail')">Fail</button><button class="status-btn btn-skip" onclick="setStatus(this,'skip')">Skip</button></div><input class="notes-input" placeholder="Notes..." /></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+  // Set generated date
+  document.getElementById('gen-date').textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  // State
+  const state = JSON.parse(localStorage.getItem('qa_report_state') || '{}');
+
+  // Restore saved state
+  document.querySelectorAll('.test-row').forEach(row => {
+    const id = row.dataset.id;
+    if (state[id]) {
+      row.dataset.status = state[id].status;
+      row.classList.add('status-' + state[id].status);
+      const note = row.querySelector('.notes-input');
+      if (note && state[id].note) note.value = state[id].note;
+    }
+  });
+
+  // Save state on notes change
+  document.querySelectorAll('.notes-input').forEach(input => {
+    input.addEventListener('input', () => saveState());
+  });
+
+  function setStatus(btn, status) {
+    const row = btn.closest('.test-row');
+    const prev = row.dataset.status;
+    if (prev) row.classList.remove('status-' + prev);
+    row.dataset.status = status;
+    row.classList.add('status-' + status);
+    saveState();
+    updateSummary();
+  }
+
+  function saveState() {
+    const s = {};
+    document.querySelectorAll('.test-row').forEach(row => {
+      s[row.dataset.id] = { status: row.dataset.status, note: row.querySelector('.notes-input')?.value || '' };
+    });
+    localStorage.setItem('qa_report_state', JSON.stringify(s));
+  }
+
+  function updateSummary() {
+    const rows = document.querySelectorAll('.test-row');
+    const total = rows.length;
+    let pass = 0, fail = 0, skip = 0;
+    rows.forEach(r => {
+      if (r.dataset.status === 'pass') pass++;
+      else if (r.dataset.status === 'fail') fail++;
+      else if (r.dataset.status === 'skip') skip++;
+    });
+    document.getElementById('count-pass').textContent = pass;
+    document.getElementById('count-fail').textContent = fail;
+    document.getElementById('count-skip').textContent = skip;
+    document.getElementById('count-total').textContent = total;
+    document.getElementById('bar-pass').style.width = (pass/total*100) + '%';
+    document.getElementById('bar-fail').style.width = (fail/total*100) + '%';
+    document.getElementById('bar-skip').style.width = (skip/total*100) + '%';
+    const done = pass + fail + skip;
+    document.getElementById('pct-label').textContent = Math.round(done/total*100) + '% complete (' + done + '/' + total + ')';
+  }
+
+  function filterRows(type, btn) {
+    document.querySelectorAll('.toolbar button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.test-row').forEach(row => {
+      let show = true;
+      if (type === 'pass') show = row.dataset.status === 'pass';
+      else if (type === 'fail') show = row.dataset.status === 'fail';
+      else if (type === 'skip') show = row.dataset.status === 'skip';
+      else if (type === 'untested') show = !row.dataset.status;
+      else if (type === 'p0') show = row.dataset.priority === 'p0';
+      else if (type === 'p1') show = row.dataset.priority === 'p1';
+      row.style.display = show ? '' : 'none';
+    });
+  }
+
+  function searchRows(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.test-row').forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(q) ? '' : 'none';
+    });
+  }
+
+  function toggleSection(id) {
+    const section = document.getElementById(id);
+    const body = section.querySelector('.section-body');
+    const toggle = section.querySelector('.section-toggle');
+    body.classList.toggle('hidden');
+    toggle.classList.toggle('collapsed');
+  }
+
+  function exportReport() {
+    const rows = document.querySelectorAll('.test-row');
+    let csv = 'ID,Priority,Test Name,Status,Notes\n';
+    rows.forEach(row => {
+      const id = row.dataset.id;
+      const priority = row.dataset.priority?.toUpperCase() || '';
+      const name = row.querySelector('.test-name')?.textContent.trim().replace(/,/g, ';') || '';
+      const status = row.dataset.status || 'untested';
+      const note = (row.querySelector('.notes-input')?.value || '').replace(/,/g, ';');
+      csv += `${id},${priority},"${name}",${status},"${note}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'earnedit-qa-report-' + new Date().toISOString().split('T')[0] + '.csv';
+    a.click();
+  }
+
+  // Initial render
+  updateSummary();
+</script>
+</body>
+</html>

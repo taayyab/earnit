@@ -47,6 +47,7 @@ import {
   PlusCircle,
 } from 'lucide-react';
 import DrillConfigPanel from '../components/admin/DrillConfigPanel';
+import VAApiStatusPanel from '../components/VAApiStatusPanel';
 import { toast } from 'sonner';
 
 export default function AgentDashboard() {
@@ -240,10 +241,10 @@ export default function AgentDashboard() {
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-yellow-500',
-      in_review: 'bg-blue-500',
+      in_review: 'bg-[#1B3A5F]',
       approved: 'bg-[hsl(var(--success))]',
       needs_evidence: 'bg-orange-500',
-      submitted: 'bg-purple-500'
+      submitted: 'bg-[#1B3A5F]'
     };
     return colors[status] || 'bg-white0';
   };
@@ -350,6 +351,10 @@ export default function AgentDashboard() {
               <Send className="h-4 w-4" />
               VA Submissions
               {!vaConfigured && <span className="text-xs text-amber-500">(Not Configured)</span>}
+            </TabsTrigger>
+            <TabsTrigger value="va-api-status" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              VA API Status
             </TabsTrigger>
             {(user?.role === 'admin' || user?.role === 'super_admin') && (
               <TabsTrigger value="drill-config" className="flex items-center gap-2">
@@ -694,7 +699,7 @@ export default function AgentDashboard() {
                                 <Button
                                   size="sm"
                                   onClick={() => handleSubmitToVa(submission.claim_id)}
-                                  className="bg-green-600 hover:bg-green-700"
+                                  className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                                 >
                                   <Send className="h-4 w-4 mr-1" />
                                   Submit
@@ -718,6 +723,10 @@ export default function AgentDashboard() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="va-api-status">
+            <VAApiStatusPanel />
           </TabsContent>
 
           <TabsContent value="drill-config">

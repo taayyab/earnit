@@ -192,7 +192,7 @@ export default function ConditionSelectionPanel({
                         </Badge>
                       )}
                       {condition.is_presumptive && (
-                        <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+                        <Badge className="bg-blue-50 text-[#1B3A5F] border-blue-200">
                           <Shield className="h-3 w-3 mr-1" />
                           Presumptive
                         </Badge>
@@ -254,7 +254,7 @@ export default function ConditionSelectionPanel({
                           )}
                         </ul>
                         {condition.is_presumptive && (
-                          <p className="mt-2 text-xs text-purple-600">
+                          <p className="mt-2 text-xs text-[#1B3A5F]">
                             As a presumptive condition, the VA assumes this is service-connected if you served in a qualifying location/period.
                           </p>
                         )}

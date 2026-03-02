@@ -36,7 +36,7 @@ import { ClientOnboardingPanel } from '../../components/claims/ClientOnboardingP
 const STATUS_COLORS = {
   draft: 'bg-gray-100 text-gray-800',
   new: 'bg-blue-100 text-blue-800',
-  in_review: 'bg-purple-100 text-purple-800',
+  in_review: 'bg-blue-50 text-[#1B3A5F]',
   evidence_needed: 'bg-orange-100 text-orange-800',
   qa_pending: 'bg-yellow-100 text-yellow-800',
   ready_to_submit: 'bg-green-100 text-green-800',
@@ -355,7 +355,7 @@ export default function AgentClaimDetail() {
                 {claim.status === 'qa_pending' && (
                   <>
                     <Button 
-                      className="w-full bg-green-600 hover:bg-green-700" 
+                      className="w-full bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                       onClick={() => handleQAApprove(true)}
                     >
                       <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -373,7 +373,7 @@ export default function AgentClaimDetail() {
                 )}
                 
                 {claim.status === 'ready_to_submit' && (
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => handleStatusChange('submitted')}>
+                  <Button className="w-full bg-[#1B3A5F] hover:bg-[#2a4a6f]" onClick={() => handleStatusChange('submitted')}>
                     <Send className="h-4 w-4 mr-2" />
                     Mark Submitted
                   </Button>

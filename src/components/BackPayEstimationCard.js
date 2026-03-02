@@ -158,7 +158,7 @@ export default function BackPayEstimationCard({ claimId, veteranId, className = 
 
         <div className="flex gap-3">
           <Button 
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+            className="flex-1 bg-[#1B3A5F] hover:bg-[#2a4a6f] text-white"
             onClick={() => navigate(`/back-pay-estimation/${claimId || ''}`)}
           >
             View Full Breakdown

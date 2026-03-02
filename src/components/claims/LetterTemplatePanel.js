@@ -217,9 +217,9 @@ export default function LetterTemplatePanel({ claimId }) {
   const getCategoryBadgeColor = (category) => {
     const colors = {
       'intent_to_file': 'bg-blue-100 text-blue-800',
-      'buddy_statement_request': 'bg-purple-100 text-purple-800',
+      'buddy_statement_request': 'bg-blue-50 text-[#1B3A5F]',
       'nexus_letter': 'bg-green-100 text-green-800',
-      'buddy_statement': 'bg-purple-100 text-purple-800',
+      'buddy_statement': 'bg-blue-50 text-[#1B3A5F]',
       'personal_statement': 'bg-orange-100 text-orange-800',
       'cover_letter': 'bg-gray-100 text-gray-800',
       'evidence_checklist': 'bg-yellow-100 text-yellow-800',

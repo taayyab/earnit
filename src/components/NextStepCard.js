@@ -35,7 +35,7 @@ const getStageConfig = (stage, claimId) => {
       description: "Add your DD-214, medical records, and supporting evidence",
       icon: Upload,
       action: "Continue Uploading",
-      route: claimId ? `/document-onboarding?claim=${claimId}` : "/document-onboarding",
+      route: claimId ? `/claim/${claimId}/documents` : "/document-onboarding",
       color: "from-[hsl(var(--primary))] to-[hsl(var(--primary))]/90",
       bgColor: "bg-white",
       borderColor: "border-neutral-200"
@@ -46,7 +46,7 @@ const getStageConfig = (stage, claimId) => {
       icon: Sparkles,
       action: "Review Conditions",
       route: claimId ? `/claim/${claimId}` : "/claim-review",
-      color: "from-purple-600 to-purple-700",
+      color: "from-[#1B3A5F] to-[#1B3A5F]",
       bgColor: "bg-white",
       borderColor: "border-neutral-200"
     },
@@ -56,7 +56,7 @@ const getStageConfig = (stage, claimId) => {
       icon: FileCheck,
       action: "Review Claim",
       route: claimId ? `/claim/${claimId}` : "/claim-review",
-      color: "from-purple-600 to-purple-700",
+      color: "from-[#1B3A5F] to-[#1B3A5F]",
       bgColor: "bg-white",
       borderColor: "border-neutral-200"
     },
@@ -95,7 +95,7 @@ const getStageConfig = (stage, claimId) => {
       description: "Your claim is with the VA. Track its status here.",
       icon: CheckCircle,
       action: "Track Status",
-      route: claimId ? `/claim/${claimId}/status` : "/appeals",
+      route: claimId ? `/claim/${claimId}` : "/appeals",
       color: "from-green-600 to-green-700",
       bgColor: "bg-white",
       borderColor: "border-neutral-200"
@@ -285,7 +285,7 @@ export function QuickActionCards({ claims, advocate }) {
       description: "Check your progress",
       icon: FileCheck,
       route: "/claim-review",
-      color: "bg-purple-500",
+      color: "bg-blue-500",
       priority: 3
     });
   }

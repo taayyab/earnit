@@ -219,11 +219,11 @@ export default function DBQFormViewer() {
           )}
         </div>
 
-        <Card className="mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+        <Card className="mb-6 bg-gradient-to-r from-[#1B3A5F] to-indigo-50 border-blue-200">
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-6 h-6 text-[#1B3A5F]" />
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-slate-900 mb-2">AI-Powered Auto-Fill</h3>

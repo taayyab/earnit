@@ -213,7 +213,7 @@ export default function VeteranJourneyTracker({
                       onClick={() => handleStageAction(stage.id)}
                       className={
                         isCurrent 
-                          ? 'bg-blue-600 hover:bg-blue-700' 
+                          ? 'bg-[#1B3A5F] hover:bg-[#2a4a6f]' 
                           : 'bg-[#D4A574] hover:bg-[#B8895E]'
                       }
                     >

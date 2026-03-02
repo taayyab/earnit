@@ -40,7 +40,7 @@ const REMINDER_TYPES = {
   first_reminder: { label: 'First Reminder', color: 'bg-yellow-100 text-yellow-800' },
   second_reminder: { label: 'Second Reminder', color: 'bg-orange-100 text-orange-800' },
   escalation: { label: 'Escalation', color: 'bg-red-100 text-red-800' },
-  appointment: { label: 'Appointment', color: 'bg-purple-100 text-purple-800' },
+  appointment: { label: 'Appointment', color: 'bg-blue-50 text-[#1B3A5F]' },
   deadline: { label: 'Deadline', color: 'bg-pink-100 text-pink-800' },
 };
 

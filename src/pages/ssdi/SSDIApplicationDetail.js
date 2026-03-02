@@ -255,7 +255,7 @@ export default function SSDIApplicationDetail() {
             {application.expedited_eligible && (
               <div className="flex justify-between">
                 <span className="text-gray-600">Expedited</span>
-                <Badge variant="outline" className="border-purple-300 text-purple-700">
+                <Badge variant="outline" className="border-blue-200 text-[#1B3A5F]">
                   {application.expedited_reason === 'va_100_pt' ? '100% P&T' : 'Qualified'}
                 </Badge>
               </div>

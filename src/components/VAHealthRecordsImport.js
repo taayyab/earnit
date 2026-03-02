@@ -54,7 +54,7 @@ const RECORD_TYPES = [
     description: 'Surgeries, therapies, and medical procedures',
     icon: FileText,
     fhirResource: 'Procedure',
-    color: 'text-purple-600'
+    color: 'text-[#1B3A5F]'
   }
 ];
 
@@ -576,7 +576,7 @@ export default function VAHealthRecordsImport({
               <div className="flex justify-between items-center">
                 <dt className="text-slate-600 text-xs">Procedures</dt>
                 <dd>
-                  <Badge className="bg-purple-100 text-purple-700 text-xs h-5">
+                  <Badge className="bg-blue-50 text-[#1B3A5F] text-xs h-5">
                     {importedRecords.procedures.length}
                   </Badge>
                 </dd>

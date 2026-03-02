@@ -89,11 +89,11 @@ export default function MedicationAnalysisCard({
   };
 
   return (
-    <Card className="border-2 border-purple-100 overflow-hidden">
-      <CardHeader className="pb-2 bg-gradient-to-r from-purple-50 to-white">
+    <Card className="border-2 border-blue-200 overflow-hidden">
+      <CardHeader className="pb-2 bg-gradient-to-r from-[#1B3A5F] to-white">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Pill className="h-5 w-5 text-purple-600" />
+            <Pill className="h-5 w-5 text-[#1B3A5F]" />
             Medication Side Effects Analysis
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -114,12 +114,12 @@ export default function MedicationAnalysisCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4">
-        <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 text-purple-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-purple-800">
+            <Info className="h-4 w-4 text-[#1B3A5F] flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-[#1B3A5F]">
               <p className="font-medium">Secondary Condition Opportunities Found</p>
-              <p className="mt-1 text-purple-700">
+              <p className="mt-1 text-[#1B3A5F]">
                 {summary || `We found ${opportunities.length} potential secondary conditions based on your medications that may be VA-claimable under 38 CFR §3.310.`}
               </p>
             </div>
@@ -178,7 +178,7 @@ export default function MedicationAnalysisCard({
             variant="ghost"
             size="sm"
             onClick={() => setExpanded(true)}
-            className="w-full text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+            className="w-full text-[#1B3A5F] hover:text-[#1B3A5F] hover:bg-blue-50"
           >
             View all {opportunities.length} opportunities
           </Button>

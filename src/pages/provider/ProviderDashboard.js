@@ -437,8 +437,8 @@ export default function ProviderDashboard() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-purple-100 rounded-lg">
-                      <TrendingUp className="w-6 h-6 text-purple-600" />
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <TrendingUp className="w-6 h-6 text-[#1B3A5F]" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-slate-900">{stats.completionRate}%</p>

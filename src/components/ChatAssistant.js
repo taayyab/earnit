@@ -173,6 +173,56 @@ export default function ChatAssistant() {
     sendMessage(question);
   };
 
+  const renderInlineMarkdown = (text) => {
+    const parts = String(text).split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, index) => {
+      if (/^\*\*[^*]+\*\*$/.test(part)) {
+        return <strong key={index}>{part.slice(2, -2)}</strong>;
+      }
+      return <React.Fragment key={index}>{part}</React.Fragment>;
+    });
+  };
+
+  const renderAssistantMarkdown = (content) => {
+    const lines = String(content || '').split('\n');
+    const elements = [];
+    let pendingListItems = [];
+    let listKey = 0;
+    let paraKey = 0;
+
+    const flushList = () => {
+      if (pendingListItems.length === 0) return;
+      elements.push(
+        <ul key={`list-${listKey++}`} className="list-disc pl-5 space-y-1">
+          {pendingListItems.map((item, index) => (
+            <li key={index}>{renderInlineMarkdown(item)}</li>
+          ))}
+        </ul>
+      );
+      pendingListItems = [];
+    };
+
+    lines.forEach((line) => {
+      const bulletMatch = line.match(/^\s*[-*]\s+(.+)$/);
+      if (bulletMatch) {
+        pendingListItems.push(bulletMatch[1]);
+        return;
+      }
+
+      flushList();
+      if (line.trim() === '') {
+        return;
+      }
+
+      elements.push(
+        <p key={`p-${paraKey++}`}>{renderInlineMarkdown(line)}</p>
+      );
+    });
+
+    flushList();
+    return elements;
+  };
+
   if (!isAvailable) return null;
   
   // Hide on pitch deck and executive summary pages
@@ -217,7 +267,7 @@ export default function ChatAssistant() {
               </button>
               <button
                 onClick={handleClose}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors active:scale-90"
+                className="p-2 rounded-lg bg-white/10 hover:bg-red-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 transition-colors active:scale-90 border border-white/20"
                 aria-label="Close chat"
               >
                 <X className="h-5 w-5" />
@@ -249,7 +299,11 @@ export default function ChatAssistant() {
                       : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
                   }`}
                 >
-                  <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                  {msg.role === 'assistant' ? (
+                    <div className="leading-relaxed space-y-2">{renderAssistantMarkdown(msg.content)}</div>
+                  ) : (
+                    <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                  )}
                   {msg.citations && msg.citations.length > 0 && (
                     <div className="mt-2 pt-2 border-t border-gray-100">
                       <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mb-1">References:</p>

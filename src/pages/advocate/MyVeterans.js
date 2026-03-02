@@ -52,12 +52,12 @@ const CLAIM_STATUSES = {
   submitted: { label: 'Submitted', color: 'bg-blue-100 text-blue-700', icon: Send },
   approved: { label: 'Approved', color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2 },
   denied: { label: 'Denied', color: 'bg-red-100 text-red-700', icon: AlertCircle },
-  pending: { label: 'Pending', color: 'bg-purple-100 text-purple-700', icon: Loader2 },
+  pending: { label: 'Pending', color: 'bg-blue-50 text-[#1B3A5F]', icon: Loader2 },
 };
 
 const SUPPORT_TIERS = {
   peer_buddy: { label: 'Peer Buddy', color: 'bg-sky-100 text-sky-700 border-sky-200' },
-  claims_guide: { label: 'Claims Guide', color: 'bg-violet-100 text-violet-700 border-violet-200' },
+  claims_guide: { label: 'Claims Guide', color: 'bg-blue-50 text-[#1B3A5F] border-blue-200' },
   full_advocate: { label: 'Full Advocate', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
 };
 

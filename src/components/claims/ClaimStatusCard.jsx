@@ -22,7 +22,7 @@ const PHASE_CONFIG = {
   2: { name: 'Initial Review', color: 'bg-blue-100 text-blue-700', progress: 25 },
   3: { name: 'Evidence Gathering', color: 'bg-amber-100 text-amber-700', progress: 45 },
   4: { name: 'Evidence Review', color: 'bg-amber-100 text-amber-700', progress: 65 },
-  5: { name: 'Rating', color: 'bg-purple-100 text-purple-700', progress: 80 },
+  5: { name: 'Rating', color: 'bg-blue-50 text-[#1B3A5F]', progress: 80 },
   6: { name: 'Preparing Decision', color: 'bg-green-100 text-green-700', progress: 90 },
   7: { name: 'Complete', color: 'bg-green-100 text-green-700', progress: 100 }
 };
@@ -32,7 +32,7 @@ const STATUS_CONFIG = {
   'Initial Review': { icon: Clock, color: 'bg-blue-100 text-blue-700' },
   'Evidence Gathering': { icon: FileText, color: 'bg-amber-100 text-amber-700' },
   'Evidence Review': { icon: Clock, color: 'bg-amber-100 text-amber-700' },
-  'Rating': { icon: Clock, color: 'bg-purple-100 text-purple-700' },
+  'Rating': { icon: Clock, color: 'bg-blue-50 text-[#1B3A5F]' },
   'Preparing Decision Letter': { icon: CheckCircle, color: 'bg-green-100 text-green-700' },
   'Complete': { icon: CheckCircle, color: 'bg-green-100 text-green-700' },
   'default': { icon: Clock, color: 'bg-slate-100 text-slate-700' }

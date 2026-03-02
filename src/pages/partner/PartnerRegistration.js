@@ -1317,7 +1317,7 @@ export default function PartnerRegistration() {
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !isAuthenticated || submitSuccess}
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-[#1B3A5F] hover:bg-[#2a4a6f] text-white px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Submit partner registration"
           >
             {isSubmitting ? (

@@ -213,7 +213,7 @@ export default function ClaimAssemblyReview({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-purple-600" />
+            <FileText className="h-5 w-5 text-[#1B3A5F]" />
             Identified Conditions
             <Badge variant="outline">{confirmedCount} of {conditions?.length || 0} confirmed</Badge>
           </CardTitle>
@@ -433,7 +433,7 @@ export default function ClaimAssemblyReview({
           size="lg"
           onClick={handleSubmit}
           disabled={!allConfirmed || loading}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
         >
           {loading ? 'Submitting...' : 'Confirm & Continue'}
         </Button>

@@ -74,14 +74,14 @@ export default function FacilitySearch() {
             </CardContent>
           </Card>
 
-          <Card className="bg-purple-50 border-purple-200">
+          <Card className="bg-blue-50 border-blue-200">
             <CardContent className="p-4 flex items-start gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Users className="h-5 w-5 text-purple-600" />
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <Users className="h-5 w-5 text-[#1B3A5F]" />
               </div>
               <div>
-                <h3 className="font-semibold text-purple-900">Vet Centers</h3>
-                <p className="text-sm text-purple-700">
+                <h3 className="font-semibold text-[#1B3A5F]">Vet Centers</h3>
+                <p className="text-sm text-[#1B3A5F]">
                   Readjustment counseling, PTSD treatment, and family support
                 </p>
               </div>

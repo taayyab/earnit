@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { documentsAPI } from '../lib/api';
-import PageHeader from '../components/PageHeader';
+import VeteranLayout from '../components/VeteranLayout';
 
 const MAX_FILE_SIZE_MB = 50;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -172,13 +172,19 @@ const DocumentUpload = () => {
   };
 
   return (
-    <div>
-      <PageHeader
-        title="Upload Medical Documents"
-        subtitle="Upload your medical records, service records, and supporting documents"
-        backTo={claimId ? `/claim/${claimId}` : '/dashboard'}
-      />
-      <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1rem' }}>
+    <VeteranLayout>
+      <div className="min-h-full bg-white">
+      <div className="w-full px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#1B3A5F] to-[#2C5282] rounded-xl flex items-center justify-center">
+              <span className="text-white text-lg" aria-hidden="true">📄</span>
+            </div>
+            Upload Medical Documents
+          </h1>
+          <p className="text-slate-600 mt-1">Upload your medical records, service records, and supporting documents</p>
+        </div>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       {error && (
         <div role="alert" className="alert alert-error" style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', color: '#991b1b' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
@@ -326,7 +332,9 @@ const DocumentUpload = () => {
         </button>
       </div>
       </div>
-    </div>
+      </div>
+      </div>
+    </VeteranLayout>
   );
 };
 

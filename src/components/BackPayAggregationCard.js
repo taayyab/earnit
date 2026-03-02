@@ -41,8 +41,8 @@ export default function BackPayAggregationCard({ veteranId, refreshKey = 0 }) {
     
     try {
       const [summaryResponse, cueResponse] = await Promise.allSettled([
-        api.get('/back-pay-aggregation/summary'),
-        api.get('/back-pay-aggregation/cue-candidates')
+        api.get('/back-pay/summary'),
+        api.get('/back-pay/cue-candidates')
       ]);
 
       if (summaryResponse.status === 'fulfilled' && summaryResponse.value?.data) {
@@ -66,7 +66,7 @@ export default function BackPayAggregationCard({ veteranId, refreshKey = 0 }) {
     setError(null);
     
     try {
-      const response = await api.post('/back-pay-aggregation/refresh', {
+      const response = await api.post('/back-pay/refresh', {
         include_va_sync: true
       });
       
@@ -174,7 +174,7 @@ export default function BackPayAggregationCard({ veteranId, refreshKey = 0 }) {
             <Button 
               onClick={runFullAnalysis} 
               disabled={refreshing}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
             >
               {refreshing ? (
                 <>

@@ -25,7 +25,7 @@ const ENGAGEMENT_STYLES = {
     icon: Shuffle,
     label: 'Open & Flexible',
     description: 'Adaptable approach, let the advocate adjust to your needs',
-    color: 'bg-purple-100 text-purple-800 border-purple-200'
+    color: 'bg-blue-50 text-[#1B3A5F] border-blue-200'
   }
 };
 

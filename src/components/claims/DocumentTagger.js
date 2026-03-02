@@ -61,12 +61,12 @@ const ICON_MAP = {
 
 const CATEGORY_COLORS = {
   DD214: 'bg-blue-100 text-blue-700 border-blue-200',
-  STR: 'bg-purple-100 text-purple-700 border-purple-200',
+  STR: 'bg-blue-50 text-[#1B3A5F] border-blue-200',
   MEDICAL_RECORDS: 'bg-green-100 text-green-700 border-green-200',
   NEXUS_LETTER: 'bg-orange-100 text-orange-700 border-orange-200',
   BUDDY_STATEMENT: 'bg-pink-100 text-pink-700 border-pink-200',
   DBQ: 'bg-cyan-100 text-cyan-700 border-cyan-200',
-  IMAGING: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  IMAGING: 'bg-blue-50 text-[#1B3A5F] border-blue-200',
   CP_EXAM: 'bg-teal-100 text-teal-700 border-teal-200',
   PERSONNEL_RECORD: 'bg-amber-100 text-amber-700 border-amber-200',
   OTHER: 'bg-gray-100 text-gray-700 border-gray-200',

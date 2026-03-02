@@ -58,7 +58,7 @@ const MEETING_TYPES = {
   check_in: { label: 'Check-in', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: MessageSquare },
   document_review: { label: 'Document Review', color: 'bg-amber-100 text-amber-700 border-amber-200', icon: FileText },
   milestone_celebration: { label: 'Milestone Celebration', color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: PartyPopper },
-  video_call: { label: 'Video Call', color: 'bg-purple-100 text-purple-700 border-purple-200', icon: Video },
+  video_call: { label: 'Video Call', color: 'bg-blue-50 text-[#1B3A5F] border-blue-200', icon: Video },
   phone_call: { label: 'Phone Call', color: 'bg-sky-100 text-sky-700 border-sky-200', icon: Phone },
   in_person: { label: 'In Person', color: 'bg-rose-100 text-rose-700 border-rose-200', icon: Users },
 };

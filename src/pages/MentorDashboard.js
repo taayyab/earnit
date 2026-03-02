@@ -294,10 +294,10 @@ export default function MentorDashboard() {
               </Button>
               <Button 
                 variant="outline" 
-                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-purple-50 hover:border-purple-300"
+                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
                 onClick={() => window.location.href = '/advocate/cases'}
               >
-                <ClipboardList className="h-5 w-5 text-purple-600" />
+                <ClipboardList className="h-5 w-5 text-[#1B3A5F]" />
                 <span className="text-sm">View Cases</span>
               </Button>
               <Button 

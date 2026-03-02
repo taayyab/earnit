@@ -46,8 +46,8 @@ const PHASE_CONFIG = {
   ready_for_review: {
     label: 'Ready for Review',
     icon: FileSearch,
-    color: 'text-purple-500',
-    bg: 'bg-purple-100',
+    color: 'text-[#1B3A5F]',
+    bg: 'bg-blue-50',
     description: 'Ready for QA check before submission'
   },
   submitted: {
@@ -120,7 +120,7 @@ export default function ConditionProgressTracker({
               <div className="text-xs text-neutral-500">Evidence Done</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-semibold text-purple-600">
+              <div className="text-lg font-semibold text-[#1B3A5F]">
                 {summary.by_phase?.ready_for_review || 0}
               </div>
               <div className="text-xs text-neutral-500">Ready</div>
@@ -155,7 +155,7 @@ export default function ConditionProgressTracker({
                     <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="font-medium text-neutral-900">{condition.name}</h4>
                       {condition.is_presumptive && (
-                        <Badge className="bg-purple-100 text-purple-700 border-0 text-xs">
+                        <Badge className="bg-blue-50 text-[#1B3A5F] border-0 text-xs">
                           <Shield className="h-3 w-3 mr-1" />
                           Presumptive
                         </Badge>

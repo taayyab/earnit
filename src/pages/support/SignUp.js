@@ -108,7 +108,7 @@ export default function SignUp() {
               </div>
               <Button 
                 onClick={() => navigate('/')}
-                className="bg-green-600 hover:bg-green-700 ml-auto flex-shrink-0"
+                className="bg-[#1B3A5F] hover:bg-[#2a4a6f] ml-auto flex-shrink-0"
               >
                 Try Demo
                 <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />

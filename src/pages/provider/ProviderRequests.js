@@ -58,7 +58,7 @@ const STATUS_CONFIG = {
   },
   in_progress: {
     label: 'In Progress',
-    color: 'bg-purple-100 text-purple-800',
+    color: 'bg-blue-50 text-[#1B3A5F]',
     icon: PlayCircle,
     description: 'Currently working'
   },
@@ -289,7 +289,7 @@ export default function ProviderRequests() {
         <Button
           key="accept"
           size="sm"
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
           onClick={() => handleAccept(request.id)}
           disabled={isSubmitting}
         >
@@ -316,7 +316,7 @@ export default function ProviderRequests() {
         <Button
           key="start"
           size="sm"
-          className="bg-purple-600 hover:bg-purple-700"
+          className="bg-[#1B3A5F] hover:bg-[#1B3A5F]"
           onClick={() => handleStartWork(request.id)}
           disabled={isSubmitting}
         >
@@ -331,7 +331,7 @@ export default function ProviderRequests() {
         <Button
           key="complete"
           size="sm"
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
           onClick={() => openCompleteModal(request)}
           disabled={isSubmitting}
         >
@@ -690,7 +690,7 @@ export default function ProviderRequests() {
                   Decline
                 </Button>
                 <Button
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                   onClick={() => handleAccept(selectedRequest.id)}
                   disabled={isSubmitting}
                 >
@@ -705,7 +705,7 @@ export default function ProviderRequests() {
             )}
             {selectedRequest?.status === 'accepted' && (
               <Button
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-[#1B3A5F] hover:bg-[#1B3A5F]"
                 onClick={() => handleStartWork(selectedRequest.id)}
                 disabled={isSubmitting}
               >
@@ -719,7 +719,7 @@ export default function ProviderRequests() {
             )}
             {selectedRequest?.status === 'in_progress' && (
               <Button
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                 onClick={() => {
                   setShowDetailModal(false);
                   openCompleteModal(selectedRequest);
@@ -811,7 +811,7 @@ export default function ProviderRequests() {
               Cancel
             </Button>
             <Button
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
               onClick={handleComplete}
               disabled={isSubmitting}
             >

@@ -133,7 +133,7 @@ export default function Login() {
       name: 'David Chen',
       icon: Briefcase, 
       description: 'Access the claims agent workflow with client management and case processing.',
-      color: 'bg-purple-500',
+      color: 'bg-blue-500',
       route: '/agent' 
     },
     { 

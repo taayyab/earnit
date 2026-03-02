@@ -493,7 +493,7 @@ export default function MetricsReports() {
                     value={`${productivityData?.summary?.avg_turnaround_days || 0} days`}
                     subtitle="From creation to submit"
                     icon={Clock}
-                    color="text-purple-600"
+                    color="text-[#1B3A5F]"
                   />
                   <MetricCard
                     title="Active Agents"

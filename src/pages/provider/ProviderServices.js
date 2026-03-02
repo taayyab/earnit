@@ -434,7 +434,7 @@ export default function ProviderServices() {
       <div className="border rounded-lg p-4 bg-blue-50">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-600" />
+            <Shield className="w-5 h-5 text-[#1B3A5F]" />
             <Label className="font-medium text-blue-900">VA Community Care Eligible</Label>
           </div>
           <Switch
@@ -464,7 +464,7 @@ export default function ProviderServices() {
                 <AlertCircle className="w-4 h-4" /> {formErrors.va_contracted_rate}
               </p>
             )}
-            <p className="text-xs text-blue-600 mt-1">
+            <p className="text-xs text-[#1B3A5F] mt-1">
               Rate negotiated with the VA for Community Care services
             </p>
           </div>
@@ -775,7 +775,7 @@ export default function ProviderServices() {
 
         <div className="mt-8 p-4 bg-blue-50 rounded-lg">
           <div className="flex items-start gap-3">
-            <FileText className="w-5 h-5 text-blue-600 mt-0.5" />
+            <FileText className="w-5 h-5 text-[#1B3A5F] mt-0.5" />
             <div>
               <h4 className="font-medium text-blue-900">Tips for Service Pricing</h4>
               <ul className="mt-2 text-sm text-blue-700 space-y-1">

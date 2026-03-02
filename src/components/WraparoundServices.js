@@ -42,10 +42,10 @@ const CATEGORY_ICONS = {
 const CATEGORY_COLORS = {
   housing: 'text-blue-500',
   employment: 'text-green-500',
-  mental_health: 'text-purple-500',
+  mental_health: 'text-[#1B3A5F]',
   financial: 'text-yellow-600',
   legal: 'text-gray-600',
-  education: 'text-indigo-500',
+  education: 'text-[#1B3A5F]',
   healthcare: 'text-red-500',
   family: 'text-pink-500'
 };
@@ -304,7 +304,7 @@ export default function WraparoundServices({ onComplete }) {
                   <Button
                     onClick={handleRequestAdvocateHelp}
                     disabled={creatingCase}
-                    className="mt-3 bg-blue-600 hover:bg-blue-700 text-white"
+                    className="mt-3 bg-[#1B3A5F] hover:bg-[#2a4a6f] text-white"
                   >
                     {creatingCase ? (
                       <>
@@ -394,7 +394,7 @@ export default function WraparoundServices({ onComplete }) {
                                 <button
                                   onClick={() => handleRequestServiceHelp(service)}
                                   disabled={isRequesting}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-purple-50 text-purple-700 rounded-full hover:bg-purple-100 transition-colors disabled:opacity-50"
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-50 text-[#1B3A5F] rounded-full hover:bg-blue-50 transition-colors disabled:opacity-50"
                                 >
                                   {isRequesting ? (
                                     <Loader2 className="h-3 w-3 animate-spin" />

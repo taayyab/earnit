@@ -105,6 +105,7 @@ export default function Onboarding() {
   const [useWizardMode, setUseWizardMode] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [advocates, setAdvocates] = useState([]);
   const [loadingAdvocates, setLoadingAdvocates] = useState(false);
   const [onboardingData, setOnboardingData] = useState({
@@ -197,7 +198,37 @@ export default function Onboarding() {
     }
   };
 
+  const validateStep = () => {
+    const step = currentStepData.id;
+    const errors = {};
+
+    if (step === 'personal_info') {
+      const p = onboardingData.personal_info;
+      if (!p.phone?.trim()) errors.phone = 'Phone number is required';
+      if (!p.address_line1?.trim()) errors.address_line1 = 'Street address is required';
+      if (!p.city?.trim()) errors.city = 'City is required';
+      if (!p.state?.trim()) errors.state = 'State is required';
+      if (!p.zip_code?.trim()) errors.zip_code = 'ZIP code is required';
+    }
+
+    if (step === 'service_data') {
+      const s = onboardingData.service_data;
+      if (!s.service_branch) errors.service_branch = 'Branch of service is required';
+      if (!s.service_era) errors.service_era = 'Service era is required';
+      if (!s.discharge_status) errors.discharge_status = 'Discharge status is required';
+    }
+
+    if (step === 'goals') {
+      if (onboardingData.goals.length === 0) errors.goals = 'Please select at least one goal';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleNext = async () => {
+    if (!validateStep()) return;
+    setFieldErrors({});
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -209,19 +240,25 @@ export default function Onboarding() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
-  const completeOnboarding = () => {
-    // Mark complete and navigate immediately — don't wait for API
-    localStorage.setItem('onboarding_completed', 'true');
-    toast.success("Welcome to EarnedIT! Let's get started.");
-    navigate('/dashboard');
-
-    // Fire API calls in background (non-blocking)
-    const { dependents, ...onboardingPayload } = onboardingData;
-    api.post('/veteran-profile/dependents', onboardingData.dependents).catch(() => {});
-    api.post('/users/complete-onboarding', {
-      ...onboardingPayload,
-      completed_at: new Date().toISOString()
-    }).catch(() => {});
+  const completeOnboarding = async () => {
+    setLoading(true);
+    try {
+      await api.post('/users/complete-onboarding', {
+        ...onboardingData,
+        completed_at: new Date().toISOString(),
+      });
+      localStorage.setItem('onboarding_completed', 'true');
+      toast.success("Welcome to EarnedIT! Let's get started.");
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Failed to save onboarding:', error);
+      // Still navigate on error — don't block the user
+      localStorage.setItem('onboarding_completed', 'true');
+      toast.success("Welcome to EarnedIT! Let's get started.");
+      navigate('/dashboard');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updatePersonalInfo = (field, value) => {
@@ -287,6 +324,7 @@ export default function Onboarding() {
         : [...current, goal];
       return { ...prev, goals: updated };
     });
+    setFieldErrors(prev => ({ ...prev, goals: '' }));
   };
 
   const selectAdvocate = (advocateId) => {
@@ -301,7 +339,7 @@ export default function Onboarding() {
     
     if (step === 'welcome') {
       return (
-        <div className="text-center space-y-6 max-w-2xl mx-auto">
+        <div className="text-center space-y-6 w-full">
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="h-24 w-24 rounded-full bg-gradient-to-br from-[#D4A574] to-[#C97B63] flex items-center justify-center">
@@ -323,7 +361,7 @@ export default function Onboarding() {
     
     if (step === 'personal_info') {
       return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Card className="bg-gradient-to-br from-[#E8C9A1]/20 to-[#B5C4AE]/20 border-[#D4A574]/30">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
@@ -335,37 +373,39 @@ export default function Onboarding() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="phone" className="flex items-center gap-2">
-                <Phone className="h-4 w-4" /> Phone Number
+                <Phone className="h-4 w-4" /> Phone Number <span className="text-red-500 ml-1">*</span>
               </Label>
               <Input
                 id="phone"
                 type="tel"
                 value={onboardingData.personal_info.phone}
-                onChange={(e) => updatePersonalInfo('phone', e.target.value)}
+                onChange={(e) => { updatePersonalInfo('phone', e.target.value); setFieldErrors(prev => ({ ...prev, phone: '' })); }}
                 placeholder="(555) 123-4567"
-                className="mt-2"
+                className={`mt-2 ${fieldErrors.phone ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 data-testid="phone-input"
               />
+              {fieldErrors.phone && <p className="text-red-500 text-xs mt-1">{fieldErrors.phone}</p>}
             </div>
-            
+
             <div className="pt-4 border-t">
               <Label className="flex items-center gap-2 mb-4">
-                <MapPin className="h-4 w-4" /> Mailing Address
+                <MapPin className="h-4 w-4" /> Mailing Address <span className="text-red-500 ml-1">*</span>
               </Label>
-              
+
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="address1" className="text-sm text-muted-foreground">Street Address</Label>
+                  <Label htmlFor="address1" className="text-sm text-muted-foreground">Street Address <span className="text-red-500">*</span></Label>
                   <Input
                     id="address1"
                     value={onboardingData.personal_info.address_line1}
-                    onChange={(e) => updatePersonalInfo('address_line1', e.target.value)}
+                    onChange={(e) => { updatePersonalInfo('address_line1', e.target.value); setFieldErrors(prev => ({ ...prev, address_line1: '' })); }}
                     placeholder="123 Main Street"
-                    className="mt-1"
+                    className={`mt-1 ${fieldErrors.address_line1 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     data-testid="address1-input"
                   />
+                  {fieldErrors.address_line1 && <p className="text-red-500 text-xs mt-1">{fieldErrors.address_line1}</p>}
                 </div>
-                
+
                 <div>
                   <Label htmlFor="address2" className="text-sm text-muted-foreground">Apt, Suite, Unit (optional)</Label>
                   <Input
@@ -376,41 +416,44 @@ export default function Onboarding() {
                     className="mt-1"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-6 gap-3">
                   <div className="col-span-3">
-                    <Label htmlFor="city" className="text-sm text-muted-foreground">City</Label>
+                    <Label htmlFor="city" className="text-sm text-muted-foreground">City <span className="text-red-500">*</span></Label>
                     <Input
                       id="city"
                       value={onboardingData.personal_info.city}
-                      onChange={(e) => updatePersonalInfo('city', e.target.value)}
+                      onChange={(e) => { updatePersonalInfo('city', e.target.value); setFieldErrors(prev => ({ ...prev, city: '' })); }}
                       placeholder="City"
-                      className="mt-1"
+                      className={`mt-1 ${fieldErrors.city ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                       data-testid="city-input"
                     />
+                    {fieldErrors.city && <p className="text-red-500 text-xs mt-1">{fieldErrors.city}</p>}
                   </div>
                   <div className="col-span-1">
-                    <Label htmlFor="state" className="text-sm text-muted-foreground">State</Label>
+                    <Label htmlFor="state" className="text-sm text-muted-foreground">State <span className="text-red-500">*</span></Label>
                     <Input
                       id="state"
                       value={onboardingData.personal_info.state}
-                      onChange={(e) => updatePersonalInfo('state', e.target.value)}
+                      onChange={(e) => { updatePersonalInfo('state', e.target.value); setFieldErrors(prev => ({ ...prev, state: '' })); }}
                       placeholder="TX"
                       maxLength={2}
-                      className="mt-1"
+                      className={`mt-1 ${fieldErrors.state ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                       data-testid="state-input"
                     />
+                    {fieldErrors.state && <p className="text-red-500 text-xs mt-1">{fieldErrors.state}</p>}
                   </div>
                   <div className="col-span-2">
-                    <Label htmlFor="zip" className="text-sm text-muted-foreground">ZIP Code</Label>
+                    <Label htmlFor="zip" className="text-sm text-muted-foreground">ZIP Code <span className="text-red-500">*</span></Label>
                     <Input
                       id="zip"
                       value={onboardingData.personal_info.zip_code}
-                      onChange={(e) => updatePersonalInfo('zip_code', e.target.value)}
+                      onChange={(e) => { updatePersonalInfo('zip_code', e.target.value); setFieldErrors(prev => ({ ...prev, zip_code: '' })); }}
                       placeholder="78701"
-                      className="mt-1"
+                      className={`mt-1 ${fieldErrors.zip_code ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                       data-testid="zip-input"
                     />
+                    {fieldErrors.zip_code && <p className="text-red-500 text-xs mt-1">{fieldErrors.zip_code}</p>}
                   </div>
                 </div>
               </div>
@@ -422,7 +465,7 @@ export default function Onboarding() {
     
     if (step === 'service_data') {
       return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Card className="bg-gradient-to-br from-[#E8C9A1]/20 to-[#B5C4AE]/20 border-[#D4A574]/30">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
@@ -433,12 +476,12 @@ export default function Onboarding() {
           
           <div className="space-y-4">
             <div>
-              <Label htmlFor="branch">Branch of Service</Label>
+              <Label htmlFor="branch">Branch of Service <span className="text-red-500">*</span></Label>
               <select
                 id="branch"
                 value={onboardingData.service_data.service_branch}
-                onChange={(e) => updateServiceData('service_branch', e.target.value)}
-                className="w-full mt-2 px-3 py-2 border border-input rounded-md bg-background"
+                onChange={(e) => { updateServiceData('service_branch', e.target.value); setFieldErrors(prev => ({ ...prev, service_branch: '' })); }}
+                className={`w-full mt-2 px-3 py-2 border rounded-md bg-background ${fieldErrors.service_branch ? 'border-red-500' : 'border-input'}`}
                 data-testid="branch-select"
               >
                 <option value="">Select branch</option>
@@ -446,15 +489,16 @@ export default function Onboarding() {
                   <option key={branch} value={branch}>{branch}</option>
                 ))}
               </select>
+              {fieldErrors.service_branch && <p className="text-red-500 text-xs mt-1">{fieldErrors.service_branch}</p>}
             </div>
-            
+
             <div>
-              <Label htmlFor="era">Service Era</Label>
+              <Label htmlFor="era">Service Era <span className="text-red-500">*</span></Label>
               <select
                 id="era"
                 value={onboardingData.service_data.service_era}
-                onChange={(e) => updateServiceData('service_era', e.target.value)}
-                className="w-full mt-2 px-3 py-2 border border-input rounded-md bg-background"
+                onChange={(e) => { updateServiceData('service_era', e.target.value); setFieldErrors(prev => ({ ...prev, service_era: '' })); }}
+                className={`w-full mt-2 px-3 py-2 border rounded-md bg-background ${fieldErrors.service_era ? 'border-red-500' : 'border-input'}`}
                 data-testid="era-select"
               >
                 <option value="">Select era</option>
@@ -462,15 +506,16 @@ export default function Onboarding() {
                   <option key={era} value={era}>{era}</option>
                 ))}
               </select>
+              {fieldErrors.service_era && <p className="text-red-500 text-xs mt-1">{fieldErrors.service_era}</p>}
             </div>
-            
+
             <div>
-              <Label htmlFor="discharge">Discharge Status</Label>
+              <Label htmlFor="discharge">Discharge Status <span className="text-red-500">*</span></Label>
               <select
                 id="discharge"
                 value={onboardingData.service_data.discharge_status}
-                onChange={(e) => updateServiceData('discharge_status', e.target.value)}
-                className="w-full mt-2 px-3 py-2 border border-input rounded-md bg-background"
+                onChange={(e) => { updateServiceData('discharge_status', e.target.value); setFieldErrors(prev => ({ ...prev, discharge_status: '' })); }}
+                className={`w-full mt-2 px-3 py-2 border rounded-md bg-background ${fieldErrors.discharge_status ? 'border-red-500' : 'border-input'}`}
                 data-testid="discharge-select"
               >
                 <option value="">Select discharge status</option>
@@ -478,6 +523,7 @@ export default function Onboarding() {
                   <option key={status.value} value={status.value}>{status.label}</option>
                 ))}
               </select>
+              {fieldErrors.discharge_status && <p className="text-red-500 text-xs mt-1">{fieldErrors.discharge_status}</p>}
               <p className="text-xs text-muted-foreground mt-2">
                 This helps us understand your eligibility for VA benefits.
               </p>
@@ -489,7 +535,7 @@ export default function Onboarding() {
     
     if (step === 'claim_type') {
       return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Card className="bg-gradient-to-br from-[#E8C9A1]/20 to-[#B5C4AE]/20 border-[#D4A574]/30">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
@@ -508,7 +554,7 @@ export default function Onboarding() {
 
     if (step === 'dependents') {
       return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Card className="bg-gradient-to-br from-[#E8C9A1]/20 to-[#B5C4AE]/20 border-[#D4A574]/30">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
@@ -617,7 +663,7 @@ export default function Onboarding() {
     
     if (step === 'matching_preferences') {
       return (
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Card className="bg-gradient-to-br from-[#E8C9A1]/20 to-[#B5C4AE]/20 border-[#D4A574]/30">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
@@ -743,7 +789,7 @@ export default function Onboarding() {
     
     if (step === 'advocate_selection') {
       return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <div className="text-center mb-8">
             <div className="inline-flex p-4 rounded-full bg-gradient-to-br from-[#D4A574]/20 to-[#8B9D83]/20 mb-4">
               <Users className="h-12 w-12 text-[#D4A574]" />
@@ -832,7 +878,7 @@ export default function Onboarding() {
     
     if (step === 'schedule') {
       return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Card className="bg-gradient-to-br from-[#E8C9A1]/20 to-[#B5C4AE]/20 border-[#D4A574]/30">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
@@ -892,7 +938,7 @@ export default function Onboarding() {
     
     if (step === 'goals') {
       return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Card className="bg-gradient-to-br from-[#E8C9A1]/20 to-[#B5C4AE]/20 border-[#D4A574]/30">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
@@ -927,13 +973,16 @@ export default function Onboarding() {
               </button>
             ))}
           </div>
+          {fieldErrors.goals && (
+            <p className="text-red-500 text-sm mt-2 text-center">{fieldErrors.goals}</p>
+          )}
         </div>
       );
     }
-    
+
     if (step === 'resources') {
       return (
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Card className="bg-gradient-to-br from-[#E8C9A1]/20 to-[#B5C4AE]/20 border-[#D4A574]/30">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
@@ -1005,7 +1054,7 @@ export default function Onboarding() {
     
     if (step === 'complete') {
       return (
-        <div className="text-center space-y-6 max-w-2xl mx-auto">
+        <div className="text-center space-y-6 w-full">
           <div className="flex justify-center mb-6">
             <div className="h-24 w-24 rounded-full bg-gradient-to-br from-[#10B981] to-[#8B9D83] flex items-center justify-center">
               <CheckCircle2 className="h-12 w-12 text-white" />
@@ -1058,7 +1107,7 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-white" data-testid="onboarding-page">
       <div className="border-b border-border bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <div className="w-full px-20 py-6">
           <div className="flex items-center gap-3 mb-4">
             <img src={logoImage} alt="EarnedIT" className="h-20 w-auto" />
             <div>
@@ -1074,7 +1123,7 @@ export default function Onboarding() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full px-20 py-12">
         <div className="mb-12 text-center">
           <div className="inline-flex p-3 rounded-full bg-gradient-to-br from-[#D4A574]/10 to-[#8B9D83]/10 mb-4">
             <Icon className="h-8 w-8 text-[hsl(var(--primary))]" />
@@ -1085,7 +1134,7 @@ export default function Onboarding() {
 
         {renderStepContent()}
 
-        <div className="flex items-center justify-between mt-12 max-w-3xl mx-auto">
+        <div className="flex items-center justify-between mt-12 w-full mb-28">
           <Button
             variant="outline"
             onClick={handleBack}

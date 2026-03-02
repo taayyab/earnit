@@ -37,7 +37,7 @@ const getEventColor = (type) => {
     case 'claim_progress':
       return { bg: 'bg-blue-100', text: 'text-blue-600', badge: 'bg-blue-100 text-blue-700' };
     case 'document':
-      return { bg: 'bg-purple-100', text: 'text-purple-600', badge: 'bg-purple-100 text-purple-700' };
+      return { bg: 'bg-blue-50', text: 'text-[#1B3A5F]', badge: 'bg-blue-50 text-[#1B3A5F]' };
     case 'meeting':
       return { bg: 'bg-amber-100', text: 'text-amber-600', badge: 'bg-amber-100 text-amber-700' };
     case 'qa_improvement':

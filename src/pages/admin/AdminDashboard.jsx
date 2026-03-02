@@ -276,10 +276,10 @@ export default function AdminDashboard() {
 
   const getRoleBadgeColor = (role) => {
     const colors = {
-      veteran: 'bg-blue-500',
+      veteran: 'bg-[#1B3A5F]',
       peer_mentor: 'bg-green-500',
       veteran_advocate: 'bg-green-500',
-      claims_agent: 'bg-purple-500',
+      claims_agent: 'bg-[#1B3A5F]',
       partner_admin: 'bg-orange-500',
       admin: 'bg-red-500',
       super_admin: 'bg-red-700'
@@ -290,12 +290,12 @@ export default function AdminDashboard() {
   const getStatusBadgeColor = (status) => {
     const colors = {
       draft: 'bg-gray-500',
-      new: 'bg-blue-500',
+      new: 'bg-[#1B3A5F]',
       in_review: 'bg-yellow-500',
       evidence_needed: 'bg-orange-500',
-      qa_pending: 'bg-purple-500',
+      qa_pending: 'bg-[#1B3A5F]',
       ready_to_submit: 'bg-cyan-500',
-      submitted: 'bg-indigo-500',
+      submitted: 'bg-[#1B3A5F]',
       approved: 'bg-green-500',
       denied: 'bg-red-500'
     };
@@ -400,8 +400,8 @@ export default function AdminDashboard() {
                       <p className="text-sm font-medium text-muted-foreground">Total Claims</p>
                       <p className="text-3xl font-bold">{dashboardStats?.total_claims || 0}</p>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-purple-500" />
+                    <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-[#1B3A5F]" />
                     </div>
                   </div>
                 </CardContent>

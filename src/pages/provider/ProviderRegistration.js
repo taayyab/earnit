@@ -1587,7 +1587,7 @@ export default function ProviderRegistration() {
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || submitSuccess}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
             >
               {isSubmitting ? (
                 <>

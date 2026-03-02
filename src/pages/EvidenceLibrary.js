@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PageHeader from '../components/PageHeader';
+import VeteranLayout from '../components/VeteranLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Progress } from '../components/ui/progress';
+import { Skeleton } from '../components/ui/skeleton';
 import {
   FileText,
   Upload,
@@ -43,7 +44,7 @@ const LARGE_FILE_WARNING_SIZE = 5 * 1024 * 1024; // 5MB
 const DOCUMENT_CATEGORIES = {
   'DD214': { label: 'DD-214', color: 'bg-blue-100 text-blue-700', icon: FileText },
   'MEDICAL_RECORDS': { label: 'Medical Records', color: 'bg-green-100 text-green-700', icon: FileText },
-  'NEXUS_LETTER': { label: 'Nexus Letter', color: 'bg-purple-100 text-purple-700', icon: FileText },
+  'NEXUS_LETTER': { label: 'Nexus Letter', color: 'bg-blue-50 text-[#1B3A5F]', icon: FileText },
   'SERVICE_TREATMENT_RECORDS': { label: 'Service Treatment Records', color: 'bg-amber-100 text-amber-700', icon: FileText },
   'BUDDY_STATEMENT': { label: 'Buddy Statement', color: 'bg-pink-100 text-pink-700', icon: FileText },
   'DBQ': { label: 'DBQ', color: 'bg-teal-100 text-teal-700', icon: FileText },
@@ -396,19 +397,36 @@ export default function EvidenceLibrary() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-16 w-16 border-4 border-[#1B3A5F] border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-lg text-slate-600">Loading your evidence library...</p>
+      <VeteranLayout>
+        <div className="min-h-full bg-white">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-xl" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-64" />
+                    <Skeleton className="h-4 w-80" />
+                  </div>
+                </div>
+                <Skeleton className="h-12 w-52 rounded-lg" />
+              </div>
+              <div className="flex gap-4">
+                <Skeleton className="h-10 flex-1 rounded-md" />
+                <Skeleton className="h-10 w-56 rounded-md" />
+                <Skeleton className="h-10 w-44 rounded-md" />
+              </div>
+              <Skeleton className="h-96 w-full rounded-xl" />
+            </div>
+          </div>
         </div>
-      </div>
+      </VeteranLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <PageHeader title="Evidence Library" />
-
+    <VeteranLayout>
+      <div className="min-h-full bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
@@ -428,7 +446,7 @@ export default function EvidenceLibrary() {
                 onClick={initiateAutoLink}
                 disabled={autoLinkingAll}
                 aria-label="Auto-link all documents to conditions using AI"
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-md"
+                className="bg-gradient-to-r from-[#1B3A5F] to-indigo-600 hover:from-[#1B3A5F] hover:to-indigo-700 text-white shadow-md"
               >
                 {autoLinkingAll ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -450,11 +468,11 @@ export default function EvidenceLibrary() {
         </div>
 
         {showClaimSelector && (
-          <Card className="mb-6 border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 shadow-md">
+          <Card className="mb-6 border-2 border-blue-200 bg-gradient-to-r from-[#1B3A5F] to-indigo-50 shadow-md">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Wand2 className="w-5 h-5 text-purple-600" />
+                  <Wand2 className="w-5 h-5 text-[#1B3A5F]" />
                   <h3 className="font-semibold text-slate-900">Select a Claim for Auto-Linking</h3>
                 </div>
                 <Button
@@ -482,7 +500,7 @@ export default function EvidenceLibrary() {
                         handleAutoLinkAll(claim);
                       }
                     }}
-                    className="p-4 rounded-lg border-2 border-slate-200 bg-white hover:border-purple-400 hover:shadow-md transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                    className="p-4 rounded-lg border-2 border-slate-200 bg-white hover:border-blue-200 hover:shadow-md transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
                   >
                     <div className="font-medium text-slate-900 mb-1">
                       {claim.claim_type || claim.type || 'VA Claim'}
@@ -991,6 +1009,7 @@ export default function EvidenceLibrary() {
           </Card>
         )}
       </div>
-    </div>
+      </div>
+    </VeteranLayout>
   );
 }

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PageHeader from '../components/PageHeader';
 import EngagementPreferences from '../components/EngagementPreferences';
 import DataExportCard from '../components/settings/DataExportCard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { useAuth } from '../lib/auth-context';
+import VeteranLayout from '../components/VeteranLayout';
 import { Settings as SettingsIcon, MessageSquare, Bell, Shield, User, Download } from 'lucide-react';
 
 export default function Settings() {
@@ -15,11 +15,19 @@ export default function Settings() {
   const [activeTab, setActiveTab] = useState('engagement');
 
   return (
-    <div className="min-h-screen bg-white">
-      <PageHeader title="Settings" subtitle="Manage your preferences and account settings" />
-      
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+    <VeteranLayout>
+      <div className="min-h-full bg-white">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#1B3A5F] to-[#2C5282] rounded-xl flex items-center justify-center">
+                <SettingsIcon className="w-5 h-5 text-white" />
+              </div>
+              Settings
+            </h1>
+            <p className="text-slate-600 mt-1">Manage your preferences and account settings</p>
+          </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5">
             <TabsTrigger value="engagement" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
@@ -145,8 +153,9 @@ export default function Settings() {
               <DataExportCard />
             </TabsContent>
           </div>
-        </Tabs>
+          </Tabs>
+        </div>
       </div>
-    </div>
+    </VeteranLayout>
   );
 }

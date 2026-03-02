@@ -114,11 +114,11 @@ export default function RatingPredictionCard({ claimId, conditions = [], documen
   }
 
   return (
-    <Card className="border-2 border-purple-100 overflow-hidden">
-      <CardHeader className="pb-2 bg-gradient-to-r from-purple-50 to-white">
+    <Card className="border-2 border-blue-200 overflow-hidden">
+      <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-white">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-purple-600" />
+            <BarChart3 className="h-5 w-5 text-[#1B3A5F]" />
             Rating Prediction
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -128,7 +128,7 @@ export default function RatingPredictionCard({ claimId, conditions = [], documen
               size="sm"
               onClick={fetchPrediction}
               disabled={loading}
-              className="text-purple-600 hover:text-purple-700"
+              className="text-[#1B3A5F] hover:text-[#1B3A5F]"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
@@ -164,7 +164,7 @@ export default function RatingPredictionCard({ claimId, conditions = [], documen
 
         {loading && !prediction && (
           <div className="py-8 text-center">
-            <RefreshCw className="h-8 w-8 animate-spin text-purple-400 mx-auto mb-3" />
+            <RefreshCw className="h-8 w-8 animate-spin text-[#2a4a6f] mx-auto mb-3" />
             <p className="text-sm text-slate-600">Analyzing your claim for rating prediction...</p>
           </div>
         )}
@@ -187,7 +187,7 @@ export default function RatingPredictionCard({ claimId, conditions = [], documen
                 )}
                 <div className="mt-2 h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-purple-500 rounded-full transition-all"
+                    className="h-full bg-[#1B3A5F] rounded-full transition-all"
                     style={{ width: `${prediction.combined_rating || 0}%` }}
                   />
                 </div>
@@ -218,7 +218,7 @@ export default function RatingPredictionCard({ claimId, conditions = [], documen
             {prediction.condition_predictions && prediction.condition_predictions.length > 0 && (
               <div className="mb-4">
                 <h4 className="font-medium text-slate-700 mb-3 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-purple-500" />
+                  <Sparkles className="h-4 w-4 text-[#1B3A5F]" />
                   Per-Condition Breakdown
                 </h4>
                 <div className="space-y-2">
@@ -242,7 +242,7 @@ export default function RatingPredictionCard({ claimId, conditions = [], documen
                       </div>
                       <div className="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-purple-400 rounded-full transition-all"
+                          className="h-full bg-[#2a4a6f] rounded-full transition-all"
                           style={{ width: `${cond.predicted_rating || 0}%` }}
                         />
                       </div>
@@ -283,12 +283,12 @@ export default function RatingPredictionCard({ claimId, conditions = [], documen
             {expanded && (
               <div className="border-t pt-4 mt-2 space-y-4">
                 {prediction.formula_explanation && (
-                  <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                    <h4 className="font-medium text-purple-800 mb-2 flex items-center gap-2">
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-medium text-[#1B3A5F] mb-2 flex items-center gap-2">
                       <BarChart3 className="h-4 w-4" />
                       VA Combined Rating Formula
                     </h4>
-                    <p className="text-sm text-purple-700">
+                    <p className="text-sm text-[#1B3A5F]">
                       {prediction.formula_explanation}
                     </p>
                   </div>
@@ -322,7 +322,7 @@ export default function RatingPredictionCard({ claimId, conditions = [], documen
                             <span className="text-sm font-medium text-slate-600 w-12">{rating}%</span>
                             <div className="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-purple-400 rounded-full transition-all"
+                                className="h-full bg-[#2a4a6f] rounded-full transition-all"
                                 style={{ width: `${probability * 100}%` }}
                               />
                             </div>
@@ -354,7 +354,7 @@ export default function RatingPredictionCard({ claimId, conditions = [], documen
                 variant="ghost"
                 size="sm"
                 onClick={() => setExpanded(true)}
-                className="w-full text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                className="w-full text-[#1B3A5F] hover:text-[#1B3A5F] hover:bg-blue-50"
               >
                 View detailed breakdown & recommendations
               </Button>

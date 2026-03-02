@@ -51,13 +51,13 @@ const STATUS_CONFIG = {
   },
   accepted: {
     label: 'Accepted',
-    color: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+    color: 'bg-blue-50 text-[#1B3A5F] border-blue-200',
     icon: CheckCircle2,
     step: 3
   },
   in_progress: {
     label: 'In Progress',
-    color: 'bg-purple-100 text-purple-800 border-purple-300',
+    color: 'bg-blue-50 text-[#1B3A5F] border-blue-200',
     icon: RefreshCw,
     step: 4
   },
@@ -127,7 +127,7 @@ function StatusTimeline({ status }) {
                   isCompleted
                     ? 'bg-green-500 border-green-500 text-white'
                     : isCurrent
-                    ? 'bg-blue-500 border-blue-500 text-white'
+                    ? 'bg-[#1B3A5F] border-[#1B3A5F] text-white'
                     : 'bg-white border-slate-300 text-slate-400'
                 }`}
               >

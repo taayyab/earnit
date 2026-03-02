@@ -106,13 +106,13 @@ export default function SSDIStart() {
       </div>
 
       {eligibility?.expedited_eligible && (
-        <Card className="mb-6 border-purple-200 bg-purple-50">
+        <Card className="mb-6 border-blue-200 bg-blue-50">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Zap className="h-5 w-5 text-purple-600" />
+              <Zap className="h-5 w-5 text-[#1B3A5F]" />
               <div>
-                <span className="font-semibold text-purple-900">Expedited Processing Available</span>
-                <p className="text-purple-700 text-sm">
+                <span className="font-semibold text-[#1B3A5F]">Expedited Processing Available</span>
+                <p className="text-[#1B3A5F] text-sm">
                   {eligibility.expedited_reason === 'va_100_pt' 
                     ? 'Your 100% Permanent & Total VA rating qualifies you for faster processing.'
                     : 'You qualify for SSA expedited processing.'}

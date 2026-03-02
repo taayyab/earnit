@@ -217,8 +217,8 @@ export default function OnboardingWizard({ onComplete }) {
                 <p className="text-sm font-medium">Guided</p>
                 <p className="text-xs text-muted-foreground">Step-by-step help</p>
               </div>
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <CheckCircle2 className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <CheckCircle2 className="h-8 w-8 text-[#1B3A5F] mx-auto mb-2" />
                 <p className="text-sm font-medium">Proven</p>
                 <p className="text-xs text-muted-foreground">Higher success rates</p>
               </div>

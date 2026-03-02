@@ -130,7 +130,7 @@ export function AccessibilityReportButton() {
       <button
         onClick={handleRunAudit}
         disabled={isRunning}
-        className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium flex items-center gap-2"
+        className="bg-[#1B3A5F] hover:bg-[#1B3A5F] text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium flex items-center gap-2"
         aria-label="Run accessibility audit"
       >
         {isRunning ? (

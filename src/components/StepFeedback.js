@@ -68,8 +68,8 @@ export default function StepFeedback({ type, show, onHide, customMessage }) {
 
 export function ProgressMilestone({ milestone, description }) {
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 flex items-center gap-4">
-      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+    <div className="bg-gradient-to-r from-blue-50 to-[#1B3A5F] border border-blue-200 rounded-lg p-4 flex items-center gap-4">
+      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-[#1B3A5F] rounded-full flex items-center justify-center">
         <Sparkles className="h-6 w-6 text-white" />
       </div>
       <div>
@@ -108,7 +108,7 @@ export function EncouragementBanner({ variant = 'default' }) {
   const colorClasses = {
     blue: 'from-blue-50 to-blue-100 border-blue-200 text-blue-900',
     green: 'from-green-50 to-green-100 border-green-200 text-green-900',
-    purple: 'from-purple-50 to-purple-100 border-purple-200 text-purple-900'
+    purple: 'from-[#1B3A5F] to-[#1B3A5F] border-blue-200 text-[#1B3A5F]'
   };
 
   return (

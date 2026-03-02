@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, Star, Trophy, Medal } from 'lucide-react';
 import { feedback } from '../lib/uxFeedback';
 
-const CONFETTI_COLORS = ['#1B3A5F', '#C41E3A', '#FFD700', '#4CAF50', '#FF6B6B', '#9C27B0'];
+const CONFETTI_COLORS = ['#1B3A5F', '#C41E3A', '#FFD700', '#4CAF50', '#FF6B6B', '#2196F3'];
 
 const Confetti = ({ count = 50 }) => {
   const [pieces, setPieces] = useState([]);
@@ -48,25 +48,25 @@ const CELEBRATION_CONFIGS = {
     icon: CheckCircle,
     title: "Claim Submitted!",
     subtitle: "You've taken a big step forward, soldier.",
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
+    color: 'text-[#1B3A5F]',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
     confetti: true
   },
   claim_approved: {
     icon: Trophy,
     title: "Victory!",
     subtitle: "Your claim has been approved. Mission accomplished.",
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
-    borderColor: 'border-yellow-300',
+    color: 'text-[#1B3A5F]',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
     confetti: true
   },
   document_uploaded: {
     icon: CheckCircle,
     title: "Evidence Secured",
     subtitle: "Document uploaded successfully.",
-    color: 'text-blue-600',
+    color: 'text-[#1B3A5F]',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
     confetti: false
@@ -75,18 +75,18 @@ const CELEBRATION_CONFIGS = {
     icon: Star,
     title: "Milestone Reached!",
     subtitle: "Keep pushing forward.",
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
+    color: 'text-[#1B3A5F]',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
     confetti: false
   },
   profile_complete: {
     icon: Medal,
     title: "Profile Complete!",
     subtitle: "You're ready to start your claim.",
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
-    borderColor: 'border-indigo-200',
+    color: 'text-[#1B3A5F]',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
     confetti: true
   }
 };

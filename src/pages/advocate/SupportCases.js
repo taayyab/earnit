@@ -80,10 +80,10 @@ const CATEGORY_ICONS = {
 const CATEGORY_COLORS = {
   housing: 'bg-blue-100 text-blue-700 border-blue-200',
   employment: 'bg-green-100 text-green-700 border-green-200',
-  mental_health: 'bg-purple-100 text-purple-700 border-purple-200',
+  mental_health: 'bg-blue-50 text-[#1B3A5F] border-blue-200',
   financial: 'bg-yellow-100 text-yellow-700 border-yellow-200',
   legal: 'bg-gray-100 text-gray-700 border-gray-200',
-  education: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  education: 'bg-blue-50 text-[#1B3A5F] border-blue-200',
   healthcare: 'bg-red-100 text-red-700 border-red-200',
   family: 'bg-pink-100 text-pink-700 border-pink-200'
 };
@@ -109,7 +109,7 @@ const PRIORITY_CONFIG = {
 
 const STATUS_CONFIG = {
   new: { label: 'New', color: 'bg-blue-100 text-blue-700' },
-  assigned: { label: 'Assigned', color: 'bg-purple-100 text-purple-700' },
+  assigned: { label: 'Assigned', color: 'bg-blue-50 text-[#1B3A5F]' },
   in_progress: { label: 'In Progress', color: 'bg-amber-100 text-amber-700' },
   pending_partner: { label: 'Pending Partner', color: 'bg-orange-100 text-orange-700' },
   resolved: { label: 'Resolved', color: 'bg-green-100 text-green-700' },
@@ -682,7 +682,7 @@ function ReviewWorkflowPanel({ caseData, onUpdate }) {
         <Button
           onClick={handleSubmitReview}
           disabled={submitting}
-          className="w-full bg-blue-600 hover:bg-blue-700"
+          className="w-full bg-[#1B3A5F] hover:bg-[#2a4a6f]"
         >
           {submitting ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />

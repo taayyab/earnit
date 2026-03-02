@@ -84,9 +84,9 @@ export default function NotificationCenter() {
       case 'document_received':
         return <FileText {...iconProps} className="h-5 w-5 text-green-600" />;
       case 'agent_assigned':
-        return <UserPlus {...iconProps} className="h-5 w-5 text-purple-600" />;
+        return <UserPlus {...iconProps} className="h-5 w-5 text-[#1B3A5F]" />;
       case 'meeting_scheduled':
-        return <Calendar {...iconProps} className="h-5 w-5 text-indigo-600" />;
+        return <Calendar {...iconProps} className="h-5 w-5 text-[#1B3A5F]" />;
       case 'deadline_reminder':
         return <Clock {...iconProps} className="h-5 w-5 text-amber-600" />;
       case 'urgent':
@@ -112,11 +112,11 @@ export default function NotificationCenter() {
         return `bg-blue-50 ${baseUnread} border-l-blue-500`;
       case 'agent_assigned':
       case 'advocate_connection_accepted':
-        return `bg-purple-50 ${baseUnread} border-l-purple-500`;
+        return `bg-blue-50 ${baseUnread} border-l-[#1B3A5F]`;
       case 'meeting_scheduled':
       case 'meeting_reminder_24h':
       case 'meeting_reminder_1h':
-        return `bg-indigo-50 ${baseUnread} border-l-indigo-500`;
+        return `bg-blue-50 ${baseUnread} border-l-[#1B3A5F]`;
       default:
         return `bg-slate-50 ${baseUnread} border-l-[hsl(var(--accent))]`;
     }

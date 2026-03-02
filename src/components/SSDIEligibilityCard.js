@@ -111,7 +111,7 @@ export default function SSDIEligibilityCard({ claimId, claimStatus, vaRating }) 
             </div>
           </div>
           {eligibility.expedited_eligible && (
-            <Badge className="bg-purple-100 text-purple-800 border-purple-300">
+            <Badge className="bg-blue-50 text-[#1B3A5F] border-blue-200">
               <Zap className="h-3 w-3 mr-1" />
               Expedited
             </Badge>

@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { useAuth } from '../lib/auth-context';
 import api from '../lib/api';
 import { useDemoMode } from '../context/DemoModeContext';
-import PageHeader from '../components/PageHeader';
+import VeteranLayout from '../components/VeteranLayout';
 import DocumentGuidance, { DocumentHelpButton } from '../components/DocumentGuidance';
 import JourneyProgress from '../components/JourneyProgress';
 import StepFeedback from '../components/StepFeedback';
@@ -1051,13 +1051,8 @@ export default function DocumentOnboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <PageHeader 
-        showBackButton={true} 
-        backTo="/dashboard"
-        showHomeButton={true}
-      />
-      <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
+    <VeteranLayout>
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         <div className="mb-6">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Start Your VA Disability Claim</h1>
@@ -1150,6 +1145,6 @@ export default function DocumentOnboarding() {
       />
       
       {CelebrationComponent}
-    </div>
+    </VeteranLayout>
   );
 }

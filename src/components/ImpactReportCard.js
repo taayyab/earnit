@@ -123,7 +123,7 @@ export default function ImpactReportCard({ report, previousReport, title, catego
 
   const getReportTypeBadge = () => {
     const types = {
-      platform: { label: 'Platform', color: 'bg-purple-100 text-purple-800' },
+      platform: { label: 'Platform', color: 'bg-blue-50 text-[#1B3A5F]' },
       organization: { label: 'Organization', color: 'bg-blue-100 text-blue-800' },
       agent: { label: 'Agent', color: 'bg-green-100 text-green-800' },
       advocate: { label: 'Advocate', color: 'bg-amber-100 text-amber-800' },

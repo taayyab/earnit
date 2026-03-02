@@ -53,7 +53,7 @@ const PRIORITY_COLORS = {
 };
 
 const STATUS_COLORS = {
-  new: 'bg-purple-100 text-purple-800',
+  new: 'bg-blue-50 text-[#1B3A5F]',
   assigned: 'bg-blue-100 text-blue-800',
   in_progress: 'bg-yellow-100 text-yellow-800',
   pending_partner: 'bg-orange-100 text-orange-800',
@@ -200,7 +200,7 @@ export default function SupportCaseDashboard() {
         <PageHeader title="Support Cases" />
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <RefreshCw className="h-12 w-12 animate-spin mx-auto text-blue-600 mb-4" />
+            <RefreshCw className="h-12 w-12 animate-spin mx-auto text-[#1B3A5F] mb-4" />
             <p className="text-lg text-slate-500">Loading support cases...</p>
           </div>
         </div>
@@ -219,14 +219,14 @@ export default function SupportCaseDashboard() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {statistics && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="border-l-4 border-l-purple-500">
+            <Card className="border-l-4 border-l-[#1B3A5F]">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">New Cases</p>
                     <p className="text-2xl font-bold">{statistics.new_cases || 0}</p>
                   </div>
-                  <ClipboardList className="h-8 w-8 text-purple-500 opacity-50" />
+                  <ClipboardList className="h-8 w-8 text-[#1B3A5F] opacity-50" />
                 </div>
               </CardContent>
             </Card>
@@ -313,7 +313,7 @@ export default function SupportCaseDashboard() {
                             onClick={() => setSelectedCase(supportCase)}
                             className={`p-4 rounded-lg border cursor-pointer transition-all ${
                               selectedCase?.case_id === supportCase.case_id
-                                ? 'border-blue-500 bg-blue-50'
+                                ? 'border-[#1B3A5F] bg-blue-50'
                                 : 'border-slate-200 hover:border-slate-300 hover:bg-white'
                             }`}
                           >
@@ -361,7 +361,7 @@ export default function SupportCaseDashboard() {
                     {selectedCase.veteran_email && (
                       <a 
                         href={`mailto:${selectedCase.veteran_email}`}
-                        className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
+                        className="flex items-center gap-1 text-sm text-[#1B3A5F] hover:underline"
                       >
                         <Mail className="h-3 w-3" />
                         {selectedCase.veteran_email}
@@ -382,7 +382,7 @@ export default function SupportCaseDashboard() {
                     <Button 
                       onClick={() => handleSelfAssign(selectedCase.case_id)}
                       disabled={processing}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      className="w-full bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                     >
                       <UserPlus className="h-4 w-4 mr-2" />
                       Take This Case
@@ -417,7 +417,7 @@ export default function SupportCaseDashboard() {
                               {service.contact_phone && (
                                 <a
                                   href={`tel:${service.contact_phone}`}
-                                  className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                                  className="text-xs text-[#1B3A5F] hover:underline flex items-center gap-1"
                                 >
                                   <Phone className="h-3 w-3" />
                                   Call
@@ -425,7 +425,7 @@ export default function SupportCaseDashboard() {
                               )}
                               <button
                                 onClick={() => openReferralDialog(service)}
-                                className="text-xs text-purple-600 hover:underline flex items-center gap-1"
+                                className="text-xs text-[#1B3A5F] hover:underline flex items-center gap-1"
                               >
                                 <Building2 className="h-3 w-3" />
                                 Create Referral
@@ -530,7 +530,7 @@ export default function SupportCaseDashboard() {
                 <p className="font-medium">{referralPartner.name}</p>
                 <p className="text-sm text-muted-foreground">{referralPartner.description}</p>
                 {referralPartner.contact_phone && (
-                  <p className="text-sm text-blue-600 mt-1">{referralPartner.contact_phone}</p>
+                  <p className="text-sm text-[#1B3A5F] mt-1">{referralPartner.contact_phone}</p>
                 )}
               </div>
             )}

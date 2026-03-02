@@ -967,7 +967,7 @@ export default function VeteranClientOnboarding() {
                   blue: isSelected ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-blue-300',
                   green: isSelected ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-green-300',
                   amber: isSelected ? 'border-amber-500 bg-amber-50' : 'border-slate-200 hover:border-amber-300',
-                  purple: isSelected ? 'border-purple-500 bg-purple-50' : 'border-slate-200 hover:border-purple-300'
+                  purple: isSelected ? 'border-blue-200 bg-blue-50' : 'border-slate-200 hover:border-blue-200'
                 };
                 
                 return (
@@ -1664,7 +1664,7 @@ export default function VeteranClientOnboarding() {
               Your personalized roadmap is ready. Start building the claim now with pre-filled information.
             </p>
             <Button 
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              className="w-full bg-[#1B3A5F] hover:bg-[#2a4a6f] text-white"
               onClick={() => navigate('/agent/create-claim', { state: onboardingData })}
             >
               <FileText className="w-4 h-4 mr-2" />
@@ -1845,7 +1845,7 @@ export default function VeteranClientOnboarding() {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                className="bg-[#1B3A5F] hover:bg-[#2a4a6f] text-white flex items-center gap-2"
               >
                 {isSubmitting ? 'Submitting...' : 'Complete Onboarding'}
                 <CheckCircle2 className="w-4 h-4" />

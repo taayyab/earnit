@@ -176,7 +176,7 @@ function DisabilityRatingCard({ rating }) {
 
   const combinedRating = rating.combined_rating || 0;
   const ratingColor = 
-    combinedRating >= 70 ? 'text-purple-600' :
+    combinedRating >= 70 ? 'text-[#1B3A5F]' :
     combinedRating >= 50 ? 'text-blue-600' :
     combinedRating >= 30 ? 'text-amber-600' :
     'text-slate-600';
@@ -229,12 +229,12 @@ function DisabilityRatingCard({ rating }) {
         )}
 
         {(rating.special_monthly_compensation || rating.total_disability_individual_unemployability) && (
-          <div className="mt-4 p-2 bg-purple-50 rounded border border-purple-200">
+          <div className="mt-4 p-2 bg-blue-50 rounded border border-blue-200">
             {rating.special_monthly_compensation && (
-              <Badge className="bg-purple-100 text-purple-700 mr-2">SMC</Badge>
+              <Badge className="bg-blue-50 text-[#1B3A5F] mr-2">SMC</Badge>
             )}
             {rating.total_disability_individual_unemployability && (
-              <Badge className="bg-purple-100 text-purple-700">TDIU</Badge>
+              <Badge className="bg-blue-50 text-[#1B3A5F]">TDIU</Badge>
             )}
           </div>
         )}

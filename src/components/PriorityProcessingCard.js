@@ -20,9 +20,9 @@ const REASON_DISPLAY = {
   purple_heart: {
     label: 'Purple Heart Recipient',
     icon: Heart,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200'
+    color: 'text-red-700',
+    bgColor: 'bg-red-50',
+    borderColor: 'border-red-200'
   },
   homeless: {
     label: 'Experiencing Homelessness',

@@ -124,7 +124,7 @@ export default function HealthRecordsSync({ veteranIcn, claimId, onRecordsImport
   };
 
   const getConditionCategory = (condition) => {
-    if (condition.category?.includes('mental')) return { label: 'Mental Health', color: 'bg-purple-100 text-purple-700' };
+    if (condition.category?.includes('mental')) return { label: 'Mental Health', color: 'bg-blue-50 text-[#1B3A5F]' };
     if (condition.category?.includes('musculoskeletal')) return { label: 'Musculoskeletal', color: 'bg-blue-100 text-blue-700' };
     if (condition.category?.includes('respiratory')) return { label: 'Respiratory', color: 'bg-cyan-100 text-cyan-700' };
     return { label: 'General', color: 'bg-neutral-100 text-neutral-700' };
@@ -283,7 +283,7 @@ export default function HealthRecordsSync({ veteranIcn, claimId, onRecordsImport
                 <Button
                   onClick={handleImportSelected}
                   disabled={importing}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                 >
                   {importing ? (
                     <>

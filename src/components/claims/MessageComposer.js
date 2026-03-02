@@ -35,7 +35,7 @@ import { toast } from 'sonner';
 const TEMPLATE_CATEGORIES = {
   evidence: { label: 'Evidence Requests', color: 'bg-blue-100 text-blue-800' },
   status: { label: 'Status Updates', color: 'bg-green-100 text-green-800' },
-  appointment: { label: 'Appointments', color: 'bg-purple-100 text-purple-800' },
+  appointment: { label: 'Appointments', color: 'bg-blue-50 text-[#1B3A5F]' },
   onboarding: { label: 'Onboarding', color: 'bg-yellow-100 text-yellow-800' },
   follow_up: { label: 'Follow-ups', color: 'bg-orange-100 text-orange-800' },
 };

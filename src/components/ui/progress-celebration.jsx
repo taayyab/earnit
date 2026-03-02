@@ -78,13 +78,13 @@ export function ProgressCelebration({
     step_complete: 'bg-green-50 border-green-200',
     document_uploaded: 'bg-blue-50 border-blue-200',
     claim_submitted: 'bg-[hsl(var(--warm-gold-light))] border-[hsl(var(--warm-gold))]',
-    milestone: 'bg-purple-50 border-purple-200',
+    milestone: 'bg-blue-50 border-blue-200',
   }
   const iconColors = {
     step_complete: 'text-green-600',
     document_uploaded: 'text-blue-600',
     claim_submitted: 'text-[hsl(var(--warm-gold-dark))]',
-    milestone: 'text-purple-600',
+    milestone: 'text-[#1B3A5F]',
   }
 
   return (

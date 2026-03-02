@@ -325,7 +325,7 @@ export default function ProviderSearch() {
 
         <div className="flex flex-wrap gap-2">
           {provider.serves_telehealth && (
-            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+            <Badge variant="outline" className="text-xs bg-blue-50 text-[#1B3A5F] border-blue-200">
               <Video className="h-3 w-3 mr-1" />
               Telehealth
             </Badge>
@@ -629,7 +629,7 @@ export default function ProviderSearch() {
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-[#1B3A5F]" />
               </div>
             ) : providers.length === 0 ? (
               <Card className="py-16">
@@ -710,7 +710,7 @@ export default function ProviderSearch() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           {loadingDetails ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#1B3A5F]" />
             </div>
           ) : providerDetails ? (
             <>
@@ -721,7 +721,7 @@ export default function ProviderSearch() {
                     <DialogDescription className="flex items-center gap-2 mt-2">
                       <TierBadge tier={providerDetails.tier} />
                       {providerDetails.serves_telehealth && (
-                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                        <Badge variant="outline" className="bg-blue-50 text-[#1B3A5F] border-blue-200">
                           <Video className="h-3 w-3 mr-1" />
                           Telehealth
                         </Badge>

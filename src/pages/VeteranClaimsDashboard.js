@@ -6,6 +6,7 @@ import { CreateClaimModal } from '../components/claims/CreateClaimModal';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
+import { Skeleton } from '../components/ui/skeleton';
 import { 
   FileText, 
   Plus, 
@@ -15,7 +16,6 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  Loader2,
   ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -161,11 +161,17 @@ export default function VeteranClaimsDashboard() {
 
   return (
     <VeteranLayout>
-      <div className="p-6 max-w-6xl mx-auto">
+      <div className="min-h-full bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-[#1B3A5F]">My Claims</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#1B3A5F] to-[#2C5282] rounded-xl flex items-center justify-center">
+                <FileText className="w-5 h-5 text-white" />
+              </div>
+              My Claims
+            </h1>
+            <p className="text-slate-600 mt-1">
               Manage your VA disability claims and track their progress
             </p>
           </div>
@@ -183,9 +189,13 @@ export default function VeteranClaimsDashboard() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-[#1B3A5F]" />
-            <span className="ml-2 text-muted-foreground">Loading claims...</span>
+          <div className="space-y-4 py-2">
+            <Skeleton className="h-28 w-full rounded-xl" />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Skeleton className="h-52 w-full rounded-xl" />
+              <Skeleton className="h-52 w-full rounded-xl" />
+              <Skeleton className="h-52 w-full rounded-xl" />
+            </div>
           </div>
         ) : claims.length === 0 ? (
           <Card className="text-center py-12">
@@ -220,6 +230,7 @@ export default function VeteranClaimsDashboard() {
             </p>
           </div>
         )}
+      </div>
       </div>
     </VeteranLayout>
   );

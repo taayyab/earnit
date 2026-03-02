@@ -119,7 +119,7 @@ export default function PartnerDashboard() {
   const getClaimStatusBadge = (status) => {
     const config = {
       intake: { label: 'Intake', className: 'bg-blue-100 text-blue-800' },
-      in_progress: { label: 'In Progress', className: 'bg-purple-100 text-purple-800' },
+      in_progress: { label: 'In Progress', className: 'bg-blue-50 text-[#1B3A5F]' },
       submitted: { label: 'Submitted', className: 'bg-green-100 text-green-800' },
       pending_decision: { label: 'Pending Decision', className: 'bg-amber-100 text-amber-800' }
     };
@@ -334,8 +334,8 @@ export default function PartnerDashboard() {
                   <p className="text-sm text-slate-500">Active Clients</p>
                   <p className="text-2xl font-bold text-slate-900">{stats.activeClaims}</p>
                 </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-[#1B3A5F]" />
                 </div>
               </div>
             </CardContent>

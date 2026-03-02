@@ -14,6 +14,7 @@ import BackPayAggregationCard from '../components/BackPayAggregationCard';
 import ClaimForecastCard from '../components/ClaimForecastCard';
 import BackPayEstimationCard from '../components/BackPayEstimationCard';
 import VAStatusSyncCard from '../components/VAStatusSyncCard';
+import VAApiStatusPanel from '../components/VAApiStatusPanel';
 import MeetingScheduler from '../components/MeetingScheduler';
 import MedicationAnalysisCard from '../components/MedicationAnalysisCard';
 import SurveyModal from '../components/SurveyModal';
@@ -23,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
+import { Skeleton } from '../components/ui/skeleton';
 import { 
   FileText, 
   Upload, 
@@ -49,9 +51,52 @@ import {
   Gavel,
   Library,
   ClipboardCheck,
-  DollarSign
+  DollarSign,
+  Star,
+  MapPin,
+  Award,
+  Flag
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+function DashboardSkeleton() {
+  return (
+    <div className="min-h-full bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 pb-24">
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-12 w-12 rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-72" />
+              <Skeleton className="h-4 w-52" />
+            </div>
+          </div>
+          <Skeleton className="h-10 w-56 rounded-lg hidden sm:block" />
+        </div>
+
+        <Skeleton className="h-36 w-full rounded-2xl mb-8" />
+        <Skeleton className="h-56 w-full rounded-2xl mb-8" />
+        <Skeleton className="h-40 w-full rounded-xl mb-8" />
+
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <Skeleton className="h-44 w-full rounded-xl" />
+          <Skeleton className="h-44 w-full rounded-xl" />
+        </div>
+
+        <Skeleton className="h-40 w-full rounded-xl mb-8" />
+        <Skeleton className="h-32 w-full rounded-xl mb-8" />
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <Skeleton key={idx} className="h-24 w-full rounded-xl" />
+          ))}
+        </div>
+
+        <Skeleton className="h-72 w-full rounded-xl" />
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [claims, setClaims] = useState([]);
@@ -71,6 +116,7 @@ export default function Dashboard() {
   const [surveyBannerDismissed, setSurveyBannerDismissed] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [queuePosition, setQueuePosition] = useState(null);
+  const [veteranProfile, setVeteranProfile] = useState(null);
   const { user } = useAuth();
   const { isDemoMode, appendDemoParam, demoProfile } = useDemoMode();
   const navigate = useNavigate();
@@ -78,10 +124,11 @@ export default function Dashboard() {
   const { connected: realtimeConnected, registerHandler } = useRealtimeUpdates();
 
   const handleClaimUpdate = useCallback((data) => {
-    if (data.claim_id && claims.length > 0) {
-      setClaims(prevClaims => 
-        prevClaims.map(claim => 
-          claim.id === data.claim_id 
+    const incomingId = data.claim_id || data.id;
+    if (incomingId) {
+      setClaims(prevClaims =>
+        prevClaims.map(claim =>
+          (claim.id === incomingId || claim.claim_id === incomingId)
             ? { ...claim, status: data.status || claim.status, ...data.updates }
             : claim
         )
@@ -91,7 +138,7 @@ export default function Dashboard() {
         description: data.message || `Your claim status has changed to ${data.status}`
       });
     }
-  }, [claims]);
+  }, []);
 
   const handleNotificationUpdate = useCallback((data) => {
     setUnreadNotifications(prev => prev + 1);
@@ -132,15 +179,20 @@ export default function Dashboard() {
   }, []);
 
   const checkOnboardingAndLoadData = async () => {
-    // Check localStorage first to prevent redirect loops
+    // Demo users and locally-completed users skip the onboarding check
     const locallyCompleted = localStorage.getItem('onboarding_completed') === 'true';
-    if (!locallyCompleted) {
+    const storedUser = localStorage.getItem('user');
+    const isDemoUser = storedUser ? (() => { try { return JSON.parse(storedUser)?.is_demo === true; } catch { return false; } })() : false;
+
+    if (!locallyCompleted && !isDemoUser) {
       try {
         const onboardingStatusRes = await api.get('/users/onboarding-status').catch(() => ({ data: { completed: true } }));
         if (!onboardingStatusRes.data.completed) {
           navigate('/onboarding', { replace: true });
           return;
         }
+        // Mark complete in localStorage so future loads skip this check
+        localStorage.setItem('onboarding_completed', 'true');
       } catch (err) {
         // On error, continue to dashboard
       }
@@ -152,7 +204,7 @@ export default function Dashboard() {
     try {
       setLoading(true);
       const demoSuffix = isDemoMode ? '?demo=true' : '';
-      const [claimsRes, advocateRes, conditionRes, journeyRes, meetingsRes, medicationRes, onboardingRes, surveysRes] = await Promise.all([
+      const [claimsRes, advocateRes, conditionRes, journeyRes, meetingsRes, medicationRes, onboardingRes, surveysRes, profileRes] = await Promise.all([
         claimsAPI.list(),
         api.get(appendDemoParam('/advocates/my-advocate')).catch(() => ({ data: { has_advocate: false } })),
         api.get(appendDemoParam('/conditions/dashboard/summary')).catch(() => ({ data: { success: false } })),
@@ -160,11 +212,12 @@ export default function Dashboard() {
         api.get(appendDemoParam('/meetings/upcoming')).catch(() => ({ data: { meetings: [] } })),
         api.get(appendDemoParam('/claims-intelligence/medication-opportunities')).catch(() => ({ data: { opportunities: [] } })),
         api.get(appendDemoParam('/onboarding-checklist')).catch(() => ({ data: { success: false, checklist: null } })),
-        api.get(appendDemoParam('/surveys/pending')).catch(() => ({ data: { surveys: [], count: 0 } }))
+        api.get(appendDemoParam('/surveys/pending')).catch(() => ({ data: { surveys: [], count: 0 } })),
+        api.get('/users/profile').catch(() => ({ data: { profile: null } }))
       ]);
       
       setClaims(claimsRes.data.claims || []);
-      if (advocateRes.data.has_advocate) {
+      if (advocateRes.data.hasAdvocate || advocateRes.data.has_advocate) {
         setAdvocate(advocateRes.data.advocate);
       }
       if (conditionRes.data.success && conditionRes.data.summary) {
@@ -182,6 +235,7 @@ export default function Dashboard() {
         setOnboardingProgress(onboardingRes.data.checklist);
       }
       setPendingSurveys(surveysRes.data.surveys || []);
+      if (profileRes.data.profile) setVeteranProfile(profileRes.data.profile);
     } catch (err) {
       console.error('Failed to load dashboard:', err);
       toast.error('Failed to load some dashboard data');
@@ -277,12 +331,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <VeteranLayout>
-        <div className="min-h-full bg-slate-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin h-16 w-16 border-4 border-[#1B3A5F] border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-lg text-slate-600">Loading your dashboard...</p>
-          </div>
-        </div>
+        <DashboardSkeleton />
       </VeteranLayout>
     );
   }
@@ -331,6 +380,31 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        {/* Onboarding banner — shown once at the top, not repeated */}
+        {(!user?.onboarding_completed && !onboardingProgress?.completed) && (
+          <div className="mb-6 flex items-center justify-between gap-4 rounded-xl border-2 border-amber-200 bg-amber-50 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <ClipboardCheck className="w-5 h-5 text-amber-600 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-slate-900 text-sm">Complete Your Onboarding</p>
+                <p className="text-xs text-slate-600">
+                  {onboardingProgress && onboardingProgress.total_items > 0
+                    ? `${onboardingProgress.completed_items || 0} of ${onboardingProgress.total_items} steps completed`
+                    : 'Tell us about yourself to personalize your experience'}
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              className="bg-amber-600 hover:bg-amber-700 text-white shrink-0"
+              onClick={() => navigate('/onboarding')}
+            >
+              Continue Onboarding
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        )}
 
         {pendingSurveys.length > 0 && !surveyBannerDismissed && (
           <SurveyBanner
@@ -387,8 +461,8 @@ export default function Dashboard() {
                 {[
                   { label: 'Documents', icon: Upload, done: claims[0]?.documents_count > 0 },
                   { label: 'AI Analysis', icon: Sparkles, done: conditionProgress.conditions?.length > 0 },
-                  { label: 'Conditions', icon: Target, done: conditionProgress.summary?.selected_count > 0 },
-                  { label: 'Evidence', icon: FileText, done: conditionProgress.summary?.avg_completion >= 80 },
+                  { label: 'Conditions', icon: Target, done: (conditionProgress.summary?.selected_count || 0) > 0 },
+                  { label: 'Evidence', icon: FileText, done: (conditionProgress.summary?.avg_completion || 0) >= 80 },
                   { label: 'QA Review', icon: Shield, done: claims[0]?.status === 'qa_complete' },
                   { label: 'Submit', icon: CheckCircle2, done: claims[0]?.status === 'submitted' },
                 ].map((step, idx) => (
@@ -471,7 +545,7 @@ export default function Dashboard() {
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {conditionProgress.conditions.slice(0, 6).map((condition, idx) => (
+              {(conditionProgress.conditions || []).slice(0, 6).map((condition, idx) => (
                 <Card 
                   key={idx} 
                   className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-[#1B3A5F]/30"
@@ -515,38 +589,53 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Onboarding Progress Card - shows if user hasn't completed onboarding */}
-        {(!user?.onboarding_completed && !onboardingProgress?.completed) && (
-          <Card className="mb-8 border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-white">
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                    <ClipboardCheck className="w-6 h-6 text-amber-600" />
+
+        {veteranProfile && (
+          <Card className="mb-8 border-2 border-slate-100">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg text-[#1B3A5F]">
+                <Shield className="w-5 h-5" />
+                Your Service Profile
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                {veteranProfile.serviceBranch && (
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">Branch</p>
+                    <p className="font-semibold text-slate-900 text-sm">{veteranProfile.serviceBranch}</p>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900">Complete Your Onboarding</h3>
-                    <p className="text-sm text-slate-600">
-                      {onboardingProgress 
-                        ? `${onboardingProgress.completed_items || 0} of ${onboardingProgress.total_items || 5} steps completed`
-                        : 'Tell us about yourself to personalize your experience'}
-                    </p>
+                )}
+                {veteranProfile.serviceEra && (
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">Era</p>
+                    <p className="font-semibold text-slate-900 text-sm">{veteranProfile.serviceEra}</p>
                   </div>
-                </div>
-                <Button 
-                  className="bg-amber-600 hover:bg-amber-700 text-white w-full sm:w-auto"
-                  onClick={() => navigate('/onboarding')}
-                >
-                  Continue Onboarding
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                )}
+                {veteranProfile.dischargeStatus && (
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">Discharge</p>
+                    <p className="font-semibold text-slate-900 text-sm capitalize">{veteranProfile.dischargeStatus.replace(/_/g, ' ')}</p>
+                  </div>
+                )}
+                {veteranProfile.claimType && (
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="text-xs text-slate-500 mb-1 font-medium uppercase tracking-wide">Claim Type</p>
+                    <p className="font-semibold text-slate-900 text-sm capitalize">{veteranProfile.claimType.replace(/_/g, ' ')}</p>
+                  </div>
+                )}
               </div>
-              {onboardingProgress && onboardingProgress.total_items > 0 && (
-                <div className="mt-4">
-                  <Progress 
-                    value={(onboardingProgress.completed_items / onboardingProgress.total_items) * 100} 
-                    className="h-2" 
-                  />
+
+              {veteranProfile.goals && Array.isArray(veteranProfile.goals) && veteranProfile.goals.length > 0 && (
+                <div>
+                  <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-2">Your Goals</p>
+                  <div className="flex flex-wrap gap-2">
+                    {veteranProfile.goals.map((goal, i) => (
+                      <Badge key={i} className="bg-[#1B3A5F]/10 text-[#1B3A5F] hover:bg-[#1B3A5F]/20 border-0 text-xs font-medium capitalize">
+                        {String(goal).replace(/_/g, ' ')}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -554,8 +643,8 @@ export default function Dashboard() {
         )}
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          
-          <Card 
+
+          <Card
             className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-[#1B3A5F]/30 focus-visible:ring-2 focus-visible:ring-[#1B3A5F] focus-visible:ring-offset-2" 
             onClick={() => navigate('/forms-library')}
             role="button"
@@ -698,7 +787,7 @@ export default function Dashboard() {
           </Card>
 
           <Card 
-            className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-purple-300 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2" 
+            className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-200 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2" 
             onClick={() => navigate('/evidence-library')}
             role="button"
             aria-label="Evidence Library - Manage and link documents to conditions"
@@ -712,8 +801,8 @@ export default function Dashboard() {
           >
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                  <Library className="w-6 h-6 text-purple-600" aria-hidden="true" />
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <Library className="w-6 h-6 text-[#1B3A5F]" aria-hidden="true" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-slate-900">Evidence Library</h3>
@@ -784,6 +873,10 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           )}
+        </div>
+
+        <div className="mb-8">
+          <VAApiStatusPanel />
         </div>
 
         {showHealthImport && (
@@ -877,55 +970,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {!claims.length && (
-          <Card className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-100">
-            <CardContent className="pt-8 pb-8">
-              <div className="text-center max-w-2xl mx-auto">
-                <div className="flex justify-center gap-3 mb-6">
-                  <div className="w-16 h-16 bg-[#E8F4FD] rounded-2xl flex items-center justify-center">
-                    <Sparkles className="w-8 h-8 text-[#1B3A5F]" />
-                  </div>
-                </div>
-                
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                  Let AI Build Your Claim
-                </h2>
-                <p className="text-slate-600 mb-6">
-                  Upload your DD-214 and medical records. Our AI will analyze everything, identify 
-                  all conditions you may be eligible for, and show you exactly what evidence you need 
-                  for VA approval.
-                </p>
-                
-                <div className="grid md:grid-cols-3 gap-4 mb-8 text-left">
-                  {[
-                    { icon: Upload, title: 'Upload Documents', desc: 'DD-214, medical records, service records' },
-                    { icon: Sparkles, title: 'AI Analysis', desc: 'Identifies conditions & required evidence' },
-                    { icon: Target, title: 'Roadmap', desc: 'Step-by-step path to approval' },
-                  ].map((step, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-4 bg-white rounded-lg border border-slate-100">
-                      <div className="w-10 h-10 bg-[#1B3A5F]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <step.icon className="w-5 h-5 text-[#1B3A5F]" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-slate-900 text-sm">{step.title}</h4>
-                        <p className="text-xs text-slate-600">{step.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <Button 
-                  size="lg"
-                  className="bg-[#1B3A5F] hover:bg-[#0F2A4A] text-white px-8"
-                  onClick={() => navigate('/document-onboarding')}
-                >
-                  <Upload className="w-5 h-5 mr-2" />
-                  Start Your Claim
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {claims.length > 0 && (
           <Card className="border-2 border-slate-100">

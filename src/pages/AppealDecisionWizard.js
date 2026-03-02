@@ -935,23 +935,23 @@ export default function AppealDecisionWizard() {
               </div>
 
               {generateRemediationRoadmap(decisionData.denialLetterAnalysis).length > 0 && (
-                <Card className="border-purple-200 bg-purple-50">
+                <Card className="border-blue-200 bg-blue-50">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2 text-purple-800">
+                    <CardTitle className="text-lg flex items-center gap-2 text-[#1B3A5F]">
                       <Target className="w-5 h-5" />
                       Your Remediation Roadmap
                     </CardTitle>
-                    <CardDescription className="text-purple-700">
+                    <CardDescription className="text-[#1B3A5F]">
                       Based on the denial reasons, here's your action plan to strengthen your appeal
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {generateRemediationRoadmap(decisionData.denialLetterAnalysis).map((item, idx) => (
-                      <div key={idx} className="bg-white rounded-lg p-4 border border-purple-200">
+                      <div key={idx} className="bg-white rounded-lg p-4 border border-blue-200">
                         <div className="flex items-center gap-2 mb-3">
-                          <Badge className="bg-purple-600 text-white">{item.condition}</Badge>
-                          <span className="text-sm text-purple-600">-</span>
-                          <span className="text-sm text-purple-700 italic">"{item.denial_reason}"</span>
+                          <Badge className="bg-[#1B3A5F] text-white">{item.condition}</Badge>
+                          <span className="text-sm text-[#1B3A5F]">-</span>
+                          <span className="text-sm text-[#1B3A5F] italic">"{item.denial_reason}"</span>
                         </div>
                         <div className="space-y-2">
                           {item.steps.map((step, stepIdx) => (
@@ -1490,7 +1490,7 @@ export default function AppealDecisionWizard() {
                 Your {selectedOption?.form} has been pre-filled with your information. 
                 Review it carefully before submitting to the VA.
               </p>
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button className="bg-[#1B3A5F] hover:bg-[#2a4a6f]">
                 <Download className="w-4 h-4 mr-2" />
                 Download Form
               </Button>

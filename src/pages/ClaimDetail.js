@@ -374,7 +374,7 @@ export default function ClaimDetail() {
                               {condition.name || condition.condition_name}
                             </h4>
                             {condition.is_presumptive && (
-                              <Badge className="bg-purple-100 text-purple-700 border-0 text-xs">
+                              <Badge className="bg-blue-50 text-[#1B3A5F] border-0 text-xs">
                                 <Shield className="h-3 w-3 mr-1" />
                                 Presumptive
                               </Badge>
@@ -511,7 +511,7 @@ export default function ClaimDetail() {
                   {!claim.intake_data && !claim.conditions?.length && (
                     <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
                       <div className="flex items-start gap-3">
-                        <ClipboardList className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+                        <ClipboardList className="h-6 w-6 text-[#1B3A5F] flex-shrink-0 mt-1" />
                         <div className="flex-1">
                           <h4 className="font-semibold mb-1">Complete Your Intake Questionnaire</h4>
                           <p className="text-sm text-muted-foreground mb-3">
@@ -519,7 +519,7 @@ export default function ClaimDetail() {
                           </p>
                           <Button
                             onClick={() => navigate(`/claim/${claimId}/intake`)}
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                             data-testid="start-intake-button"
                           >
                             Start Intake Questionnaire
@@ -541,7 +541,7 @@ export default function ClaimDetail() {
                           </p>
                           <Button
                             onClick={() => navigate(`/claim/${claimId}/documents`)}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
                             data-testid="upload-docs-button"
                           >
                             Upload Documents
@@ -575,9 +575,9 @@ export default function ClaimDetail() {
                   )}
                   
                   {claim.form_completed && claim.status === 'draft' && (
-                    <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
+                    <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
                       <div className="flex items-start gap-3">
-                        <Send className="h-6 w-6 text-purple-600 flex-shrink-0 mt-1" />
+                        <Send className="h-6 w-6 text-[#1B3A5F] flex-shrink-0 mt-1" />
                         <div className="flex-1">
                           <h4 className="font-semibold mb-1">Ready to Submit!</h4>
                           <p className="text-sm text-muted-foreground mb-3">
@@ -585,7 +585,7 @@ export default function ClaimDetail() {
                           </p>
                           <Button
                             onClick={() => navigate(`/form/${claimId}`)}
-                            className="bg-purple-600 hover:bg-purple-700"
+                            className="bg-[#1B3A5F] hover:bg-[#1B3A5F]"
                           >
                             Review & Submit
                             <ArrowRight className="h-4 w-4 ml-2" />
@@ -771,7 +771,7 @@ export default function ClaimDetail() {
               <Card className="border-l-4 border-l-purple-500">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-purple-600" />
+                    <Brain className="h-5 w-5 text-[#1B3A5F]" />
                     AI Claims Analysis Results
                   </CardTitle>
                 </CardHeader>
@@ -796,12 +796,12 @@ export default function ClaimDetail() {
                       <h4 className="font-semibold mb-3 text-sm">Condition Mapping Results</h4>
                       <div className="space-y-3">
                         {aiAnalysis.condition_analyses?.map((analysis, i) => (
-                          <div key={i} className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200">
+                          <div key={i} className="p-4 rounded-lg bg-gradient-to-br from-[#1B3A5F] to-blue-50 border border-blue-200">
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                   <p className="font-semibold">{analysis.condition_input}</p>
-                                  <Badge className="bg-purple-600 text-white">
+                                  <Badge className="bg-[#1B3A5F] text-white">
                                     Code {analysis.va_code}
                                   </Badge>
                                   <Badge variant="outline" className="text-xs">
@@ -811,10 +811,10 @@ export default function ClaimDetail() {
                                 <p className="text-sm text-muted-foreground">{analysis.va_name}</p>
                               </div>
                             </div>
-                            <div className="mt-3 p-3 bg-white rounded border border-purple-100">
+                            <div className="mt-3 p-3 bg-white rounded border border-blue-200">
                               <div className="flex items-center gap-2 mb-2">
-                                <span className="text-xs font-semibold text-purple-900">Evidence Score:</span>
-                                <span className="text-sm font-bold text-purple-600">{analysis.evidence_score}%</span>
+                                <span className="text-xs font-semibold text-[#1B3A5F]">Evidence Score:</span>
+                                <span className="text-sm font-bold text-[#1B3A5F]">{analysis.evidence_score}%</span>
                               </div>
                               {analysis.missing_evidence && analysis.missing_evidence.length > 0 && (
                                 <div className="mt-2">
@@ -830,7 +830,7 @@ export default function ClaimDetail() {
                                 </div>
                               )}
                               {analysis.secondary_suggestions && analysis.secondary_suggestions.length > 0 && (
-                                <div className="mt-2 pt-2 border-t border-purple-100">
+                                <div className="mt-2 pt-2 border-t border-blue-200">
                                   <p className="text-xs font-semibold text-blue-900 mb-1">💡 Consider Also Claiming:</p>
                                   <div className="flex flex-wrap gap-1">
                                     {analysis.secondary_suggestions.slice(0, 3).map((sec, k) => (
@@ -858,7 +858,7 @@ export default function ClaimDetail() {
                           {aiAnalysis.secondary_condition_suggestions.slice(0, 5).map((suggestion, i) => (
                             <div key={i} className="p-3 rounded-lg bg-blue-50 border border-blue-200">
                               <p className="text-sm font-medium text-blue-900">
-                                {suggestion.secondary} <span className="text-xs text-blue-600">(secondary to {suggestion.primary})</span>
+                                {suggestion.secondary} <span className="text-xs text-[#1B3A5F]">(secondary to {suggestion.primary})</span>
                               </p>
                               <p className="text-xs text-blue-700 mt-1">{suggestion.explanation}</p>
                             </div>
@@ -890,7 +890,7 @@ export default function ClaimDetail() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-purple-600" />
+                    <Brain className="h-5 w-5 text-[#1B3A5F]" />
                     AI Evidence Analysis
                   </CardTitle>
                 </CardHeader>
@@ -998,7 +998,7 @@ export default function ClaimDetail() {
                       className={`${
                         claim.status === 'approved' ? 'bg-[hsl(var(--success))]' :
                         claim.status === 'submitted' ? 'bg-[#8B9D83]' :
-                        claim.status === 'in_review' ? 'bg-blue-500' :
+                        claim.status === 'in_review' ? 'bg-[#1B3A5F]' :
                         claim.status === 'denied' ? 'bg-[hsl(var(--destructive))]' :
                         'bg-neutral-400'
                       } text-white text-sm px-3 py-1`}

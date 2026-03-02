@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, CheckCircle, Circle, AlertTriangle, Clock, FileText, Calendar, ChevronRight, Shield, Info, Download, ExternalLink, HelpCircle, Lightbulb, Upload } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, CheckCircle, Circle, AlertTriangle, Clock, FileText, Calendar, ChevronRight, Shield, Info, Download, ExternalLink, HelpCircle, Lightbulb, Upload, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -174,6 +174,8 @@ export default function ConditionRoadmap({
   claimId 
 }) {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const [uploadingReqId, setUploadingReqId] = useState(null);
   const [requirements, setRequirements] = useState([]);
   const [overrides, setOverrides] = useState({});
   const [showDisclaimer, setShowDisclaimer] = useState(false);
@@ -181,6 +183,37 @@ export default function ConditionRoadmap({
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showGuidance, setShowGuidance] = useState(null);
+
+  const handleUploadClick = (reqId) => {
+    setUploadingReqId(reqId);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset so the same file can be re-selected if needed
+    e.target.value = '';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    if (claimId) formData.append('claim_id', claimId);
+    if (uploadingReqId) formData.append('requirement_id', uploadingReqId);
+
+    try {
+      await api.post('/documents/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      toast.success(`"${file.name}" uploaded successfully`);
+      // Refresh requirements so the status updates in the modal
+      await loadRequirements();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Upload failed. Please try again.');
+    } finally {
+      setUploadingReqId(null);
+    }
+  };
 
   useEffect(() => {
     if (isOpen && condition) {
@@ -345,13 +378,21 @@ export default function ConditionRoadmap({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+      {/* Hidden file input — triggered programmatically by Upload Document buttons */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.txt"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
       <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-hidden">
         <div className="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-neutral-900">{condition.condition_name || condition.name}</h2>
             <div className="flex items-center gap-2 mt-1">
               {condition.is_presumptive && (
-                <Badge className="bg-purple-100 text-purple-700 border-0">
+                <Badge className="bg-blue-50 text-[#1B3A5F] border-0">
                   <Shield className="h-3 w-3 mr-1" />
                   Presumptive
                 </Badge>
@@ -467,11 +508,16 @@ export default function ConditionRoadmap({
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate('/document-onboarding')}
+                            disabled={uploadingReqId === req.id}
+                            onClick={() => handleUploadClick(req.id)}
                             className="text-green-700 border-green-300 hover:bg-green-50"
                           >
-                            <Upload className="h-3.5 w-3.5 mr-1.5" />
-                            Upload Document
+                            {uploadingReqId === req.id ? (
+                              <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                            ) : (
+                              <Upload className="h-3.5 w-3.5 mr-1.5" />
+                            )}
+                            {uploadingReqId === req.id ? 'Uploading...' : 'Upload Document'}
                           </Button>
                         </div>
                       )}
@@ -636,11 +682,11 @@ export default function ConditionRoadmap({
                 >
                   Close
                 </Button>
-                <Button 
+                <Button
                   className="flex-1 bg-[#1B3A5F] hover:bg-[#1B3A5F]/90"
                   onClick={() => {
                     setShowGuidance(null);
-                    navigate('/document-onboarding');
+                    fileInputRef.current?.click();
                   }}
                 >
                   <Upload className="h-4 w-4 mr-2" />

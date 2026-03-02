@@ -141,7 +141,7 @@ export default function DBQAutofillButton({
               disabled={disabled || isLoading || !documents.length}
               variant={error ? 'destructive' : variant}
               size={size}
-              className={`gap-2 ${lastResult && !error ? 'bg-green-600 hover:bg-green-700' : ''}`}
+              className={`gap-2 ${lastResult && !error ? 'bg-[#1B3A5F] hover:bg-[#2a4a6f]' : ''}`}
             >
               {getButtonContent()}
             </Button>

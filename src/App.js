@@ -12,6 +12,7 @@ import DemoModeBanner from './components/DemoModeBanner';
 import ChatAssistant from './components/ChatAssistant';
 import { SkipToContent } from './components/ui/skip-to-content';
 import { AriaLiveProvider } from './components/ui/aria-live-region';
+import { Skeleton } from './components/ui/skeleton';
 import { AccessibilityReportButton } from './utils/accessibility-testing';
 import { ClaimStageGuard, RequireQAPass, RequireRDBApproval, RequireDenialLetter } from './components/ClaimStageGuard';
 import { CLAIM_STAGES } from './hooks/useClaimStage';
@@ -63,7 +64,7 @@ class ChunkErrorBoundary extends React.Component {
             <p className="text-gray-600 mb-4">A new version may be available.</p>
             <button
               onClick={() => { sessionStorage.removeItem('chunk_reload'); window.location.reload(); }}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-[#1B3A5F] text-white rounded hover:bg-[#2a4a6f]"
             >
               Refresh Page
             </button>
@@ -150,10 +151,21 @@ const SSDIApplicationDetail = lazyWithRetry(() => import('./pages/ssdi/SSDIAppli
 
 function PageLoader() {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin h-12 w-12 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-muted-foreground">Loading...</p>
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-10 w-10 rounded-xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+        </div>
+        <Skeleton className="h-56 w-full rounded-2xl" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+        </div>
       </div>
     </div>
   );
@@ -163,14 +175,7 @@ function PrivateRoute({ children, allowPendingAccreditation = false }) {
   const { user, loading, needsMfaVerification } = useAuth();
   
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader />;
   }
   
   if (!user) {
@@ -194,14 +199,7 @@ function MFARoute({ children }) {
   const { user, loading, mfaRequired, mfaVerified } = useAuth();
   
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader />;
   }
   
   if (!user) {
