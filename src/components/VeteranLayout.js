@@ -17,6 +17,11 @@ import {
   Menu,
   X,
   ChevronRight,
+  Shield,
+  Layers,
+  Heart,
+  Building2,
+  MapPin,
 } from 'lucide-react';
 import logoImg from '../assets/logo.webp';
 import NotificationCenter from './NotificationCenter';
@@ -58,6 +63,36 @@ const navItems = [
     href: '/advocates',
     icon: Users,
     description: 'Advocate matching',
+  },
+  {
+    title: 'Service History',
+    href: '/service-history',
+    icon: Shield,
+    description: 'VA records & eligibility',
+  },
+  {
+    title: 'Health Records',
+    href: '/health-records',
+    icon: Heart,
+    description: 'VA FHIR health data',
+  },
+  {
+    title: 'Community Care',
+    href: '/community-care',
+    icon: Building2,
+    description: 'MISSION Act eligibility',
+  },
+  {
+    title: 'VA Facilities',
+    href: '/facilities',
+    icon: MapPin,
+    description: 'Find VA locations',
+  },
+  {
+    title: 'VA API Scenarios',
+    href: '/va-api-scenarios',
+    icon: Layers,
+    description: 'All 13 VA API demos',
   },
 ];
 
@@ -490,7 +525,7 @@ export default function VeteranLayout({ children }) {
           <NotificationCenter />
         </header>
 
-        <main className="flex-1 overflow-auto pb-24">
+        <main className="flex-1 overflow-auto">
           {children}
         </main>
       </div>

@@ -3,6 +3,8 @@ import { Navigate, useParams, useLocation } from 'react-router-dom';
 import { useClaimStage, STAGE_LABELS, getRouteForStage, getStageIndex, STAGE_ORDER } from '../hooks/useClaimStage';
 import { AlertTriangle, Lock, ArrowRight } from 'lucide-react';
 import { Button } from './ui/button';
+import { Skeleton } from './ui/skeleton';
+import VeteranLayout from './VeteranLayout';
 
 export function ClaimStageGuard({ 
   children, 
@@ -28,12 +30,29 @@ export function ClaimStageGuard({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center" role="status" aria-live="polite">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full mx-auto mb-4" aria-hidden="true" />
-          <p className="text-muted-foreground">Checking claim status...</p>
+      <VeteranLayout>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8" role="status" aria-live="polite">
+          <div className="flex items-center gap-4 mb-8">
+            <Skeleton className="h-10 w-10 rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-64" />
+              <Skeleton className="h-4 w-40" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <Skeleton className="h-48 w-full rounded-xl" />
+              <Skeleton className="h-64 w-full rounded-xl" />
+              <Skeleton className="h-40 w-full rounded-xl" />
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-36 w-full rounded-xl" />
+              <Skeleton className="h-48 w-full rounded-xl" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+            </div>
+          </div>
         </div>
-      </div>
+      </VeteranLayout>
     );
   }
 
@@ -167,12 +186,13 @@ export function RequireQAPass({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-muted-foreground">Checking QA status...</p>
+      <VeteranLayout>
+        <div className="mx-auto max-w-3xl px-4 py-8 space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-48 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
         </div>
-      </div>
+      </VeteranLayout>
     );
   }
 
@@ -219,12 +239,13 @@ export function RequireRDBApproval({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-muted-foreground">Checking RDB status...</p>
+      <VeteranLayout>
+        <div className="mx-auto max-w-3xl px-4 py-8 space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-48 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
         </div>
-      </div>
+      </VeteranLayout>
     );
   }
 
@@ -276,12 +297,13 @@ export function RequireDenialLetter({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-muted-foreground">Checking appeal status...</p>
+      <VeteranLayout>
+        <div className="mx-auto max-w-3xl px-4 py-8 space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-48 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
         </div>
-      </div>
+      </VeteranLayout>
     );
   }
 

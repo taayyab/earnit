@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('mfaRequired', mfa_required ? 'true' : 'false');
     localStorage.setItem('mfaVerified', 'false');
+    localStorage.removeItem('onboarding_completed');
 
     setToken(access_token);
     setUser(userData);
@@ -96,6 +97,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('mfaRequired', 'false');
     localStorage.setItem('mfaVerified', 'true');
+    localStorage.removeItem('onboarding_completed');
 
     setToken(access_token);
     setUser(userData);
@@ -115,6 +117,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('mfaRequired', 'false');
     localStorage.setItem('mfaVerified', 'true');
+    localStorage.removeItem('onboarding_completed');
 
     setToken(access_token);
     setUser(userData);
@@ -151,6 +154,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     localStorage.removeItem('mfaRequired');
     localStorage.removeItem('mfaVerified');
+    localStorage.removeItem('onboarding_completed');
     setToken(null);
     setUser(null);
     setMfaRequired(false);

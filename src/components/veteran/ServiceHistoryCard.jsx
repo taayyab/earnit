@@ -204,6 +204,11 @@ function DisabilityRatingCard({ rating }) {
                 {rating.individual_ratings.length} rated conditions
               </p>
             )}
+            {rating.monthly_payment_estimate && (
+              <p className="text-sm font-semibold text-green-700 mt-1">
+                ~${rating.monthly_payment_estimate.toLocaleString('en-US', { minimumFractionDigits: 2 })}/mo
+              </p>
+            )}
           </div>
         </div>
 
@@ -281,6 +286,8 @@ export function ServiceHistoryCard({ onDataLoaded, compact = false, initialData 
   const [disabilityRating, setDisabilityRating] = useState(initialData?.disability_rating || null);
   const [veteranStatus, setVeteranStatus] = useState(initialData?.veteran_status || null);
   const [demoMode, setDemoMode] = useState(initialData?.demo_mode || false);
+  const [dataSource, setDataSource] = useState(initialData?.data_source || null);
+  const [retrievedAt, setRetrievedAt] = useState(initialData?.retrieved_at || null);
   const [error, setError] = useState(null);
 
   const loadData = useCallback(async () => {
@@ -297,6 +304,8 @@ export function ServiceHistoryCard({ onDataLoaded, compact = false, initialData 
       if (historyRes.data?.success) {
         setServiceHistory(historyRes.data.service_history);
         setDemoMode(historyRes.data.demo_mode || false);
+        setDataSource(historyRes.data.data_source || null);
+        setRetrievedAt(historyRes.data.retrieved_at || null);
       }
 
       if (ratingRes.data?.success) {
@@ -429,6 +438,19 @@ export function ServiceHistoryCard({ onDataLoaded, compact = false, initialData 
           </Button>
         </div>
       </div>
+
+      {/* VA API Source Banner */}
+      {dataSource && (
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[#1B3A5F]/5 border border-[#1B3A5F]/20 text-xs text-[#1B3A5F]">
+          <Shield className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="font-medium">{dataSource}</span>
+          {retrievedAt && (
+            <span className="ml-auto text-[#1B3A5F]/60">
+              {new Date(retrievedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+        </div>
+      )}
 
       <VeteranStatusBadge status={veteranStatus} />
 

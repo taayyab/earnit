@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { claimsAPI } from '../lib/api';
 import VeteranLayout from '../components/VeteranLayout';
-import { CreateClaimModal } from '../components/claims/CreateClaimModal';
+// CreateClaimModal is an agent/admin flow — veterans use document-onboarding instead
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -152,17 +152,9 @@ export default function VeteranClaimsDashboard() {
     }
   };
 
-  const handleClaimCreated = (newClaim) => {
-    loadClaims();
-    if (newClaim?.id) {
-      navigate(`/claim/${newClaim.id}`);
-    }
-  };
-
   return (
     <VeteranLayout>
-      <div className="min-h-full bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-full bg-white px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
@@ -177,9 +169,12 @@ export default function VeteranClaimsDashboard() {
           </div>
           
           <div className="flex flex-wrap gap-2">
-            <CreateClaimModal onClaimCreated={handleClaimCreated} />
-            <Button 
-              variant="outline" 
+            <Button onClick={() => navigate('/claim-review', { state: { forceNew: true } })}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Claim
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => navigate('/appeals')}
             >
               <Gavel className="h-4 w-4 mr-2" />
@@ -205,7 +200,10 @@ export default function VeteranClaimsDashboard() {
               <p className="text-muted-foreground mb-4">
                 Start your first VA disability claim to get the benefits you've earned.
               </p>
-              <CreateClaimModal onClaimCreated={handleClaimCreated} />
+              <Button onClick={() => navigate('/claim-review', { state: { forceNew: true } })}>
+                <Plus className="h-4 w-4 mr-2" />
+                Start Your First Claim
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -230,7 +228,6 @@ export default function VeteranClaimsDashboard() {
             </p>
           </div>
         )}
-      </div>
       </div>
     </VeteranLayout>
   );

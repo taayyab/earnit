@@ -201,13 +201,21 @@ export default function ConditionRoadmap({
     if (claimId) formData.append('claim_id', claimId);
     if (uploadingReqId) formData.append('requirement_id', uploadingReqId);
 
+    const reqIdToMark = uploadingReqId;
     try {
       await api.post('/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success(`"${file.name}" uploaded successfully`);
-      // Refresh requirements so the status updates in the modal
-      await loadRequirements();
+      // Locally mark the requirement as received so the UI updates immediately
+      // (the backend refresh may not work when condition.id is absent)
+      if (reqIdToMark) {
+        setRequirements(prev => prev.map(r =>
+          r.id === reqIdToMark ? { ...r, status: 'received' } : r
+        ));
+      }
+      // Also try a backend refresh (no-op if condition.id missing)
+      if (condition.id) await loadRequirements();
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Upload failed. Please try again.');
     } finally {
@@ -314,26 +322,36 @@ export default function ConditionRoadmap({
   };
 
   const handleSave = async () => {
+    // Block if any mandatory requirement is missing and not overridden
+    const unmetMandatory = requirements.filter(
+      r => r.mandatory && r.status !== 'received' && r.status !== 'reviewed' && !overrides[r.id]
+    );
+    if (unmetMandatory.length > 0) {
+      toast.error(
+        `${unmetMandatory.length} required document${unmetMandatory.length > 1 ? 's' : ''} missing: ${unmetMandatory.map(r => r.title).join(', ')}. Upload them or click "Override" to proceed anyway.`,
+        { duration: 5000 }
+      );
+      return;
+    }
+
     setSaving(true);
     try {
       const overrideIds = Object.entries(overrides)
         .filter(([_, val]) => val)
         .map(([id]) => id);
-      
-      // Only call API if condition has a database ID
+
       if (condition.id) {
         await api.put(`/conditions/condition/${condition.id}/overrides`, {
           overrides: overrideIds,
-          justification: overrideIds.length > 0 
-            ? 'Veteran acknowledged missing requirements and wishes to proceed' 
+          justification: overrideIds.length > 0
+            ? 'Veteran acknowledged missing requirements and wishes to proceed'
             : null
         });
         toast.success('Requirements updated');
       } else {
-        // For non-persisted conditions, just close with local stats
         toast.success('Progress saved locally');
       }
-      
+
       const stats = getCompletionStats();
       onSave?.({
         requirements,
@@ -357,14 +375,30 @@ export default function ConditionRoadmap({
 
   const stats = getCompletionStats();
 
+  const toggleRequirementComplete = (reqId) => {
+    setRequirements(prev => prev.map(r =>
+      r.id === reqId
+        ? { ...r, status: (r.status === 'received' || r.status === 'reviewed') ? 'missing' : 'received' }
+        : r
+    ));
+  };
+
   const getStatusIcon = (req) => {
     if (overrides[req.id]) {
       return <AlertTriangle className="h-5 w-5 text-amber-500" />;
     }
     if (req.status === 'received' || req.status === 'reviewed') {
-      return <CheckCircle className="h-5 w-5 text-green-500" />;
+      return (
+        <button onClick={() => toggleRequirementComplete(req.id)} title="Mark as incomplete" className="flex-shrink-0">
+          <CheckCircle className="h-5 w-5 text-green-500 hover:text-green-400" />
+        </button>
+      );
     }
-    return <Circle className="h-5 w-5 text-neutral-300" />;
+    return (
+      <button onClick={() => toggleRequirementComplete(req.id)} title="Mark as received" className="flex-shrink-0">
+        <Circle className="h-5 w-5 text-neutral-300 hover:text-green-400" />
+      </button>
+    );
   };
 
   const getCategoryIcon = (category) => {

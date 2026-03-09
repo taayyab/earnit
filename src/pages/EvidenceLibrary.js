@@ -120,14 +120,25 @@ export default function EvidenceLibrary() {
         api.get('/claims/list').catch(() => ({ data: { success: false, claims: [] } }))
       ]);
 
-      const docs = docsRes.data.documents || [];
+      // Normalize backend camelCase fields to what the component expects
+      const docs = (docsRes.data.documents || []).map(d => ({
+        ...d,
+        filename: d.fileName || d.filename,
+        file_size: d.fileSize || d.file_size,
+        category: d.documentType || d.category,
+        uploaded_at: d.createdAt || d.uploaded_at,
+      }));
       setDocuments(docs);
 
       if (conditionsRes.data.success && conditionsRes.data.summary?.conditions) {
         setConditions(conditionsRes.data.summary.conditions);
       }
 
-      const loadedClaims = claimsRes.data.claims || [];
+      const loadedClaims = (claimsRes.data.claims || []).map(c => ({
+        ...c,
+        claim_type: c.claimType || c.claim_type,
+        created_at: c.createdAt || c.created_at,
+      }));
       if (loadedClaims.length > 0) {
         setClaims(loadedClaims);
         const activeClaim = loadedClaims.find(c => c.status !== 'closed' && c.status !== 'denied');

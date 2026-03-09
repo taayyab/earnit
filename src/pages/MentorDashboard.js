@@ -86,7 +86,7 @@ export default function MentorDashboard() {
         active: activeCount,
         completed: completedCount,
         pending: pendingCount,
-        rating: profileRes.data.average_rating || 4.8,
+        rating: profileRes.data.average_rating ?? 0,
         total: profileRes.data.total_veterans_helped || activeCount + completedCount
       });
 
@@ -297,7 +297,7 @@ export default function MentorDashboard() {
                 className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
                 onClick={() => window.location.href = '/advocate/cases'}
               >
-                <ClipboardList className="h-5 w-5 text-[#1B3A5F]" />
+                <ClipboardList className="h-5 w-5 text-emerald-700" />
                 <span className="text-sm">View Cases</span>
               </Button>
               <Button 

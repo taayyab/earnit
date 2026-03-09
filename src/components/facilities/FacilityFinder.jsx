@@ -85,7 +85,7 @@ const US_STATES = [
 ];
 
 const FACILITY_TYPES = [
-  { value: '', label: 'All Facility Types' },
+  { value: 'all', label: 'All Facility Types' },
   { value: 'health', label: 'VA Medical Centers & Clinics', icon: Heart },
   { value: 'benefits', label: 'VA Regional Offices', icon: Briefcase },
   { value: 'vet_center', label: 'Vet Centers', icon: Users }
@@ -108,7 +108,7 @@ const FACILITY_TYPE_COLORS = {
 export default function FacilityFinder({ defaultState = 'TX', defaultZip = '', compact = false }) {
   const [zipCode, setZipCode] = useState(defaultZip);
   const [state, setState] = useState(defaultState);
-  const [facilityType, setFacilityType] = useState('');
+  const [facilityType, setFacilityType] = useState('all');
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -137,7 +137,7 @@ export default function FacilityFinder({ defaultState = 'TX', defaultZip = '', c
       const params = new URLSearchParams();
       if (zipCode) params.append('zip_code', zipCode);
       if (state) params.append('state', state);
-      if (facilityType) params.append('facility_type', facilityType);
+      if (facilityType && facilityType !== 'all') params.append('facility_type', facilityType);
       params.append('per_page', '20');
 
       const response = await api.get(`/facilities/search?${params.toString()}`);

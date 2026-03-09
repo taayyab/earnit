@@ -110,6 +110,7 @@ export default function Dashboard() {
   const [upcomingMeetings, setUpcomingMeetings] = useState([]);
   const [medicationOpportunities, setMedicationOpportunities] = useState([]);
   const [onboardingProgress, setOnboardingProgress] = useState(null);
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
   const [dataRefreshKey, setDataRefreshKey] = useState(0);
   const [pendingSurveys, setPendingSurveys] = useState([]);
   const [showSurveyModal, setShowSurveyModal] = useState(false);
@@ -179,23 +180,16 @@ export default function Dashboard() {
   }, []);
 
   const checkOnboardingAndLoadData = async () => {
-    // Demo users and locally-completed users skip the onboarding check
-    const locallyCompleted = localStorage.getItem('onboarding_completed') === 'true';
-    const storedUser = localStorage.getItem('user');
-    const isDemoUser = storedUser ? (() => { try { return JSON.parse(storedUser)?.is_demo === true; } catch { return false; } })() : false;
-
-    if (!locallyCompleted && !isDemoUser) {
-      try {
-        const onboardingStatusRes = await api.get('/users/onboarding-status').catch(() => ({ data: { completed: true } }));
-        if (!onboardingStatusRes.data.completed) {
-          navigate('/onboarding', { replace: true });
-          return;
-        }
-        // Mark complete in localStorage so future loads skip this check
-        localStorage.setItem('onboarding_completed', 'true');
-      } catch (err) {
-        // On error, continue to dashboard
+    try {
+      const onboardingStatusRes = await api.get('/users/onboarding-status');
+      if (!onboardingStatusRes.data.completed) {
+        navigate('/onboarding', { replace: true });
+        return;
       }
+      localStorage.setItem('onboarding_completed', 'true');
+      setOnboardingComplete(true);
+    } catch {
+      // On error, continue to dashboard
     }
     loadDashboardData();
   };
@@ -203,39 +197,17 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const demoSuffix = isDemoMode ? '?demo=true' : '';
-      const [claimsRes, advocateRes, conditionRes, journeyRes, meetingsRes, medicationRes, onboardingRes, surveysRes, profileRes] = await Promise.all([
+
+      // Phase 1 — critical: claims list drives the mission card and primary content
+      const [claimsRes, onboardingRes] = await Promise.all([
         claimsAPI.list(),
-        api.get(appendDemoParam('/advocates/my-advocate')).catch(() => ({ data: { has_advocate: false } })),
-        api.get(appendDemoParam('/conditions/dashboard/summary')).catch(() => ({ data: { success: false } })),
-        api.get(appendDemoParam('/lifecycle/veteran/journey')).catch(() => ({ data: { success: false } })),
-        api.get(appendDemoParam('/meetings/upcoming')).catch(() => ({ data: { meetings: [] } })),
-        api.get(appendDemoParam('/claims-intelligence/medication-opportunities')).catch(() => ({ data: { opportunities: [] } })),
         api.get(appendDemoParam('/onboarding-checklist')).catch(() => ({ data: { success: false, checklist: null } })),
-        api.get(appendDemoParam('/surveys/pending')).catch(() => ({ data: { surveys: [], count: 0 } })),
-        api.get('/users/profile').catch(() => ({ data: { profile: null } }))
       ]);
-      
+
       setClaims(claimsRes.data.claims || []);
-      if (advocateRes.data.hasAdvocate || advocateRes.data.has_advocate) {
-        setAdvocate(advocateRes.data.advocate);
-      }
-      if (conditionRes.data.success && conditionRes.data.summary) {
-        setConditionProgress({
-          conditions: conditionRes.data.summary.conditions || [],
-          summary: conditionRes.data.summary
-        });
-      }
-      if (journeyRes.data.success) {
-        setJourneyStage(journeyRes.data.journey);
-      }
-      setUpcomingMeetings(meetingsRes.data.meetings || meetingsRes.data.upcoming_meetings || []);
-      setMedicationOpportunities(medicationRes.data.opportunities || medicationRes.data.secondary_condition_opportunities || []);
       if (onboardingRes.data.success && onboardingRes.data.checklist) {
         setOnboardingProgress(onboardingRes.data.checklist);
       }
-      setPendingSurveys(surveysRes.data.surveys || []);
-      if (profileRes.data.profile) setVeteranProfile(profileRes.data.profile);
     } catch (err) {
       console.error('Failed to load dashboard:', err);
       toast.error('Failed to load some dashboard data');
@@ -243,17 +215,50 @@ export default function Dashboard() {
       setLoading(false);
       setDataRefreshKey(prev => prev + 1);
     }
+
+    // Phase 2 — secondary: loads in background after page is visible
+    loadSecondaryDashboardData();
+  };
+
+  const loadSecondaryDashboardData = async () => {
+    const [advocateRes, conditionRes, journeyRes, meetingsRes, medicationRes, surveysRes, profileRes] = await Promise.all([
+      api.get(appendDemoParam('/advocates/my-advocate')).catch(() => ({ data: { has_advocate: false } })),
+      api.get(appendDemoParam('/conditions/dashboard/summary')).catch(() => ({ data: { success: false } })),
+      api.get(appendDemoParam('/lifecycle/veteran/journey')).catch(() => ({ data: { success: false } })),
+      api.get(appendDemoParam('/meetings/upcoming')).catch(() => ({ data: { meetings: [] } })),
+      api.get(appendDemoParam('/claims-intelligence/medication-opportunities')).catch(() => ({ data: { opportunities: [] } })),
+      api.get(appendDemoParam('/surveys/pending')).catch(() => ({ data: { surveys: [], count: 0 } })),
+      api.get('/users/profile').catch(() => ({ data: { profile: null } })),
+    ]);
+
+    if (advocateRes.data.hasAdvocate || advocateRes.data.has_advocate) {
+      setAdvocate(advocateRes.data.advocate);
+    }
+    if (conditionRes.data.success && conditionRes.data.summary) {
+      setConditionProgress({
+        conditions: conditionRes.data.summary.conditions || [],
+        summary: conditionRes.data.summary
+      });
+    }
+    if (journeyRes.data.success) {
+      setJourneyStage(journeyRes.data.journey);
+    }
+    setUpcomingMeetings(meetingsRes.data.meetings || meetingsRes.data.upcoming_meetings || []);
+    setMedicationOpportunities(medicationRes.data.opportunities || medicationRes.data.secondary_condition_opportunities || []);
+    setPendingSurveys(surveysRes.data.surveys || []);
+    if (profileRes.data.profile) setVeteranProfile(profileRes.data.profile);
   };
 
   const getClaimProgress = () => {
     if (!claims.length) return 0;
     
     const statusToProgress = {
-      'draft': 0,
+      'draft': 10,
+      'in_progress': 33,
       'documents_uploaded': 17,
-      'in_review': 33,
-      'analysis_complete': 33,
-      'conditions_selected': 50,
+      'in_review': 50,
+      'analysis_complete': 50,
+      'conditions_selected': 67,
       'qa_pending': 67,
       'qa_complete': 83,
       'ready_to_submit': 83,
@@ -272,7 +277,7 @@ export default function Dashboard() {
         title: 'Start Your Claim',
         description: 'Upload your military and medical documents to begin. Our AI will identify all conditions you may be eligible to claim.',
         action: 'Upload Documents',
-        actionPath: '/document-onboarding',
+        actionPath: '/claim-review',
         icon: Upload,
         color: 'bg-[#1B3A5F]'
       };
@@ -280,13 +285,25 @@ export default function Dashboard() {
     
     const claim = claims[0];
     const conditionCount = conditionProgress.conditions?.length || 0;
-    
-    if (claim.status === 'draft' || !claim.documents_count) {
+    const SUBMITTED_STATUSES = ['submitted', 'in_review', 'approved'];
+
+    if (SUBMITTED_STATUSES.includes(claim.status)) {
+      return {
+        title: 'Claim Submitted to VA',
+        description: 'Your claim is now with the VA. While you wait for a decision, you can monitor progress or start a new claim.',
+        action: 'Start a New Claim',
+        actionPath: '/claim-review',
+        icon: CheckCircle2,
+        color: 'bg-green-600'
+      };
+    }
+
+    if (!claim.documents_count || claim.documents_count === 0) {
       return {
         title: 'Upload Your Documents',
         description: 'Upload your DD-214, medical records, and any supporting evidence. The more documents you provide, the better our AI can identify your conditions.',
         action: 'Continue Upload',
-        actionPath: '/document-onboarding',
+        actionPath: '/claim-review',
         icon: Upload,
         color: 'bg-[#1B3A5F]'
       };
@@ -382,7 +399,7 @@ export default function Dashboard() {
         </div>
 
         {/* Onboarding banner — shown once at the top, not repeated */}
-        {(!user?.onboarding_completed && !onboardingProgress?.completed) && (
+        {(!onboardingComplete && !user?.onboarding_completed && !onboardingProgress?.completed) && (
           <div className="mb-6 flex items-center justify-between gap-4 rounded-xl border-2 border-amber-200 bg-amber-50 px-5 py-4">
             <div className="flex items-center gap-3">
               <ClipboardCheck className="w-5 h-5 text-amber-600 flex-shrink-0" />
@@ -413,11 +430,6 @@ export default function Dashboard() {
             onDismiss={() => setSurveyBannerDismissed(true)}
           />
         )}
-
-        <NextStepCard
-          claim={claims[0] || null}
-          className="mb-6 md:mb-8"
-        />
 
         <div className={`${mission.color} rounded-2xl p-4 sm:p-6 md:p-8 mb-6 md:mb-8 text-white relative overflow-hidden`}>
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32" />
@@ -462,9 +474,9 @@ export default function Dashboard() {
                   { label: 'Documents', icon: Upload, done: claims[0]?.documents_count > 0 },
                   { label: 'AI Analysis', icon: Sparkles, done: conditionProgress.conditions?.length > 0 },
                   { label: 'Conditions', icon: Target, done: (conditionProgress.summary?.selected_count || 0) > 0 },
-                  { label: 'Evidence', icon: FileText, done: (conditionProgress.summary?.avg_completion || 0) >= 80 },
-                  { label: 'QA Review', icon: Shield, done: claims[0]?.status === 'qa_complete' },
-                  { label: 'Submit', icon: CheckCircle2, done: claims[0]?.status === 'submitted' },
+                  { label: 'Evidence', icon: FileText, done: (conditionProgress.summary?.avg_completion || 0) >= 80 || ['submitted','in_review','approved'].includes(claims[0]?.status) },
+                  { label: 'QA Review', icon: Shield, done: ['qa_complete','submitted','in_review','approved'].includes(claims[0]?.status) },
+                  { label: 'Submit', icon: CheckCircle2, done: ['submitted','in_review','approved'].includes(claims[0]?.status) },
                 ].map((step, idx) => (
                   <div key={idx} className="text-center">
                     <div className={`w-10 h-10 sm:w-10 sm:h-10 mx-auto rounded-full flex items-center justify-center mb-1 ${
@@ -546,10 +558,10 @@ export default function Dashboard() {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {(conditionProgress.conditions || []).slice(0, 6).map((condition, idx) => (
-                <Card 
-                  key={idx} 
+                <Card
+                  key={idx}
                   className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-[#1B3A5F]/30"
-                  onClick={() => navigate('/claim-review')}
+                  onClick={() => navigate(condition.claim_id ? `/claim/${condition.claim_id}` : '/claim-review')}
                 >
                   <CardContent className="pt-4">
                     <div className="flex items-start justify-between mb-3">
@@ -575,10 +587,16 @@ export default function Dashboard() {
                       </div>
                       <Progress value={condition.completion_percentage || 0} className="h-2" />
                       
-                      {condition.completion_percentage < 100 && (
+                      {condition.completion_percentage < 100 && condition.missing_requirements !== 'Awaiting VA decision' && !['submitted','in_review','approved'].includes(claims[0]?.status) && (
                         <div className="flex items-center gap-1 text-xs text-amber-600 mt-2">
                           <AlertTriangle className="w-3 h-3" />
                           <span>{condition.missing_requirements || 'Evidence needed'}</span>
+                        </div>
+                      )}
+                      {(condition.missing_requirements === 'Awaiting VA decision' || ['submitted','in_review','approved'].includes(claims[0]?.status)) && (
+                        <div className="flex items-center gap-1 text-xs text-blue-600 mt-2">
+                          <Clock className="w-3 h-3" />
+                          <span>Awaiting VA decision</span>
                         </div>
                       )}
                     </div>
@@ -675,7 +693,7 @@ export default function Dashboard() {
             className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-[#1B3A5F]/30 focus-visible:ring-2 focus-visible:ring-[#1B3A5F] focus-visible:ring-offset-2" 
             onClick={() => navigate('/advocates')}
             role="button"
-            aria-label={advocate ? `Your Advocate - ${advocate.first_name} ${advocate.last_name}` : 'Get Support - Connect with a peer mentor'}
+            aria-label={advocate ? `Your Advocate - ${advocate.name || ''}` : 'Get Support - Connect with a peer mentor'}
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -694,7 +712,7 @@ export default function Dashboard() {
                     {advocate ? 'Your Advocate' : 'Get Support'}
                   </h3>
                   <p className="text-sm text-slate-600">
-                    {advocate ? `${advocate.first_name} ${advocate.last_name}` : 'Connect with a peer mentor'}
+                    {advocate ? (advocate.name || '') : 'Connect with a peer mentor'}
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-slate-400" aria-hidden="true" />
@@ -865,7 +883,7 @@ export default function Dashboard() {
                     <p className="text-sm text-slate-600">
                       {upcomingMeetings.length > 0 
                         ? `${upcomingMeetings.length} upcoming`
-                        : `Meet with ${advocate.first_name}`}
+                        : `Meet with ${advocate.name ? advocate.name.split(' ')[0] : 'your advocate'}`}
                     </p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-slate-400" aria-hidden="true" />
@@ -960,7 +978,7 @@ export default function Dashboard() {
           >
             <MeetingScheduler
               advocateId={advocate.id || advocate.advocate_id}
-              advocateName={`${advocate.first_name} ${advocate.last_name}`}
+              advocateName={advocate.name || ''}
               onScheduled={(meeting) => {
                 setUpcomingMeetings(prev => [meeting, ...prev]);
                 toast.success('Meeting scheduled!');
@@ -982,7 +1000,7 @@ export default function Dashboard() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => navigate('/document-onboarding')}
+                  onClick={() => navigate('/claim-review', { state: { forceNew: true } })}
                 >
                   New Claim
                 </Button>
@@ -1005,7 +1023,7 @@ export default function Dashboard() {
                           {claim.claim_number || `Claim #${(claim.claim_id || claim.id)?.slice(-8)}`}
                         </h4>
                         <p className="text-sm text-slate-600">
-                          {claim.conditions_count || 0} conditions
+                          {claim.conditions_count ?? claim.conditions?.length ?? 0} condition{(claim.conditions_count ?? claim.conditions?.length ?? 0) !== 1 ? 's' : ''}
                         </p>
                       </div>
                     </div>

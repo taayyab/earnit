@@ -129,6 +129,7 @@ export const authAPI = {
   getDemoCredentials: () => api.get('/auth/demo-credentials'),
   initializeDemo: () => api.post('/auth/demo-init'),
   vaLighthouseDemo: () => api.post('/auth/va-lighthouse-demo'),
+  idmeVerify: (data) => api.post('/auth/idme/verify', data),
 };
 
 // Claims API

@@ -56,6 +56,8 @@ export default function ChatAssistant() {
   const inputRef = useRef(null);
   const location = useLocation();
 
+  // Drag state
+
   const handleOpen = () => {
     feedback('open');
     setIsAnimating(true);
@@ -92,8 +94,10 @@ export default function ChatAssistant() {
   const checkAvailability = async () => {
     try {
       const response = await api.get('/assistant/health');
-      setIsAvailable(response.data.available);
-      
+      // Only hide if backend explicitly says not available
+      if (response.data.available === false) {
+        setIsAvailable(false);
+      }
       if (response.data.greeting) {
         setMessages([{ role: 'assistant', content: response.data.greeting }]);
       }
@@ -101,7 +105,7 @@ export default function ChatAssistant() {
         setQuickQuestions(response.data.quick_questions);
       }
     } catch {
-      setIsAvailable(false);
+      // Network error — keep the component visible with default content
     }
   };
 
@@ -233,19 +237,24 @@ export default function ChatAssistant() {
       {!isOpen && (
         <button
           onClick={handleOpen}
-          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 bg-gradient-to-br from-[#1B3A5F] to-[#0f2340] text-white p-2 md:p-2.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 border-2 border-[#C41E3A]/60 group"
+          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 bg-gradient-to-br from-[#1B3A5F] to-[#0f2340] text-white p-2 md:p-2.5 rounded-full shadow-lg hover:shadow-xl transition-shadow duration-200 flex items-center gap-2 border-2 border-[#C41E3A]/60 group select-none"
           aria-label="Open Drill - VA Claims Advisor"
         >
           <div className="relative">
             <DrillAvatar size="md" showName={false} />
             <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-[#1B3A5F] animate-pulse" />
           </div>
-          <span className="hidden md:inline text-sm font-bold pr-1 uppercase tracking-wide group-hover:tracking-wider transition-all">Ask Drill</span>
+          <span className="hidden md:inline text-sm font-bold pr-1 uppercase tracking-wide">Ask Drill</span>
         </button>
       )}
 
-      {isOpen && (
-        <div className={`fixed bottom-0 right-0 md:bottom-6 md:right-6 z-50 w-full md:w-[400px] md:max-w-[calc(100vw-3rem)] h-[100dvh] md:h-[550px] md:max-h-[calc(100vh-6rem)] bg-white md:rounded-xl shadow-2xl flex flex-col overflow-hidden md:border-2 border-[#1B3A5F] ${isAnimating ? 'animate-slideUp md:animate-scaleIn' : ''}`}>
+      {isOpen && (() => {
+        const chatStyle = {};
+        return (
+        <div
+          className={`fixed bottom-0 right-0 md:bottom-6 md:right-6 z-50 w-full md:w-[400px] md:max-w-[calc(100vw-3rem)] h-[100dvh] md:h-[550px] md:max-h-[calc(100vh-6rem)] bg-white md:rounded-xl shadow-2xl flex flex-col overflow-hidden md:border-2 border-[#1B3A5F] ${isAnimating ? 'animate-slideUp md:animate-scaleIn' : ''}`}
+          style={chatStyle}
+        >
           <div className="bg-gradient-to-r from-[#1B3A5F] to-[#0f2340] text-white px-4 py-3 flex items-center justify-between safe-area-top">
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -375,7 +384,8 @@ export default function ChatAssistant() {
             </div>
           </form>
         </div>
-      )}
+        );
+      })()}
 
       <style>{`
         @keyframes slideUp {

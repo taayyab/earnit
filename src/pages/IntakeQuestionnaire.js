@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
-import PageHeader from '../components/PageHeader';
+import VeteranLayout from '../components/VeteranLayout';
+import { Skeleton } from '../components/ui/skeleton';
 import ClaimAssemblyReview from '../components/ClaimAssemblyReview';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import {
   CheckCircle2,
   ArrowRight,
-  ArrowLeft,
-  FileText,
-  AlertTriangle,
   Upload,
+  Sparkles,
+  AlertTriangle,
   RefreshCw,
-  Shield
+  Shield,
+  FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -30,10 +31,10 @@ const MEB_EVIDENCE_REQUIREMENTS = [
   { name: 'DD-214 (if discharged)', required: false }
 ];
 
-const CONFIRMATION_STEPS = [
-  { id: 1, name: 'Documents', icon: FileText },
-  { id: 2, name: 'Review & Confirm', icon: CheckCircle2 },
-  { id: 3, name: 'Ready to Submit', icon: ArrowRight }
+const STEPS = [
+  { id: 1, label: 'Documents' },
+  { id: 2, label: 'Review & Confirm' },
+  { id: 3, label: 'Ready to Submit' },
 ];
 
 export default function IntakeQuestionnaire() {
@@ -44,22 +45,18 @@ export default function IntakeQuestionnaire() {
   const [analysis, setAnalysis] = useState(null);
   const [hasDocuments, setHasDocuments] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-
   const [analysisTriggered, setAnalysisTriggered] = useState(false);
   const [aiUnavailable, setAiUnavailable] = useState(false);
   const [isMebClaim, setIsMebClaim] = useState(false);
 
   useEffect(() => {
-    if (claimId) {
-      loadClaimAnalysis();
-    }
+    if (claimId) loadClaimAnalysis();
   }, [claimId]);
 
   const loadClaimAnalysis = async () => {
     try {
       setLoading(true);
       const response = await api.get(`/intake/analysis/${claimId}`);
-      
       if (response.data.has_analysis) {
         setAnalysis(response.data);
         setCurrentStep(2);
@@ -69,22 +66,15 @@ export default function IntakeQuestionnaire() {
         }
       } else {
         const docsResponse = await api.get(`/documents/claim/${claimId}`);
-        if (docsResponse.data?.documents?.length > 0) {
-          setHasDocuments(true);
-          setCurrentStep(1);
-        } else {
-          setHasDocuments(false);
-          setCurrentStep(1);
-        }
+        setHasDocuments((docsResponse.data?.documents?.length || 0) > 0);
+        setCurrentStep(1);
       }
     } catch (error) {
-      console.error('Failed to load analysis:', error);
       if (error.response?.status === 403) {
         toast.error('Access denied');
         navigate('/dashboard');
       } else if (error.response?.status === 503) {
         setAiUnavailable(true);
-        toast.error('AI analysis is temporarily unavailable');
       }
     } finally {
       setLoading(false);
@@ -93,16 +83,11 @@ export default function IntakeQuestionnaire() {
 
   const triggerAnalysis = async () => {
     if (analysisTriggered) return;
-    
     try {
       setLoading(true);
       setAnalysisTriggered(true);
-      toast.info('Analyzing your documents...');
-      
-      const response = await api.post('/intake/trigger-analysis', {
-        claim_id: claimId
-      });
-      
+      toast.info('Running AI analysis on your documents…');
+      const response = await api.post('/intake/trigger-analysis', { claim_id: claimId });
       if (response.data.success) {
         toast.dismiss();
         toast.success(`Found ${response.data.conditions_found} conditions!`);
@@ -112,11 +97,10 @@ export default function IntakeQuestionnaire() {
       toast.dismiss();
       if (error.response?.status === 503) {
         setAiUnavailable(true);
-        toast.error('AI analysis is temporarily unavailable. Please try again later.');
+        toast.error('AI analysis temporarily unavailable. Try again shortly.');
       } else {
         toast.error('Analysis failed. Please try again.');
       }
-      console.error('Analysis error:', error);
     } finally {
       setLoading(false);
       setAnalysisTriggered(false);
@@ -126,307 +110,285 @@ export default function IntakeQuestionnaire() {
   const handleConfirmation = async (confirmationData) => {
     try {
       setSubmitting(true);
-      
       const response = await api.post('/intake/confirmation', {
         claim_id: claimId,
         snapshot_id: analysis.snapshot_id,
         ...confirmationData
       });
-      
       if (response.data.success) {
         setCurrentStep(3);
         toast.success('Claim confirmed! Ready for review.');
       } else {
         toast.error(response.data.message || 'Failed to save confirmation');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to submit confirmation');
-      console.error('Confirmation error:', error);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleProceedToReview = () => {
-    navigate('/claim-review', { state: { claimId, analysis } });
-  };
-
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
-        <PageHeader title="Claim Intake" />
-        <div className="flex items-center justify-center py-20" role="status" aria-live="polite">
-          <div className="text-center">
-            <RefreshCw className="h-12 w-12 animate-spin mx-auto text-[#1B3A5F] mb-4" aria-hidden="true" />
-            <p className="text-lg text-slate-500">Loading your claim data...</p>
+      <VeteranLayout>
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6" role="status" aria-live="polite">
+          <Skeleton className="h-16 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-40 rounded-xl" />
+            <Skeleton className="h-40 rounded-xl" />
           </div>
+          <Skeleton className="h-56 w-full rounded-xl" />
         </div>
-      </div>
+      </VeteranLayout>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-blue-50">
-      <PageHeader title="Claim Review & Confirmation" />
-      
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <nav aria-label="Claim progress">
-            <ol className="flex items-center justify-between bg-white rounded-xl p-4 shadow-sm" role="list">
-              {CONFIRMATION_STEPS.map((step, index) => {
-                const StepIcon = step.icon;
-                const isActive = currentStep >= step.id;
-                const isComplete = currentStep > step.id;
-                const isCurrent = currentStep === step.id;
-                
-                return (
-                  <React.Fragment key={step.id}>
-                    <li className="flex items-center gap-3" aria-current={isCurrent ? 'step' : undefined}>
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                        isComplete 
-                          ? 'bg-green-500 text-white' 
-                          : isActive 
-                            ? 'bg-[#1B3A5F] text-white'
-                            : 'bg-white text-gray-400'
-                      }`} aria-hidden="true">
-                        {isComplete ? (
-                          <CheckCircle2 className="h-6 w-6" />
-                        ) : (
-                          <StepIcon className="h-6 w-6" />
-                        )}
-                      </div>
-                      <div className="hidden md:block">
-                        <p className={`font-medium ${isActive ? 'text-gray-900' : 'text-gray-400'}`}>
-                          Step {step.id}
-                          <span className="sr-only">{isComplete ? ' (completed)' : isCurrent ? ' (current)' : ''}</span>
-                        </p>
-                        <p className={`text-sm ${isActive ? 'text-gray-600' : 'text-gray-400'}`}>
-                          {step.name}
-                        </p>
-                      </div>
-                    </li>
-                    {index < CONFIRMATION_STEPS.length - 1 && (
-                      <li role="presentation" className={`flex-1 h-1 mx-4 rounded-full transition-all ${
-                        currentStep > step.id ? 'bg-green-500' : 'bg-gray-200'
-                      }`} />
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </ol>
-          </nav>
-        </div>
-
-        {currentStep === 1 && !hasDocuments && (
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader className="text-center">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
-                <Upload className="h-10 w-10 text-[#1B3A5F]" />
-              </div>
-              <CardTitle className="text-2xl">Upload Your Documents First</CardTitle>
-              <CardDescription className="text-base">
-                Before we can build your claim, we need to analyze your military and medical records.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-6">
-              {isMebClaim ? (
-                <div className="bg-blue-50 p-6 rounded-lg text-left border border-blue-200">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Shield className="h-5 w-5 text-[#1B3A5F]" aria-hidden="true" />
-                    <h4 className="font-medium text-[#1B3A5F]">MEB/IDES Required Documents:</h4>
-                  </div>
-                  <ul className="space-y-2 text-[#1B3A5F]">
-                    {MEB_EVIDENCE_REQUIREMENTS.map((doc, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        {doc.required ? (
-                          <span className="text-xs font-medium text-red-600 bg-red-100 px-1.5 py-0.5 rounded">REQUIRED</span>
-                        ) : (
-                          <span className="text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">OPTIONAL</span>
-                        )}
-                        {doc.name}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-3 text-sm text-[#1B3A5F]">
-                    These documents are critical for your IDES timeline tracking and VA rating determination.
-                  </p>
+  // ── Progress bar ───────────────────────────────────────────────────────────
+  const StepBar = () => (
+    <nav aria-label="Claim intake progress" className="mb-8">
+      <ol className="flex items-center gap-0" role="list">
+        {STEPS.map((step, idx) => {
+          const done = currentStep > step.id;
+          const active = currentStep === step.id;
+          return (
+            <React.Fragment key={step.id}>
+              <li className="flex items-center gap-2 flex-shrink-0">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                  done ? 'bg-green-500 text-white' : active ? 'bg-[#1B3A5F] text-white' : 'bg-slate-100 text-slate-400'
+                }`}>
+                  {done ? <CheckCircle2 className="w-4 h-4" /> : step.id}
                 </div>
-              ) : (
-                <div className="bg-blue-50 p-6 rounded-lg text-left">
-                  <h4 className="font-medium text-blue-900 mb-3">What we'll extract automatically:</h4>
-                  <ul className="space-y-2 text-blue-800">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
-                      Service dates, branch, and MOS from your DD-214
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
-                      All diagnosed conditions from medical records
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
-                      Evidence supporting service connection
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
-                      Presumptive condition eligibility
-                    </li>
-                  </ul>
-                </div>
+                <span className={`text-sm font-medium hidden sm:block ${active ? 'text-slate-900' : done ? 'text-green-700' : 'text-slate-400'}`}>
+                  {step.label}
+                </span>
+              </li>
+              {idx < STEPS.length - 1 && (
+                <div className={`flex-1 h-0.5 mx-3 rounded-full ${done ? 'bg-green-400' : 'bg-slate-200'}`} />
               )}
-              
-              <p className="text-muted-foreground">
-                You'll only need to confirm the details — we do the heavy lifting!
-              </p>
-              
-              <Button
-                size="lg"
-                onClick={() => navigate(`/claim/${claimId}/documents`)}
-                className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
-              >
-                <Upload className="h-5 w-5 mr-2" aria-hidden="true" />
-                Upload Documents
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+            </React.Fragment>
+          );
+        })}
+      </ol>
+    </nav>
+  );
 
-        {currentStep === 1 && hasDocuments && !analysis && (
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader className="text-center">
-              <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                aiUnavailable ? 'bg-red-100' : 'bg-yellow-100'
-              }`} aria-hidden="true">
-                {aiUnavailable ? (
-                  <AlertTriangle className="h-10 w-10 text-red-600" />
-                ) : (
-                  <RefreshCw className="h-10 w-10 text-yellow-600" />
-                )}
-              </div>
-              <CardTitle className="text-2xl">
-                {aiUnavailable ? 'AI Analysis Temporarily Unavailable' : 'Documents Ready for Analysis'}
-              </CardTitle>
-              <CardDescription className="text-base">
-                {aiUnavailable 
-                  ? 'Our AI analysis service is temporarily unavailable. Please try again in a few minutes.'
-                  : 'We have your documents. Click below to start the AI analysis.'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <Button
-                size="lg"
-                onClick={triggerAnalysis}
-                disabled={loading || analysisTriggered}
-                className={aiUnavailable ? 'bg-gray-600 hover:bg-gray-700' : 'bg-[#1B3A5F] hover:bg-[#2a4a6f]'}
-              >
-                {loading ? (
-                  <>
-                    <RefreshCw className="h-5 w-5 mr-2 animate-spin" aria-hidden="true" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <ArrowRight className="h-5 w-5 mr-2" aria-hidden="true" />
-                    {aiUnavailable ? 'Try Again' : 'Analyze My Documents'}
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+  // ── Step 1: No documents yet ───────────────────────────────────────────────
+  if (currentStep === 1 && !hasDocuments) {
+    return (
+      <VeteranLayout>
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+          <StepBar />
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-[#1B3A5F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Upload className="w-8 h-8 text-[#1B3A5F]" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Upload Your Documents First</h1>
+            <p className="text-slate-500">Our AI will read your records and build your claim automatically.</p>
+          </div>
 
-        {currentStep === 2 && analysis && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center" aria-hidden="true">
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+          {isMebClaim ? (
+            <Card className="mb-6 border-blue-200">
+              <CardContent className="pt-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="w-4 h-4 text-[#1B3A5F]" />
+                  <span className="font-semibold text-[#1B3A5F] text-sm">MEB/IDES Required Documents</span>
                 </div>
-                <div>
-                  <h2 className="text-xl font-semibold">Review Your Pre-Assembled Claim</h2>
-                  <p className="text-muted-foreground">
-                    We've extracted information from your documents. Please review and confirm the details below.
-                    You only need to make changes if something is incorrect.
-                  </p>
+                <div className="space-y-2">
+                  {MEB_EVIDENCE_REQUIREMENTS.map((doc, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                      <Badge className={doc.required ? 'bg-red-100 text-red-700 text-xs' : 'bg-slate-100 text-slate-500 text-xs'}>
+                        {doc.required ? 'Required' : 'Optional'}
+                      </Badge>
+                      <span className="text-slate-700">{doc.name}</span>
+                    </div>
+                  ))}
                 </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="mb-6 border-blue-100 bg-blue-50/50">
+              <CardContent className="pt-5">
+                <p className="text-sm font-semibold text-slate-700 mb-3">What AI will extract automatically:</p>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {[
+                    'Service dates, branch & MOS from DD-214',
+                    'All diagnosed conditions from medical records',
+                    'Evidence supporting service connection',
+                    'Presumptive condition eligibility',
+                  ].map(item => (
+                    <div key={item} className="flex items-center gap-2 text-sm text-slate-600">
+                      <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Button
+            size="lg"
+            onClick={() => navigate(`/claim/${claimId}/documents`)}
+            className="w-full bg-[#1B3A5F] hover:bg-[#2a4a6f] text-white h-12"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Documents
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+      </VeteranLayout>
+    );
+  }
+
+  // ── Step 1: Documents uploaded, trigger analysis ───────────────────────────
+  if (currentStep === 1 && hasDocuments && !analysis) {
+    return (
+      <VeteranLayout>
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+          <StepBar />
+          <div className="text-center mb-8">
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
+              aiUnavailable ? 'bg-red-50' : 'bg-amber-50'
+            }`}>
+              {aiUnavailable
+                ? <AlertTriangle className="w-8 h-8 text-red-500" />
+                : <Sparkles className="w-8 h-8 text-amber-500" />
+              }
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">
+              {aiUnavailable ? 'AI Temporarily Unavailable' : 'Ready to Analyze'}
+            </h1>
+            <p className="text-slate-500 max-w-md mx-auto">
+              {aiUnavailable
+                ? 'Our AI service is temporarily unavailable. Please try again in a few minutes.'
+                : 'Your documents are uploaded. Run AI analysis to identify your conditions and build your claim.'
+              }
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => navigate(`/claim/${claimId}/documents`)}
+              className="flex-1 h-12 border-slate-300"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Add More Documents
+            </Button>
+            <Button
+              size="lg"
+              onClick={triggerAnalysis}
+              disabled={loading || analysisTriggered || aiUnavailable}
+              className="flex-1 h-12 bg-[#1B3A5F] hover:bg-[#2a4a6f] text-white"
+            >
+              {loading || analysisTriggered ? (
+                <><RefreshCw className="w-4 h-4 mr-2 animate-spin" />Analyzing…</>
+              ) : (
+                <><Sparkles className="w-4 h-4 mr-2" />Run AI Analysis<ArrowRight className="w-4 h-4 ml-2" /></>
+              )}
+            </Button>
+          </div>
+        </div>
+      </VeteranLayout>
+    );
+  }
+
+  // ── Step 2: Review & Confirm ───────────────────────────────────────────────
+  if (currentStep === 2 && analysis) {
+    const score = analysis.approval_readiness?.overall_score || 0;
+    return (
+      <VeteranLayout>
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+          <StepBar />
+
+          {/* Approval score banner */}
+          <div className={`mb-6 rounded-2xl border px-5 py-4 flex items-center justify-between gap-4 ${
+            score >= 80 ? 'bg-green-50 border-green-200' : score >= 50 ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'
+          }`}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                score >= 80 ? 'bg-green-100' : score >= 50 ? 'bg-amber-100' : 'bg-slate-100'
+              }`}>
+                <Shield className={`w-5 h-5 ${score >= 80 ? 'text-green-600' : score >= 50 ? 'text-amber-600' : 'text-slate-500'}`} />
               </div>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-[#1B3A5F] mt-0.5" aria-hidden="true" />
-                <div>
-                  <p className="font-medium text-blue-900">No typing required!</p>
-                  <p className="text-sm text-blue-700">
-                    All information has been extracted from your documents. 
-                    Simply toggle conditions on/off and select severity levels.
-                  </p>
-                </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-800">Approval Readiness</p>
+                <p className="text-xs text-slate-500">{analysis.approval_readiness?.recommendation || 'Complete the review below.'}</p>
               </div>
             </div>
-
-            <ClaimAssemblyReview
-              serviceProfile={analysis.service_profile}
-              conditions={analysis.conditions}
-              conditionScores={analysis.condition_scores}
-              approvalReadiness={analysis.approval_readiness}
-              onConfirm={handleConfirmation}
-              loading={submitting}
-            />
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="w-32 hidden sm:block">
+                <Progress value={score} className="h-2" />
+              </div>
+              <span className={`text-2xl font-bold ${
+                score >= 80 ? 'text-green-600' : score >= 50 ? 'text-amber-600' : 'text-slate-600'
+              }`}>{score}%</span>
+            </div>
           </div>
-        )}
 
-        {currentStep === 3 && (
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader className="text-center">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
-                <CheckCircle2 className="h-10 w-10 text-green-600" />
-              </div>
-              <CardTitle className="text-2xl text-green-700">Claim Confirmed!</CardTitle>
-              <CardDescription className="text-base">
-                Your claim has been confirmed and is ready for final review.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center space-y-6">
-              {analysis?.approval_readiness && (
-                <div className="bg-white p-6 rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-2">Approval Readiness Score</p>
-                  <div className="flex items-center justify-center gap-4">
-                    <Progress 
-                      value={analysis.approval_readiness.overall_score || 0} 
-                      className="h-4 w-48"
-                    />
-                    <span className="text-2xl font-bold text-green-600">
-                      {analysis.approval_readiness.overall_score || 0}%
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {analysis.approval_readiness.recommendation}
-                  </p>
+          <ClaimAssemblyReview
+            serviceProfile={analysis.service_profile}
+            conditions={analysis.conditions}
+            conditionScores={analysis.condition_scores}
+            approvalReadiness={analysis.approval_readiness}
+            onConfirm={handleConfirmation}
+            loading={submitting}
+          />
+        </div>
+      </VeteranLayout>
+    );
+  }
+
+  // ── Step 3: Confirmed ──────────────────────────────────────────────────────
+  if (currentStep === 3) {
+    const score = analysis?.approval_readiness?.overall_score || 0;
+    return (
+      <VeteranLayout>
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+          <StepBar />
+          <div className="text-center py-10">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <CheckCircle2 className="w-10 h-10 text-green-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Claim Confirmed!</h1>
+            <p className="text-slate-500 mb-8">Your claim has been confirmed and is ready for final review.</p>
+
+            {score > 0 && (
+              <div className="mb-8 bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                <p className="text-xs text-slate-500 uppercase tracking-wide font-medium mb-2">Approval Readiness Score</p>
+                <div className="flex items-center justify-center gap-4">
+                  <Progress value={score} className="h-3 w-48" />
+                  <span className="text-2xl font-bold text-green-600">{score}%</span>
                 </div>
-              )}
-              
-              <div className="grid gap-4 md:grid-cols-2">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => setCurrentStep(2)}
-                >
-                  <ArrowLeft className="h-5 w-5 mr-2" />
-                  Make Changes
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={handleProceedToReview}
-                  className="bg-[#1B3A5F] hover:bg-[#2a4a6f]"
-                >
-                  Proceed to Final Review
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
               </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
-  );
+            )}
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setCurrentStep(2)}
+                className="flex-1 h-12 border-slate-300"
+              >
+                Make Changes
+              </Button>
+              <Button
+                size="lg"
+                onClick={() => navigate(`/claim/${claimId}`)}
+                className="flex-1 h-12 bg-[#1B3A5F] hover:bg-[#2a4a6f] text-white"
+              >
+                View Full Claim
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </VeteranLayout>
+    );
+  }
+
+  return null;
 }

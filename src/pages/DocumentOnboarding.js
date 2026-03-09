@@ -9,19 +9,38 @@ import DocumentGuidance, { DocumentHelpButton } from '../components/DocumentGuid
 import JourneyProgress from '../components/JourneyProgress';
 import StepFeedback from '../components/StepFeedback';
 import { useCelebration } from '../components/Celebration';
-import { 
-  HelpCircle, 
-  FileText, 
-  Upload, 
-  CheckCircle, 
-  ArrowRight, 
+import {
+  HelpCircle,
+  FileText,
+  Upload,
+  CheckCircle,
+  ArrowRight,
   ArrowLeft,
   AlertCircle,
   ExternalLink,
   Info,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X,
+  ClipboardList,
+  Stethoscope,
+  FolderOpen,
+  FileEdit,
+  Users,
+  Loader2,
+  Trophy,
+  Pill,
+  Activity,
+  BriefcaseMedical
 } from 'lucide-react';
+
+const formatFileSize = (size) => {
+  if (!size && size !== 0) return 'Previously uploaded';
+  if (size === 0) return 'Previously uploaded';
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${(size / 1024 / 1024).toFixed(2)} MB`;
+};
 
 const WIZARD_STEPS = [
   { 
@@ -62,7 +81,7 @@ const DOCUMENT_TYPES = [
     name: 'DD-214',
     description: 'Certificate of Release or Discharge from Active Duty',
     required: true,
-    icon: '📋',
+    icon: ClipboardList,
     importance: 'critical',
     whyNeeded: 'Proves your military service dates and character of discharge. Required for all VA claims.',
     whatItAccomplishes: 'Establishes service connection eligibility and helps link conditions to service period.',
@@ -73,7 +92,7 @@ const DOCUMENT_TYPES = [
     name: 'Medical Records',
     description: 'Current VA or private medical records showing diagnoses',
     required: true,
-    icon: '🏥',
+    icon: Stethoscope,
     importance: 'critical',
     whyNeeded: 'Documents your current medical conditions and their severity.',
     whatItAccomplishes: 'Provides evidence of current disability status and helps determine rating percentage.',
@@ -84,7 +103,7 @@ const DOCUMENT_TYPES = [
     name: 'Service Treatment Records',
     description: 'In-service medical records (if available)',
     required: false,
-    icon: '📁',
+    icon: FolderOpen,
     importance: 'helpful',
     whyNeeded: 'Shows medical treatment during your military service.',
     whatItAccomplishes: 'Directly connects conditions to in-service events, strengthening your claim significantly.',
@@ -95,7 +114,7 @@ const DOCUMENT_TYPES = [
     name: 'Nexus Letter',
     description: 'Doctor\'s opinion connecting condition to service',
     required: false,
-    icon: '📝',
+    icon: FileEdit,
     importance: 'highly_beneficial',
     whyNeeded: 'Provides medical opinion linking your condition to military service.',
     whatItAccomplishes: 'Often the key evidence that establishes service connection, especially for indirect claims.'
@@ -105,7 +124,7 @@ const DOCUMENT_TYPES = [
     name: 'Buddy Statements',
     description: 'Statements from fellow service members or family',
     required: false,
-    icon: '👥',
+    icon: Users,
     importance: 'helpful',
     whyNeeded: 'Provides witness testimony about your condition or in-service events.',
     whatItAccomplishes: 'Supports claims where official documentation is limited, especially for PTSD and MST.'
@@ -185,15 +204,18 @@ function DocumentCard({ doc, expanded, onToggle }) {
   };
   
   const colors = importanceColors[doc.importance] || importanceColors.helpful;
-  
+  const DocIcon = doc.icon;
+
   return (
     <div className={`rounded-lg border-2 ${colors.border} ${colors.bg} overflow-hidden transition-all`}>
-      <button 
+      <button
         onClick={onToggle}
         className="w-full p-4 flex items-start gap-3 text-left min-h-[56px]"
         aria-expanded={expanded}
       >
-        <span className="text-2xl flex-shrink-0">{doc.icon}</span>
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/70 border border-gray-200/70 flex items-center justify-center">
+          <DocIcon className="h-5 w-5 text-gray-600" />
+        </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <h4 className="font-semibold text-gray-900">{doc.name}</h4>
@@ -351,9 +373,9 @@ function RequirementsStep({ onNext, onBack }) {
           <div className="bg-gray-50 rounded p-3">
             <p className="text-xs text-gray-500 font-medium mb-2">DOCUMENTS THAT HELP:</p>
             <ul className="text-sm text-gray-700 space-y-1">
-              <li className="flex items-center gap-2">📋 DD-214 (service dates)</li>
-              <li className="flex items-center gap-2">📁 Service Treatment Records</li>
-              <li className="flex items-center gap-2">👥 Buddy Statements</li>
+              <li className="flex items-center gap-2"><ClipboardList className="h-4 w-4 text-gray-500 flex-shrink-0" /> DD-214 (service dates)</li>
+              <li className="flex items-center gap-2"><FolderOpen className="h-4 w-4 text-gray-500 flex-shrink-0" /> Service Treatment Records</li>
+              <li className="flex items-center gap-2"><Users className="h-4 w-4 text-gray-500 flex-shrink-0" /> Buddy Statements</li>
             </ul>
           </div>
         </div>
@@ -369,9 +391,9 @@ function RequirementsStep({ onNext, onBack }) {
           <div className="bg-gray-50 rounded p-3">
             <p className="text-xs text-gray-500 font-medium mb-2">DOCUMENTS THAT HELP:</p>
             <ul className="text-sm text-gray-700 space-y-1">
-              <li className="flex items-center gap-2">🏥 Current Medical Records</li>
-              <li className="flex items-center gap-2">📝 Doctor's Diagnosis Letter</li>
-              <li className="flex items-center gap-2">💊 Prescription Records</li>
+              <li className="flex items-center gap-2"><Stethoscope className="h-4 w-4 text-gray-500 flex-shrink-0" /> Current Medical Records</li>
+              <li className="flex items-center gap-2"><FileEdit className="h-4 w-4 text-gray-500 flex-shrink-0" /> Doctor's Diagnosis Letter</li>
+              <li className="flex items-center gap-2"><Pill className="h-4 w-4 text-gray-500 flex-shrink-0" /> Prescription Records</li>
             </ul>
           </div>
         </div>
@@ -387,8 +409,8 @@ function RequirementsStep({ onNext, onBack }) {
           <div className="bg-gray-50 rounded p-3">
             <p className="text-xs text-gray-500 font-medium mb-2">DOCUMENTS THAT HELP:</p>
             <ul className="text-sm text-gray-700 space-y-1">
-              <li className="flex items-center gap-2">📝 Nexus Letter from Doctor</li>
-              <li className="flex items-center gap-2">🏥 C&P Exam Opinion</li>
+              <li className="flex items-center gap-2"><FileEdit className="h-4 w-4 text-gray-500 flex-shrink-0" /> Nexus Letter from Doctor</li>
+              <li className="flex items-center gap-2"><Stethoscope className="h-4 w-4 text-gray-500 flex-shrink-0" /> C&P Exam Opinion</li>
             </ul>
           </div>
         </div>
@@ -404,9 +426,9 @@ function RequirementsStep({ onNext, onBack }) {
           <div className="bg-gray-50 rounded p-3">
             <p className="text-xs text-gray-500 font-medium mb-2">DOCUMENTS THAT HELP:</p>
             <ul className="text-sm text-gray-700 space-y-1">
-              <li className="flex items-center gap-2">🏥 Treatment Frequency Records</li>
-              <li className="flex items-center gap-2">👥 Personal Statement</li>
-              <li className="flex items-center gap-2">📋 Employment Records</li>
+              <li className="flex items-center gap-2"><Activity className="h-4 w-4 text-gray-500 flex-shrink-0" /> Treatment Frequency Records</li>
+              <li className="flex items-center gap-2"><Users className="h-4 w-4 text-gray-500 flex-shrink-0" /> Personal Statement</li>
+              <li className="flex items-center gap-2"><ClipboardList className="h-4 w-4 text-gray-500 flex-shrink-0" /> Employment Records</li>
             </ul>
           </div>
         </div>
@@ -462,8 +484,14 @@ function UploadStep({
   showDocGuide,
   setShowDocGuide
 }) {
-  const requiredDocs = DOCUMENT_TYPES.filter(d => d.required);
-  
+  const [providerRequestSent, setProviderRequestSent] = useState(false);
+
+  const importanceBadge = {
+    critical: { label: 'Required', className: 'text-red-600' },
+    highly_beneficial: { label: 'Highly Recommended', className: 'text-amber-600' },
+    helpful: { label: 'Optional', className: 'text-gray-500' },
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-[hsl(var(--primary))]/5 border border-[hsl(var(--primary))]/20 rounded-lg p-4 md:p-6">
@@ -472,7 +500,7 @@ function UploadStep({
           Upload Your Documents
         </h2>
         <p className="text-gray-600">
-          Now that you understand what's needed, upload your documents. Our AI will analyze them to identify all claimable conditions.
+          Upload as many documents as you have. Our AI will analyze them to identify all claimable conditions. Required documents are marked below.
         </p>
       </div>
 
@@ -488,25 +516,33 @@ function UploadStep({
           </button>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
-          {requiredDocs.map(doc => {
+          {DOCUMENT_TYPES.map(doc => {
             const hasDoc = uploadedFiles.some(f => f.type === doc.id);
+            const badge = importanceBadge[doc.importance] || importanceBadge.helpful;
+            const DocIcon = doc.icon;
             return (
-              <div 
+              <div
                 key={doc.id}
                 className={`p-4 rounded-lg border-2 flex items-start gap-3 ${
-                  hasDoc 
-                    ? 'border-green-500 bg-green-50' 
-                    : 'border-red-300 bg-red-50'
+                  hasDoc
+                    ? 'border-green-500 bg-green-50'
+                    : doc.required
+                    ? 'border-red-300 bg-red-50'
+                    : doc.importance === 'highly_beneficial'
+                    ? 'border-amber-200 bg-amber-50'
+                    : 'border-gray-200 bg-gray-50'
                 }`}
               >
-                <span className="text-2xl">{doc.icon}</span>
+                <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${hasDoc ? 'bg-green-100' : doc.required ? 'bg-red-100' : doc.importance === 'highly_beneficial' ? 'bg-amber-100' : 'bg-gray-100'}`}>
+                  <DocIcon className={`h-5 w-5 ${hasDoc ? 'text-green-600' : doc.required ? 'text-red-500' : doc.importance === 'highly_beneficial' ? 'text-amber-600' : 'text-gray-500'}`} />
+                </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-gray-900">{doc.name}</span>
                     {hasDoc ? (
                       <CheckCircle className="h-5 w-5 text-green-600" />
                     ) : (
-                      <span className="text-xs text-red-600 font-medium">Required</span>
+                      <span className={`text-xs font-medium ${badge.className}`}>{badge.label}</span>
                     )}
                   </div>
                   <p className="text-sm text-gray-600 mt-1">{doc.description}</p>
@@ -525,7 +561,9 @@ function UploadStep({
       >
         <input {...getInputProps()} />
         <div className="text-center">
-          <div className="text-4xl mb-4">📤</div>
+          <div className="flex justify-center mb-4">
+            <Upload className="h-10 w-10 text-gray-400" />
+          </div>
           {isDragActive ? (
             <p className="text-[hsl(var(--primary))] font-medium text-lg">Drop files here...</p>
           ) : (
@@ -567,26 +605,28 @@ function UploadStep({
           <h3 className="font-semibold mb-4">Uploaded Documents ({uploadedFiles.length})</h3>
           <div className="space-y-3">
             {uploadedFiles.map((file, index) => (
-              <div key={index} className={`flex items-center justify-between p-3 border rounded-lg ${
-                file.needsReupload ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200'
+              <div key={index} className={`flex items-center justify-between gap-3 p-3 border rounded-lg ${
+                file.needsReupload ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'
               }`}>
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{file.needsReupload ? '⏳' : '📄'}</span>
-                  <div>
-                    <p className="font-medium text-sm">{file.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {file.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'Previously uploaded'}
-                    </p>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${
+                    file.needsReupload ? 'bg-amber-100' : 'bg-white border border-slate-200'
+                  }`}>
+                    <FileText className={`h-4 w-4 ${file.needsReupload ? 'text-amber-600' : 'text-slate-500'}`} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm text-slate-800 truncate">{file.name}</p>
+                    <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
                     {file.needsReupload && (
                       <p className="text-xs text-amber-600 font-medium">Re-upload to continue</p>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <select
                     value={file.type}
                     onChange={(e) => updateFileType(index, e.target.value)}
-                    className="text-sm border rounded px-2 py-2 min-h-[44px]"
+                    className="text-sm border border-slate-300 rounded-md px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#1B3A5F]"
                   >
                     <option value="dd214">DD-214</option>
                     <option value="medical_records">Medical Records</option>
@@ -596,10 +636,10 @@ function UploadStep({
                   </select>
                   <button
                     onClick={() => removeFile(index)}
-                    className="text-red-500 hover:text-red-700 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                     aria-label="Remove file"
                   >
-                    ✕
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -611,7 +651,9 @@ function UploadStep({
       {hasRestoredFiles() && analysis && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">📋</span>
+            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <ClipboardList className="h-5 w-5 text-blue-700" />
+            </div>
             <div className="flex-1">
               <h4 className="font-semibold text-blue-900">Previous Analysis Found</h4>
               <p className="text-sm text-blue-700 mt-1">
@@ -630,6 +672,36 @@ function UploadStep({
           </div>
         </div>
       )}
+
+      {/* Contact Medical Provider */}
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+            <BriefcaseMedical className="h-5 w-5 text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-amber-900 text-sm">Don't have your documents?</h4>
+            <p className="text-xs text-amber-700 mt-1">
+              If you can't access your medical records, service treatment records, or other required documents — request them directly from your VA healthcare provider or private doctor. We'll send a records request on your behalf.
+            </p>
+          </div>
+          <button
+            onClick={() => setProviderRequestSent(true)}
+            disabled={providerRequestSent}
+            className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-colors min-w-[130px] justify-center ${
+              providerRequestSent
+                ? 'bg-green-50 text-green-700 border border-green-200'
+                : 'bg-amber-600 text-white hover:bg-amber-700'
+            }`}
+          >
+            {providerRequestSent ? (
+              <><CheckCircle className="h-3.5 w-3.5" /> Request Sent</>
+            ) : (
+              <>Contact Provider</>
+            )}
+          </button>
+        </div>
+      </div>
 
       <div className="flex flex-col sm:flex-row justify-between gap-4 pt-4">
         <button
@@ -669,7 +741,9 @@ function AnalysisStep() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-12 text-center">
-        <div className="animate-spin text-5xl mb-6">⚙️</div>
+        <div className="flex justify-center mb-6">
+          <Loader2 className="h-12 w-12 text-[hsl(var(--primary))] animate-spin" />
+        </div>
         <h2 className="text-2xl font-semibold mb-2">Analyzing Your Documents</h2>
         <p className="text-gray-600 mb-6">
           Our AI is reviewing your records to identify all claimable conditions...
@@ -699,7 +773,11 @@ function ReviewStep({ analysis, onProceedToReview }) {
   return (
     <div className="space-y-6">
       <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <div className="text-5xl mb-4">🎉</div>
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+            <Trophy className="h-8 w-8 text-green-600" />
+          </div>
+        </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Analysis Complete!</h2>
         <p className="text-gray-600 mb-4">
           We found {conditionCount} potential claimable condition{conditionCount !== 1 ? 's' : ''} in your documents.
@@ -750,6 +828,12 @@ function ReviewStep({ analysis, onProceedToReview }) {
 }
 
 export default function DocumentOnboarding() {
+  const navigate = useNavigate();
+  React.useEffect(() => { navigate('/claim-review', { replace: true }); }, [navigate]);
+  return null;
+}
+
+function _DocumentOnboardingUnused() {
   const navigate = useNavigate();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const { celebrate, CelebrationComponent } = useCelebration();
@@ -905,8 +989,7 @@ export default function DocumentOnboarding() {
 
   const hasRequiredDocuments = () => {
     const readyFiles = uploadedFiles.filter(f => f.file && !f.needsReupload);
-    const types = readyFiles.map(f => f.type);
-    return types.includes('dd214') && types.includes('medical_records');
+    return readyFiles.length > 0;
   };
 
   const hasRestoredFiles = () => {
@@ -925,7 +1008,7 @@ export default function DocumentOnboarding() {
     if (analyzing) return;
     
     if (!hasRequiredDocuments()) {
-      setError('Please upload at least your DD-214 and medical records');
+      setError('Please upload at least one document to continue.');
       return;
     }
 

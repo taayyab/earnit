@@ -22,6 +22,8 @@ import { useAuth } from '../../lib/auth-context';
 export default function DataExportCard() {
   const { user } = useAuth();
   const currentUserId = user?.id || user?.user_id;
+  const advocateRoles = ['advocate', 'veteran_advocate', 'peer_mentor', 'peer_supporter'];
+  const isAdvocate = advocateRoles.includes(user?.role);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [summary, setSummary] = useState(null);
@@ -188,8 +190,8 @@ export default function DataExportCard() {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-50 rounded-lg">
-            <Download className="h-5 w-5 text-blue-600" />
+          <div className={`p-2 rounded-lg ${isAdvocate ? 'bg-emerald-50' : 'bg-blue-50'}`}>
+            <Download className={`h-5 w-5 ${isAdvocate ? 'text-emerald-600' : 'text-blue-600'}`} />
           </div>
           <div>
             <CardTitle>Export Your Data</CardTitle>
@@ -212,22 +214,24 @@ export default function DataExportCard() {
         <div>
           <h4 className="text-sm font-medium text-slate-900 mb-3">Your Data Summary</h4>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-2 p-3 border rounded-lg">
-              <FolderOpen className="h-4 w-4 text-blue-500" />
-              <div>
-                <p className="text-lg font-semibold">{dataSummary.claims_count || 0}</p>
-                <p className="text-xs text-slate-500">Claims</p>
+            {!isAdvocate && (
+              <div className="flex items-center gap-2 p-3 border rounded-lg">
+                <FolderOpen className="h-4 w-4 text-blue-500" />
+                <div>
+                  <p className="text-lg font-semibold">{dataSummary.claims_count || 0}</p>
+                  <p className="text-xs text-slate-500">Claims</p>
+                </div>
               </div>
-            </div>
+            )}
             <div className="flex items-center gap-2 p-3 border rounded-lg">
-              <FileText className="h-4 w-4 text-green-500" />
+              <FileText className={`h-4 w-4 ${isAdvocate ? 'text-emerald-500' : 'text-green-500'}`} />
               <div>
                 <p className="text-lg font-semibold">{dataSummary.documents_count || 0}</p>
                 <p className="text-xs text-slate-500">Documents</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 border rounded-lg">
-              <History className="h-4 w-4 text-[#1B3A5F]" />
+              <History className={`h-4 w-4 ${isAdvocate ? 'text-emerald-600' : 'text-[#1B3A5F]'}`} />
               <div>
                 <p className="text-lg font-semibold">{dataSummary.consent_records || 0}</p>
                 <p className="text-xs text-slate-500">Consent Records</p>
@@ -247,12 +251,14 @@ export default function DataExportCard() {
           <div>
             <h4 className="text-sm font-medium text-slate-900 mb-3">What's Included in Your Export</h4>
             <ul className="space-y-2">
-              {summary.export_includes.map((item, index) => (
-                <li key={index} className="flex items-center gap-2 text-sm text-slate-600">
-                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  {item}
-                </li>
-              ))}
+              {summary.export_includes
+                .filter(item => !(isAdvocate && item.toLowerCase().includes('claim')))
+                .map((item, index) => (
+                  <li key={index} className="flex items-center gap-2 text-sm text-slate-600">
+                    <CheckCircle className={`h-4 w-4 flex-shrink-0 ${isAdvocate ? 'text-emerald-500' : 'text-green-500'}`} />
+                    {item}
+                  </li>
+                ))}
             </ul>
           </div>
         )}
@@ -265,10 +271,10 @@ export default function DataExportCard() {
         )}
 
         <div className="pt-4 border-t">
-          <Button 
-            onClick={handleDownload} 
+          <Button
+            onClick={handleDownload}
             disabled={downloading}
-            className="w-full"
+            className={`w-full ${isAdvocate ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-[#1B3A5F] hover:bg-[#2C5282]'}`}
           >
             {downloading ? (
               <>

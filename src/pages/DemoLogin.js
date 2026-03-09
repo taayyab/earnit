@@ -4,9 +4,10 @@ import { useAuth } from '../lib/auth-context';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Shield, Play, AlertCircle, CheckCircle, User, Users, Briefcase, Building, Stethoscope } from 'lucide-react';
+import { Shield, Play, AlertCircle, CheckCircle, User, Users, Briefcase, Building, Stethoscope, ArrowRight } from 'lucide-react';
 import logoImage from '../assets/logo.webp';
 import { toast } from 'sonner';
+import api from '../lib/api';
 
 const DEMO_ACCOUNTS = [
   {
@@ -51,6 +52,10 @@ export default function DemoLogin() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState('veteran');
+  // Name prompt for veteran
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const { isAuthenticated, user, demoLogin } = useAuth();
   const navigate = useNavigate();
 
@@ -62,16 +67,37 @@ export default function DemoLogin() {
   }, [isAuthenticated, user, navigate, selectedAccount]);
 
   const handleDemoAccess = async (accountType) => {
+    // For veteran, ask for name first
+    if (accountType === 'veteran' && !showNamePrompt) {
+      setSelectedAccount(accountType);
+      setShowNamePrompt(true);
+      return;
+    }
     setLoading(true);
     setError('');
     setSelectedAccount(accountType);
-    
+
     try {
       const userData = await demoLogin(accountType);
-      
+
+      // Update veteran name if provided
+      if (accountType === 'veteran' && (firstName.trim() || lastName.trim())) {
+        try {
+          await api.patch('/users/me/name', {
+            first_name: firstName.trim() || userData.first_name,
+            last_name: lastName.trim() || userData.last_name,
+          });
+          localStorage.setItem('demo_display_name', `${firstName.trim()} ${lastName.trim()}`.trim());
+        } catch (nameErr) {
+          // Name update is best-effort; don't block login
+          localStorage.setItem('demo_display_name', `${firstName.trim()} ${lastName.trim()}`.trim());
+        }
+      }
+
       setSuccess(true);
-      toast.success(`Welcome to the EarnedIT Demo, ${userData.first_name}!`);
-      
+      const displayName = firstName.trim() || userData.first_name;
+      toast.success(`Welcome to the EarnedIT Demo, ${displayName}!`);
+
       const account = DEMO_ACCOUNTS.find(a => a.id === accountType);
       setTimeout(() => {
         navigate(`${account?.dashboard || '/dashboard'}?demo=true`, { replace: true });
@@ -116,6 +142,66 @@ export default function DemoLogin() {
             </Alert>
           )}
 
+          {/* Name prompt for Demo Veteran */}
+          {showNamePrompt ? (
+            <div className="border border-[#1B3A5F]/20 rounded-xl p-5 bg-[#1B3A5F]/3 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#1B3A5F]/10 flex items-center justify-center shrink-0">
+                  <User className="h-5 w-5 text-[#1B3A5F]" />
+                </div>
+                <div>
+                  <p className="font-semibold text-[#1B3A5F]">What's your name?</p>
+                  <p className="text-xs text-slate-500">This name will appear throughout the platform</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">First Name</label>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={e => setFirstName(e.target.value)}
+                    placeholder="e.g. James"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1B3A5F]/30"
+                    autoFocus
+                    onKeyDown={e => e.key === 'Enter' && firstName.trim() && handleDemoAccess('veteran')}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">Last Name</label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={e => setLastName(e.target.value)}
+                    placeholder="e.g. Wilson"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1B3A5F]/30"
+                    onKeyDown={e => e.key === 'Enter' && firstName.trim() && handleDemoAccess('veteran')}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowNamePrompt(false)}
+                  disabled={loading}
+                >
+                  Back
+                </Button>
+                <Button
+                  className="flex-1 bg-[#1B3A5F] hover:bg-[#0f2340] text-white"
+                  onClick={() => handleDemoAccess('veteran')}
+                  disabled={!firstName.trim() || loading}
+                >
+                  {loading ? (
+                    <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />Entering Demo...</>
+                  ) : (
+                    <>Continue <ArrowRight className="h-4 w-4 ml-1" /></>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {DEMO_ACCOUNTS.map((account) => {
               const Icon = account.icon;
@@ -123,8 +209,8 @@ export default function DemoLogin() {
                 <Button
                   key={account.id}
                   variant="outline"
-                  className={`h-auto p-4 flex flex-col items-start text-left hover:bg-[#1B3A5F]/5 hover:border-[#1B3A5F] transition-all ${
-                    selectedAccount === account.id ? 'border-[#1B3A5F] bg-[#1B3A5F]/5' : ''
+                  className={`h-auto p-4 flex flex-col items-start text-left hover:bg-gray-50 hover:border-gray-300 transition-all ${
+                    selectedAccount === account.id && loading ? 'border-[#1B3A5F] bg-[#1B3A5F]/5' : ''
                   }`}
                   onClick={() => handleDemoAccess(account.id)}
                   disabled={loading || success}
@@ -146,6 +232,7 @@ export default function DemoLogin() {
               );
             })}
           </div>
+          )}
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
             <p className="font-medium mb-2">Demo Environment Features:</p>

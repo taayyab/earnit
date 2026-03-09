@@ -27,6 +27,22 @@ export default function QAChecklist({ open, onOpenChange, claimId, onSubmitReady
   const [qaReport, setQaReport] = useState(null);
   const [loading, setLoading] = useState(false);
   const [expandedChecks, setExpandedChecks] = useState(new Set());
+  const [generatingRdb, setGeneratingRdb] = useState(false);
+
+  const generateRDB = async () => {
+    try {
+      setGeneratingRdb(true);
+      await api.post('/rdb/generate', { claimId });
+      toast.success('Rating Decision Brief generated!');
+      // Re-run QA to reflect updated status
+      const res = await api.post(`/qa/check/${claimId}`);
+      setQaReport(res.data.report);
+    } catch (err) {
+      toast.error('Failed to generate Rating Decision Brief');
+    } finally {
+      setGeneratingRdb(false);
+    }
+  };
 
   const runQACheck = async () => {
     try {
@@ -171,9 +187,22 @@ export default function QAChecklist({ open, onOpenChange, claimId, onSubmitReady
                       </div>
                       <p className="text-sm text-muted-foreground">{check.message}</p>
                       {check.action_required && (
-                        <p className="text-sm text-[hsl(var(--accent))] mt-2 font-medium">
-                          → {check.action_required}
-                        </p>
+                        check.check_id === 'rdb_generated' ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="mt-2 text-xs border-yellow-400 text-yellow-700 hover:bg-yellow-50"
+                            onClick={(e) => { e.stopPropagation(); generateRDB(); }}
+                            disabled={generatingRdb}
+                          >
+                            {generatingRdb ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : null}
+                            Generate Rating Decision Brief
+                          </Button>
+                        ) : (
+                          <p className="text-sm text-[hsl(var(--accent))] mt-2 font-medium">
+                            → {check.action_required}
+                          </p>
+                        )
                       )}
                     </div>
                     {expandedChecks.has(check.check_id) ? (

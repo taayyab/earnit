@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context';
-import PageHeader from '../components/PageHeader';
+import VeteranLayout from '../components/VeteranLayout';
 import api from '../lib/api';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -126,6 +126,7 @@ export default function AppealDecisionWizard() {
   const [deniedConditions, setDeniedConditions] = useState([]);
   
   const [appealCaseId, setAppealCaseId] = useState(null);
+  const [downloadingDemo, setDownloadingDemo] = useState(false);
   const [roadmapData, setRoadmapData] = useState(null);
   const [evidenceRequirements, setEvidenceRequirements] = useState([]);
   
@@ -247,6 +248,28 @@ export default function AppealDecisionWizard() {
       toast.error('Failed to load claim data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadDemoLetter = async () => {
+    try {
+      setDownloadingDemo(true);
+      const condition = decisionData.deniedConditions?.[0] || 'PTSD';
+      const response = await api.get(`/appeals/dummy-denial-letter?condition=${encodeURIComponent(condition)}`, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'VA_Decision_Letter_DEMO.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success('Demo denial letter downloaded! Upload it below to test the appeal flow.');
+    } catch {
+      toast.error('Failed to generate demo letter');
+    } finally {
+      setDownloadingDemo(false);
     }
   };
 
@@ -886,17 +909,39 @@ export default function AppealDecisionWizard() {
               </div>
             </div>
           ) : (
-            <label className="block p-8 text-center border-2 border-dashed border-slate-300 rounded-lg hover:border-[#1B3A5F] cursor-pointer transition-colors">
-              <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-              <p className="text-slate-600 font-medium">Click to upload your VA decision letter</p>
-              <p className="text-sm text-slate-500 mt-1">PDF or image files accepted</p>
-              <input 
-                type="file" 
-                className="hidden" 
-                accept=".pdf,.png,.jpg,.jpeg"
-                onChange={handleDenialLetterUpload}
-              />
-            </label>
+            <div className="space-y-3">
+              <label className="block p-8 text-center border-2 border-dashed border-slate-300 rounded-lg hover:border-[#1B3A5F] cursor-pointer transition-colors">
+                <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                <p className="text-slate-600 font-medium">Click to upload your VA decision letter</p>
+                <p className="text-sm text-slate-500 mt-1">PDF or image files accepted</p>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  onChange={handleDenialLetterUpload}
+                />
+              </label>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 border-t border-slate-200" />
+                <span className="text-xs text-slate-400">or</span>
+                <div className="flex-1 border-t border-slate-200" />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full border-amber-300 text-amber-700 hover:bg-amber-50"
+                onClick={downloadDemoLetter}
+                disabled={downloadingDemo}
+              >
+                {downloadingDemo
+                  ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  : <Download className="w-4 h-4 mr-2" />}
+                Download Demo Denial Letter (for testing)
+              </Button>
+              <p className="text-xs text-slate-400 text-center">
+                Downloads a realistic VA denial letter PDF — upload it above to test the full appeal flow
+              </p>
+            </div>
           )}
 
           {decisionData.denialLetterAnalysis && (
@@ -1531,18 +1576,16 @@ export default function AppealDecisionWizard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
-        <PageHeader title="Appeal Decision Wizard" />
+      <VeteranLayout>
         <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-slate-400" />
         </div>
-      </div>
+      </VeteranLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <PageHeader title="Appeal Decision Wizard" />
+    <VeteranLayout>
       
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Button 
@@ -1588,6 +1631,6 @@ export default function AppealDecisionWizard() {
           )}
         </div>
       </div>
-    </div>
+    </VeteranLayout>
   );
 }

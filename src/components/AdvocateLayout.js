@@ -100,6 +100,8 @@ function Sidebar({ collapsed, setCollapsed, milestoneCount = 0 }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [availability, setAvailability] = useState(true);
+  const [availabilityLoading, setAvailabilityLoading] = useState(true);
+  const [availabilityUpdating, setAvailabilityUpdating] = useState(false);
 
   useEffect(() => {
     loadAvailability();
@@ -107,20 +109,26 @@ function Sidebar({ collapsed, setCollapsed, milestoneCount = 0 }) {
 
   const loadAvailability = async () => {
     try {
+      setAvailabilityLoading(true);
       const res = await api.get('/peer-support/profile');
       setAvailability(res.data.is_available || false);
     } catch (error) {
       console.error('Failed to load availability:', error);
+    } finally {
+      setAvailabilityLoading(false);
     }
   };
 
   const handleAvailabilityChange = async (checked) => {
     try {
+      setAvailabilityUpdating(true);
       await api.put('/peer-support/profile', { is_available: checked });
       setAvailability(checked);
       toast.success(checked ? 'You are now available for advocacy' : 'You are now unavailable');
     } catch (error) {
       toast.error('Failed to update availability');
+    } finally {
+      setAvailabilityUpdating(false);
     }
   };
 
@@ -164,11 +172,20 @@ function Sidebar({ collapsed, setCollapsed, milestoneCount = 0 }) {
           </div>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-xs text-emerald-200">Available</span>
-            <Switch
-              checked={availability}
-              onCheckedChange={handleAvailabilityChange}
-              className="data-[state=checked]:bg-emerald-500"
-            />
+            {availabilityLoading || availabilityUpdating ? (
+              <div className="h-5 w-9 flex items-center justify-center">
+                <svg className="animate-spin h-4 w-4 text-emerald-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+              </div>
+            ) : (
+              <Switch
+                checked={availability}
+                onCheckedChange={handleAvailabilityChange}
+                className="data-[state=checked]:bg-emerald-500"
+              />
+            )}
           </div>
         </div>
       )}
@@ -225,6 +242,8 @@ function MobileSidebar({ milestoneCount = 0 }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [availability, setAvailability] = useState(true);
+  const [availabilityLoading, setAvailabilityLoading] = useState(true);
+  const [availabilityUpdating, setAvailabilityUpdating] = useState(false);
 
   useEffect(() => {
     loadAvailability();
@@ -232,20 +251,26 @@ function MobileSidebar({ milestoneCount = 0 }) {
 
   const loadAvailability = async () => {
     try {
+      setAvailabilityLoading(true);
       const res = await api.get('/peer-support/profile');
       setAvailability(res.data.is_available || false);
     } catch (error) {
       console.error('Failed to load availability:', error);
+    } finally {
+      setAvailabilityLoading(false);
     }
   };
 
   const handleAvailabilityChange = async (checked) => {
     try {
+      setAvailabilityUpdating(true);
       await api.put('/peer-support/profile', { is_available: checked });
       setAvailability(checked);
       toast.success(checked ? 'You are now available for advocacy' : 'You are now unavailable');
     } catch (error) {
       toast.error('Failed to update availability');
+    } finally {
+      setAvailabilityUpdating(false);
     }
   };
 
@@ -290,11 +315,20 @@ function MobileSidebar({ milestoneCount = 0 }) {
             </div>
             <div className="mt-3 flex items-center justify-between">
               <span className="text-xs text-emerald-200">Available for Advocacy</span>
-              <Switch
-                checked={availability}
-                onCheckedChange={handleAvailabilityChange}
-                className="data-[state=checked]:bg-emerald-500"
-              />
+              {availabilityLoading || availabilityUpdating ? (
+                <div className="h-5 w-9 flex items-center justify-center">
+                  <svg className="animate-spin h-4 w-4 text-emerald-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                </div>
+              ) : (
+                <Switch
+                  checked={availability}
+                  onCheckedChange={handleAvailabilityChange}
+                  className="data-[state=checked]:bg-emerald-500"
+                />
+              )}
             </div>
           </div>
 
@@ -392,17 +426,6 @@ export default function AdvocateLayout({ children }) {
           <div className="flex-1 flex items-center gap-4">
             <h1 className="text-lg font-semibold text-slate-900 lg:hidden">EarnedIT</h1>
           </div>
-
-          {milestoneCount > 0 && (
-            <div className="relative">
-              <Button variant="ghost" size="sm" className="relative" onClick={() => window.location.href = '/mentor'}>
-                <Bell className="h-5 w-5 text-slate-600" />
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-emerald-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                  {milestoneCount > 9 ? '9+' : milestoneCount}
-                </span>
-              </Button>
-            </div>
-          )}
 
           <NotificationCenter />
         </header>

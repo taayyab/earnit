@@ -98,7 +98,7 @@ export function AdvocateRatingModal({
         <CardHeader className="flex flex-row items-start justify-between">
           <div>
             <CardTitle>Rate Your Experience</CardTitle>
-            <CardDescription>How was your session with {advocateName}?</CardDescription>
+            <CardDescription>How has your experience been with {advocateName}?</CardDescription>
           </div>
           {onClose && (
             <Button variant="ghost" size="icon" onClick={onClose}>

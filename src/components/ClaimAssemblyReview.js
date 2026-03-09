@@ -114,10 +114,12 @@ export default function ClaimAssemblyReview({
 
   const getReadinessColor = (level) => {
     switch (level) {
-      case 'submission_ready': return 'bg-green-500';
-      case 'needs_minor_work': return 'bg-yellow-500';
-      case 'needs_significant_work': return 'bg-orange-500';
-      default: return 'bg-red-500';
+      case 'submission_ready':
+      case 'strong': return 'bg-green-500 text-white';
+      case 'needs_minor_work':
+      case 'moderate': return 'bg-amber-500 text-white';
+      case 'needs_significant_work': return 'bg-orange-500 text-white';
+      default: return 'bg-slate-400 text-white';
     }
   };
 
@@ -149,8 +151,8 @@ export default function ClaimAssemblyReview({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className={getReadinessColor(approvalReadiness?.readiness_level)}>
-              {approvalReadiness?.readiness_level?.replace(/_/g, ' ').toUpperCase() || 'PENDING'}
+            <Badge className={getReadinessColor(approvalReadiness?.readiness_level || approvalReadiness?.status)}>
+              {(approvalReadiness?.readiness_level || approvalReadiness?.status || 'pending').replace(/_/g, ' ').toUpperCase()}
             </Badge>
             <span className="text-sm text-muted-foreground">
               {approvalReadiness?.recommendation || 'Complete the review below.'}

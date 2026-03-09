@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
+import { getSocket } from '../lib/socket';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
@@ -22,9 +23,28 @@ export default function NotificationCenter() {
   useEffect(() => {
     if (!user) return;
     loadNotifications();
-    // Poll for new notifications every 30 seconds
+    // Poll for new notifications every 30 seconds (fallback)
     const interval = setInterval(loadNotifications, 30000);
     return () => clearInterval(interval);
+  }, [user]);
+
+  // Real-time: connect to socket and listen for new_notification events
+  useEffect(() => {
+    const userId = user?.id || user?.user_id;
+    if (!userId) return;
+    const socket = getSocket(userId);
+    socket.emit('join', userId);
+
+    const handleNewNotification = (notification) => {
+      setNotifications(prev => {
+        if (prev.some(n => n.notification_id === notification.notification_id)) return prev;
+        return [notification, ...prev];
+      });
+      setUnreadCount(prev => prev + 1);
+    };
+
+    socket.on('new_notification', handleNewNotification);
+    return () => { socket.off('new_notification', handleNewNotification); };
   }, [user]);
 
   const loadNotifications = async () => {

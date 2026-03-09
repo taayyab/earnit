@@ -80,10 +80,10 @@ const CATEGORY_ICONS = {
 const CATEGORY_COLORS = {
   housing: 'bg-blue-100 text-blue-700 border-blue-200',
   employment: 'bg-green-100 text-green-700 border-green-200',
-  mental_health: 'bg-blue-50 text-[#1B3A5F] border-blue-200',
+  mental_health: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   financial: 'bg-yellow-100 text-yellow-700 border-yellow-200',
   legal: 'bg-gray-100 text-gray-700 border-gray-200',
-  education: 'bg-blue-50 text-[#1B3A5F] border-blue-200',
+  education: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   healthcare: 'bg-red-100 text-red-700 border-red-200',
   family: 'bg-pink-100 text-pink-700 border-pink-200'
 };
@@ -109,7 +109,7 @@ const PRIORITY_CONFIG = {
 
 const STATUS_CONFIG = {
   new: { label: 'New', color: 'bg-blue-100 text-blue-700' },
-  assigned: { label: 'Assigned', color: 'bg-blue-50 text-[#1B3A5F]' },
+  assigned: { label: 'Assigned', color: 'bg-emerald-50 text-emerald-700' },
   in_progress: { label: 'In Progress', color: 'bg-amber-100 text-amber-700' },
   pending_partner: { label: 'Pending Partner', color: 'bg-orange-100 text-orange-700' },
   resolved: { label: 'Resolved', color: 'bg-green-100 text-green-700' },
@@ -170,33 +170,59 @@ function StatCard({ title, value, icon: Icon, color }) {
 
 function CrisisResourcesPanel() {
   return (
-    <Card className="border-red-200 bg-red-50">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm flex items-center gap-2 text-red-800">
-          <AlertTriangle className="h-4 w-4" />
-          Crisis Resources
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-2">
-          {CRISIS_RESOURCES.map((resource, i) => (
-            <div key={i} className="flex items-center justify-between p-2 bg-white rounded-lg border border-red-100">
-              <div>
-                <p className="text-sm font-medium text-slate-900">{resource.name}</p>
-                <p className="text-xs text-muted-foreground">{resource.description}</p>
-              </div>
-              <a
-                href={`tel:${resource.phone.replace(/[^0-9]/g, '')}`}
-                className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-full text-xs font-medium hover:bg-red-700 transition-colors"
-              >
-                <Phone className="h-3 w-3" />
-                {resource.phone}
-              </a>
-            </div>
-          ))}
+    <div className="rounded-2xl overflow-hidden border border-red-200 shadow-sm">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-red-600 to-red-700 px-4 py-3 flex items-center gap-2">
+        <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
+          <AlertTriangle className="h-4 w-4 text-white" />
         </div>
-      </CardContent>
-    </Card>
+        <div>
+          <p className="text-white font-semibold text-sm">Crisis Resources</p>
+          <p className="text-red-100 text-xs">Available 24/7 — act immediately if life is at risk</p>
+        </div>
+      </div>
+
+      {/* Resources */}
+      <div className="bg-red-50 p-3 space-y-2">
+        {CRISIS_RESOURCES.map((resource, i) => (
+          <div
+            key={i}
+            className={`flex items-center justify-between gap-3 p-3 rounded-xl border ${
+              resource.urgent
+                ? 'bg-white border-red-200 shadow-sm'
+                : 'bg-white/60 border-red-100'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${resource.urgent ? 'bg-red-500' : 'bg-orange-400'}`} />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-900 leading-tight">{resource.name}</p>
+                <p className="text-xs text-slate-500 mt-0.5 leading-tight">{resource.description}</p>
+              </div>
+            </div>
+            <a
+              href={`tel:${resource.phone.replace(/[^0-9+]/g, '')}`}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all flex-shrink-0 ${
+                resource.urgent
+                  ? 'bg-red-600 text-white hover:bg-red-700 shadow-sm'
+                  : 'bg-orange-500 text-white hover:bg-orange-600'
+              }`}
+            >
+              <Phone className="h-3 w-3" />
+              <span className="hidden sm:inline">{resource.phone}</span>
+              <span className="sm:hidden">Call</span>
+            </a>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer note */}
+      <div className="bg-red-100 px-4 py-2 border-t border-red-200">
+        <p className="text-xs text-red-700 text-center">
+          If a veteran is in immediate danger, call <strong>911</strong> first.
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -682,7 +708,7 @@ function ReviewWorkflowPanel({ caseData, onUpdate }) {
         <Button
           onClick={handleSubmitReview}
           disabled={submitting}
-          className="w-full bg-[#1B3A5F] hover:bg-[#2a4a6f]"
+          className="w-full bg-emerald-600 hover:bg-emerald-700"
         >
           {submitting ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />

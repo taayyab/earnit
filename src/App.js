@@ -81,6 +81,7 @@ const AdvocateMatching = lazyWithRetry(() => import('./pages/AdvocateMatching'))
 const IntakeQuestionnaire = lazyWithRetry(() => import('./pages/IntakeQuestionnaire'));
 const DocumentUpload = lazyWithRetry(() => import('./pages/DocumentUpload'));
 const ClaimDetail = lazyWithRetry(() => import('./pages/ClaimDetail'));
+const BackPayEstimationPage = lazyWithRetry(() => import('./pages/BackPayEstimationPage'));
 const MentorDashboard = lazyWithRetry(() => import('./pages/MentorDashboard'));
 const Messages = lazyWithRetry(() => import('./pages/Messages'));
 const AgentDashboard = lazyWithRetry(() => import('./pages/AgentDashboard'));
@@ -111,6 +112,10 @@ const CourseExample = lazyWithRetry(() => import('./pages/CourseExample'));
 const FormsLibrary = lazyWithRetry(() => import('./pages/FormsLibrary'));
 const DBQFormViewer = lazyWithRetry(() => import('./pages/DBQFormViewer'));
 const EvidenceLibrary = lazyWithRetry(() => import('./pages/EvidenceLibrary'));
+const ServiceHistoryPage = lazyWithRetry(() => import('./pages/ServiceHistoryPage'));
+const HealthRecordsPage  = lazyWithRetry(() => import('./pages/HealthRecordsPage'));
+const CommunityCarePage  = lazyWithRetry(() => import('./pages/CommunityCarePage'));
+const VAApiScenariosPage = lazyWithRetry(() => import('./pages/VAApiScenariosPage'));
 const TemplateEditor = lazyWithRetry(() => import('./pages/TemplateEditor'));
 const TermsOfService = lazyWithRetry(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazyWithRetry(() => import('./pages/legal/PrivacyPolicy'));
@@ -242,6 +247,26 @@ function RoleRedirect({ children }) {
   return children;
 }
 
+// Restrict access to advocate-only routes
+function AdvocateRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  if (!user) return <Navigate to="/login" replace />;
+  const advocateRoles = ['advocate', 'veteran_advocate', 'peer_mentor', 'peer_supporter'];
+  if (!advocateRoles.includes(user.role)) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+// Restrict /mentor to advocate roles only (veterans get redirected)
+function MentorRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  if (!user) return <Navigate to="/login" replace />;
+  const advocateRoles = ['advocate', 'veteran_advocate', 'peer_mentor', 'peer_supporter', 'claims_agent', 'va_attorney', 'vso_representative'];
+  if (!advocateRoles.includes(user.role)) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
 function App() {
   return (
     <ChunkErrorBoundary>
@@ -284,9 +309,9 @@ function App() {
             <Route path="/ssdi/:ssdiId/status-check" element={<PrivateRoute><SSDIApplicationDetail /></PrivateRoute>} />
             
             <Route path="/advocate/register" element={<VetAdvocateRegistration />} />
-            <Route path="/advocate/veterans" element={<PrivateRoute><MyVeterans /></PrivateRoute>} />
-            <Route path="/advocate/calendar" element={<PrivateRoute><AdvocateCalendar /></PrivateRoute>} />
-            <Route path="/advocate/cases" element={<PrivateRoute><SupportCases /></PrivateRoute>} />
+            <Route path="/advocate/veterans" element={<AdvocateRoute><MyVeterans /></AdvocateRoute>} />
+            <Route path="/advocate/calendar" element={<AdvocateRoute><AdvocateCalendar /></AdvocateRoute>} />
+            <Route path="/advocate/cases" element={<AdvocateRoute><SupportCases /></AdvocateRoute>} />
             <Route path="/onboard/:token" element={<VeteranIntakeForm />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/help" element={<FAQ />} />
@@ -315,6 +340,38 @@ function App() {
               element={
                 <PrivateRoute>
                   <EvidenceLibrary />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/service-history"
+              element={
+                <PrivateRoute>
+                  <ServiceHistoryPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/health-records"
+              element={
+                <PrivateRoute>
+                  <HealthRecordsPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/community-care"
+              element={
+                <PrivateRoute>
+                  <CommunityCarePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/va-api-scenarios"
+              element={
+                <PrivateRoute>
+                  <VAApiScenariosPage />
                 </PrivateRoute>
               }
             />
@@ -433,11 +490,15 @@ function App() {
               }
             />
             <Route
+              path="/back-pay-estimation/:claimId"
+              element={<PrivateRoute><BackPayEstimationPage /></PrivateRoute>}
+            />
+            <Route
               path="/mentor"
               element={
-                <PrivateRoute>
+                <MentorRoute>
                   <MentorDashboard />
-                </PrivateRoute>
+                </MentorRoute>
               }
             />
             <Route
@@ -542,11 +603,7 @@ function App() {
               path="/form/:claimId"
               element={
                 <PrivateRoute>
-                  <ClaimStageGuard minStage={CLAIM_STAGES.QA_REVIEW}>
-                    <RequireQAPass>
-                      <FormEditor />
-                    </RequireQAPass>
-                  </ClaimStageGuard>
+                  <FormEditor />
                 </PrivateRoute>
               }
             />

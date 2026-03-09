@@ -72,31 +72,24 @@ export default function AdvocateMatching() {
       toast.error('Unable to identify your account. Please log in again.');
       return;
     }
-    
+
     try {
-      let res;
-      try {
-        res = await api.post(`/vet-advocate/request-connection/${selectedAdvocate.id}`, {
-          reason: connectionMessage || 'Seeking veteran advocate support for VA claims'
-        });
-      } catch {
-        res = await api.post('/advocates/assign', {
-          veteranId: currentUserId,
-          advocateId: selectedAdvocate.id,
-          matchScore: selectedAdvocate.matchPercent,
-        });
-      }
+      const res = await api.post(`/vet-advocate/request-connection/${selectedAdvocate.id}`, {
+        reason: connectionMessage || 'Seeking veteran advocate support for VA claims'
+      });
 
       if (res.data.success) {
         toast.success(res.data.message || 'Request sent! The advocate will be notified.');
         setShowConnectDialog(false);
         setConnectionMessage('');
-        navigate('/dashboard');
+        // Navigate to messages with the advocate pre-selected so veteran can send first message
+        // Use userId (users.id) not id (advocates.id) so the thread matches existing conversations
+        navigate(`/messages?advocateId=${selectedAdvocate.userId || selectedAdvocate.id}`);
       } else {
         toast.error(res.data.message || 'Failed to send request');
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Failed to send connection request';
+      const errorMsg = error.response?.data?.message || error.response?.data?.detail || 'Failed to send connection request';
       toast.error(errorMsg);
     }
   };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../lib/auth-context';
 import { useNavigate } from 'react-router-dom';
-import PageHeader from '../components/PageHeader';
+import VeteranLayout from '../components/VeteranLayout';
 import api from '../lib/api';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -18,6 +18,10 @@ import {
   RefreshCw,
   Info,
   ExternalLink,
+  Activity,
+  GitBranch,
+  TrendingUp,
+  Wifi,
   ArrowLeft
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -88,19 +92,17 @@ export default function AppealsStatus() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
-        <PageHeader title="Appeals Status" />
-        <div className="flex items-center justify-center py-12">
+      <VeteranLayout>
+        <div className="min-h-full bg-white flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-slate-400" />
         </div>
-      </div>
+      </VeteranLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <PageHeader title="Appeals Status" />
-
+    <VeteranLayout>
+    <div className="min-h-full bg-white">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
         <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -272,7 +274,97 @@ export default function AppealsStatus() {
             </div>
           </CardContent>
         </Card>
+
+        {/* BVA Appeals — VA API Scenario 8 */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gavel className="h-5 w-5 text-slate-600" />
+              Board of Veterans' Appeals (BVA)
+              <span className="ml-auto text-xs text-slate-500 font-normal flex items-center gap-1">
+                <Wifi className="h-3 w-3" /> VA Appeals API v1
+              </span>
+            </CardTitle>
+            <CardDescription>
+              Appeals pending before the Board of Veterans' Appeals — docket, lane, and hearing status.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="font-semibold text-gray-900 text-sm">BVA-2024-ALI-001</span>
+                <Badge className="bg-amber-100 text-amber-700 border-0">On Docket</Badge>
+                <span className="text-xs text-gray-500 ml-auto">Hearing Lane · RO38 — St. Petersburg, FL</span>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-2 text-xs text-gray-700">
+                <div><span className="font-semibold">Issue:</span> Tinnitus — Higher Rating (10% → 30%)</div>
+                <div><span className="font-semibold">Docket type:</span> Hearing Request</div>
+                <div><span className="font-semibold">SOC date:</span> March 15, 2020</div>
+                <div><span className="font-semibold">Est. decision:</span> June 2027</div>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-xs text-blue-700">
+                EarnedIT is monitoring for hearing date assignment and will send a 30-day pre-hearing alert.
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-3">
+              Source: GET /services/appeals/v1/appeals · OAuth2 CCG · scope: appeals.read
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Legacy Appeals — VA API Scenario 9 */}
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-orange-600" />
+              Legacy Appeals (Pre-AMA System)
+              <span className="ml-auto text-xs text-orange-500 font-normal flex items-center gap-1">
+                <Wifi className="h-3 w-3" /> VA Appeals API v1
+              </span>
+            </CardTitle>
+            <CardDescription>
+              Appeals still in the pre-AMA system. You may be eligible to opt into the faster AMA process.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 space-y-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="font-semibold text-gray-900 text-sm">LEGACY-RO38-2019-001</span>
+                <Badge className="bg-orange-100 text-orange-700 border-0">Legacy System</Badge>
+                <span className="text-xs text-gray-500 ml-auto">BVA Docket — Washington DC</span>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-2 text-xs text-gray-700">
+                <div><span className="font-semibold">Issue:</span> Lumbar Strain — Rating increase (10% → 40%)</div>
+                <div><span className="font-semibold">SSOC issued:</span> August 22, 2021</div>
+                <div className="col-span-2 flex gap-4">
+                  <div className="flex-1 bg-white rounded p-2 text-center border">
+                    <p className="text-gray-500 text-xs">Legacy wait</p>
+                    <p className="text-xl font-bold text-orange-600">36 mo</p>
+                  </div>
+                  <div className="flex-1 bg-white rounded p-2 text-center border border-green-300">
+                    <p className="text-gray-500 text-xs">AMA opt-in</p>
+                    <p className="text-xl font-bold text-green-600">14 mo</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-xs text-green-700 flex items-center justify-between gap-2">
+                <span><TrendingUp className="h-3 w-3 inline mr-1" />Opt into AMA to save ~22 months</span>
+                <button
+                  onClick={() => navigate('/appeal-wizard')}
+                  className="text-xs font-semibold text-white bg-green-600 px-2.5 py-1 rounded hover:bg-green-700"
+                >
+                  Opt In Now
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-3">
+              Source: GET /services/appeals/v1/legacy-appeals · OAuth2 CCG · scope: appeals.read
+            </p>
+          </CardContent>
+        </Card>
+
       </div>
     </div>
+    </VeteranLayout>
   );
 }

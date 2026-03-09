@@ -52,12 +52,12 @@ const CLAIM_STATUSES = {
   submitted: { label: 'Submitted', color: 'bg-blue-100 text-blue-700', icon: Send },
   approved: { label: 'Approved', color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2 },
   denied: { label: 'Denied', color: 'bg-red-100 text-red-700', icon: AlertCircle },
-  pending: { label: 'Pending', color: 'bg-blue-50 text-[#1B3A5F]', icon: Loader2 },
+  pending: { label: 'Pending', color: 'bg-emerald-50 text-emerald-700', icon: Loader2 },
 };
 
 const SUPPORT_TIERS = {
   peer_buddy: { label: 'Peer Buddy', color: 'bg-sky-100 text-sky-700 border-sky-200' },
-  claims_guide: { label: 'Claims Guide', color: 'bg-blue-50 text-[#1B3A5F] border-blue-200' },
+  claims_guide: { label: 'Claims Guide', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   full_advocate: { label: 'Full Advocate', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
 };
 
@@ -88,7 +88,7 @@ function JourneyProgressMini({ currentStep, className = '' }) {
           return (
             <div 
               key={step.id} 
-              className={`flex flex-col items-center ${isComplete ? 'text-emerald-600' : 'text-slate-300'}`}
+              className={`flex flex-col items-center ${isComplete ? 'text-emerald-700' : 'text-slate-300'}`}
               title={step.title}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -117,60 +117,69 @@ function VeteranCard({ veteran, onViewDetails, onMessage, onSchedule }) {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-emerald-500">
+    <Card className="hover:shadow-md transition-all duration-200 border border-slate-200 hover:border-slate-300">
       <CardContent className="p-5">
-        <div className="flex items-start gap-4">
-          <Avatar className="h-12 w-12 bg-emerald-100">
-            <AvatarFallback className="bg-emerald-100 text-emerald-700 font-semibold text-lg">
+        <div className="flex items-start gap-3 mb-4">
+          <Avatar className="h-11 w-11 flex-shrink-0">
+            <AvatarFallback className="bg-emerald-600/10 text-emerald-700 font-bold text-base">
               {veteran.name?.charAt(0) || 'V'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h3 className="font-semibold text-slate-900 truncate">{veteran.name}</h3>
-              <Badge variant="outline" className={tier.color}>
-                {tier.label}
-              </Badge>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-slate-900 truncate text-sm">{veteran.name}</h3>
             </div>
-            <div className="flex items-center gap-2 mb-3">
-              <Badge className={`${status.color} font-normal`}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge className={`${status.color} font-normal text-xs`}>
                 <StatusIcon className="h-3 w-3 mr-1" />
                 {status.label}
               </Badge>
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                Last contact: {formatDate(veteran.last_contact)}
-              </span>
+              <Badge variant="outline" className={`${tier.color} text-xs`}>
+                {tier.label}
+              </Badge>
             </div>
-            <JourneyProgressMini currentStep={veteran.journey_step || 'documents'} />
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+        {/* Claim info row */}
+        <div className="flex items-center justify-between text-xs text-slate-500 mb-3 px-1">
+          <span className="flex items-center gap-1">
+            <FileText className="h-3 w-3" />
+            {veteran.claim_id ? `Claim #${veteran.claim_id.slice(0, 6).toUpperCase()}` : 'No active claim'}
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {formatDate(veteran.last_contact)}
+          </span>
+        </div>
+
+        <JourneyProgressMini currentStep={veteran.journey_step || 'documents'} />
+
+        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300"
+            className="flex-1 text-xs hover:bg-gray-50 hover:border-gray-300"
             onClick={() => onMessage(veteran)}
           >
-            <MessageSquare className="h-4 w-4 mr-1.5" />
+            <MessageSquare className="h-3.5 w-3.5 mr-1" />
             Message
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300"
+            className="flex-1 text-xs hover:bg-gray-50 hover:border-gray-300"
             onClick={() => onSchedule(veteran)}
           >
-            <Calendar className="h-4 w-4 mr-1.5" />
+            <Calendar className="h-3.5 w-3.5 mr-1" />
             Schedule
           </Button>
           <Button
             size="sm"
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+            className="flex-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
             onClick={() => onViewDetails(veteran)}
           >
-            <Eye className="h-4 w-4 mr-1.5" />
+            <Eye className="h-3.5 w-3.5 mr-1" />
             Details
           </Button>
         </div>
@@ -189,71 +198,98 @@ function VeteranDetailsPanel({ veteran, open, onClose, onStartAssessment }) {
   const formatDate = (dateString) => {
     if (!dateString) return 'Not available';
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      year: 'numeric', month: 'short', day: 'numeric'
     });
   };
 
+  const stepIndex = JOURNEY_STEPS.findIndex(s => s.id === veteran.journey_step);
+  const currentStepIndex = stepIndex >= 0 ? stepIndex : 0;
+
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader className="pb-4">
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto p-0">
+        {/* Header */}
+        <div className="bg-emerald-600 text-white px-6 py-5">
           <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16 bg-emerald-100">
-              <AvatarFallback className="bg-emerald-100 text-emerald-700 font-bold text-2xl">
+            <Avatar className="h-14 w-14 flex-shrink-0">
+              <AvatarFallback className="bg-white/20 text-white font-bold text-xl">
                 {veteran.name?.charAt(0) || 'V'}
               </AvatarFallback>
             </Avatar>
             <div>
-              <SheetTitle className="text-xl">{veteran.name}</SheetTitle>
-              <SheetDescription>
-                <Badge variant="outline" className={tier.color}>
+              <h2 className="text-lg font-bold">{veteran.name}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge className={`${status.color} border text-xs`}>
+                  <StatusIcon className="h-3 w-3 mr-1" />
+                  {status.label}
+                </Badge>
+                <Badge variant="outline" className="border-white/30 text-white/80 text-xs bg-white/10">
                   {tier.label}
                 </Badge>
-              </SheetDescription>
+              </div>
             </div>
           </div>
-        </SheetHeader>
+        </div>
 
-        <div className="space-y-6 py-4">
-          <div className="bg-slate-50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-slate-900 mb-3 flex items-center gap-2">
-              <Shield className="h-4 w-4 text-emerald-600" />
-              Claim Status
-            </h4>
-            <div className="flex items-center gap-3">
-              <Badge className={`${status.color} text-sm px-3 py-1`}>
-                <StatusIcon className="h-4 w-4 mr-1.5" />
-                {status.label}
-              </Badge>
-            </div>
+        <div className="p-5 space-y-5">
+          {/* Claim Details */}
+          <div className="bg-slate-50 rounded-xl border p-4 space-y-3">
+            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Current Claim</h4>
+            {veteran.claim_id ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Claim ID</span>
+                  <code className="text-xs font-mono bg-white border border-slate-200 px-2 py-0.5 rounded">
+                    #{veteran.claim_id.slice(0, 8).toUpperCase()}
+                  </code>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Status</span>
+                  <Badge className={`${status.color} text-xs`}>
+                    <StatusIcon className="h-3 w-3 mr-1" />
+                    {status.label}
+                  </Badge>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full mt-1 text-xs hover:bg-gray-50"
+                  onClick={() => window.location.href = `/claim/${veteran.claim_id}`}
+                >
+                  <FileText className="h-3.5 w-3.5 mr-1.5" />
+                  View Full Claim Details
+                </Button>
+              </>
+            ) : (
+              <p className="text-sm text-slate-400 italic">No active claim assigned</p>
+            )}
           </div>
 
-          <div className="bg-slate-50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-slate-900 mb-3">Journey Progress</h4>
-            <div className="space-y-3">
+          {/* Journey Progress */}
+          <div className="bg-slate-50 rounded-xl border p-4">
+            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Claim Journey</h4>
+            <div className="space-y-2">
               {JOURNEY_STEPS.map((step, index) => {
-                const stepIndex = JOURNEY_STEPS.findIndex(s => s.id === veteran.journey_step);
-                const currentIndex = stepIndex >= 0 ? stepIndex : 0;
-                const isComplete = index < currentIndex;
-                const isCurrent = index === currentIndex;
+                const isComplete = index < currentStepIndex;
+                const isCurrent = index === currentStepIndex;
                 const Icon = step.icon;
-                
                 return (
                   <div key={step.id} className="flex items-center gap-3">
-                    <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                      isComplete ? 'bg-emerald-500 text-white' :
-                      isCurrent ? 'bg-emerald-100 text-emerald-700 ring-2 ring-emerald-500' :
+                    <div className={`h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      isComplete ? 'bg-emerald-600 text-white' :
+                      isCurrent ? 'bg-emerald-50 text-emerald-700 ring-2 ring-emerald-600' :
                       'bg-slate-200 text-slate-400'
                     }`}>
-                      {isComplete ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                      {isComplete ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Icon className="h-3.5 w-3.5" />}
                     </div>
-                    <span className={`text-sm ${isCurrent ? 'font-medium text-slate-900' : 'text-slate-600'}`}>
+                    <span className={`text-sm flex-1 ${isCurrent ? 'font-semibold text-slate-900' : 'text-slate-500'}`}>
                       {step.title}
                     </span>
                     {isCurrent && (
-                      <Badge className="bg-emerald-100 text-emerald-700 ml-auto">Current</Badge>
+                      <span className="text-xs px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full font-medium">Current</span>
+                    )}
+                    {isComplete && (
+                      <span className="text-xs text-slate-400">Done</span>
                     )}
                   </div>
                 );
@@ -261,73 +297,53 @@ function VeteranDetailsPanel({ veteran, open, onClose, onStartAssessment }) {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-slate-900">Assignment Details</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Assigned Date</p>
-                <p className="font-medium">{formatDate(veteran.assigned_at)}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Last Contact</p>
-                <p className="font-medium">{formatDate(veteran.last_contact)}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Support Tier</p>
-                <p className="font-medium capitalize">{veteran.tier?.replace('_', ' ') || 'Peer Buddy'}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Status</p>
-                <p className="font-medium capitalize">{veteran.status || 'Active'}</p>
-              </div>
+          {/* Assignment info */}
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="bg-slate-50 rounded-lg border p-3">
+              <p className="text-xs text-slate-400 mb-0.5">Assigned</p>
+              <p className="font-medium text-slate-800 text-xs">{formatDate(veteran.assigned_at)}</p>
+            </div>
+            <div className="bg-slate-50 rounded-lg border p-3">
+              <p className="text-xs text-slate-400 mb-0.5">Last Contact</p>
+              <p className="font-medium text-slate-800 text-xs">{formatDate(veteran.last_contact)}</p>
+            </div>
+            <div className="bg-slate-50 rounded-lg border p-3">
+              <p className="text-xs text-slate-400 mb-0.5">Support Tier</p>
+              <p className="font-medium text-slate-800 text-xs capitalize">{veteran.tier?.replace(/_/g, ' ') || 'Peer Buddy'}</p>
+            </div>
+            <div className="bg-slate-50 rounded-lg border p-3">
+              <p className="text-xs text-slate-400 mb-0.5">Assignment</p>
+              <p className="font-medium text-slate-800 text-xs capitalize">{veteran.status || 'Active'}</p>
             </div>
           </div>
 
-          {veteran.consent && (
-            <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-              <h4 className="text-sm font-medium text-amber-900 mb-2 flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Consent Permissions
-              </h4>
-              <ul className="text-sm text-amber-800 space-y-1">
-                {veteran.consent.claim_status && <li>✓ View claim status</li>}
-                {veteran.consent.submission_needs && <li>✓ View submission needs</li>}
-              </ul>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2 pt-4 border-t">
-            <Button 
-              className="w-full bg-emerald-600 hover:bg-emerald-700"
+          {/* Actions */}
+          <div className="flex flex-col gap-2 pt-1">
+            <Button
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={() => window.location.href = `/messages?veteran=${veteran.id}`}
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Send Message
             </Button>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => window.location.href = `/advocate/calendar?schedule=${veteran.id}`}
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Schedule Meeting
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => window.location.href = `/claim/${veteran.claim_id || veteran.id}`}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              View Full Claim
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300"
-              onClick={() => onStartAssessment(veteran)}
-            >
-              <ClipboardCheck className="h-4 w-4 mr-2" />
-              Complete Assessment
-            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                className="hover:bg-gray-50 hover:border-gray-300 text-sm"
+                onClick={() => window.location.href = `/advocate/calendar?schedule=${veteran.id}`}
+              >
+                <Calendar className="h-4 w-4 mr-1.5" />
+                Schedule
+              </Button>
+              <Button
+                variant="outline"
+                className="hover:bg-gray-50 hover:border-gray-300 text-sm"
+                onClick={() => onStartAssessment(veteran)}
+              >
+                <ClipboardCheck className="h-4 w-4 mr-1.5" />
+                Assessment
+              </Button>
+            </div>
           </div>
         </div>
       </SheetContent>

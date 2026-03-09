@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
+import { useAuth } from '../lib/auth-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
@@ -52,6 +53,11 @@ const FREQUENCIES = [
 ];
 
 export default function EngagementPreferences({ onSaved }) {
+  const { user } = useAuth();
+  const isAdvocate = ['advocate', 'veteran_advocate', 'peer_mentor', 'peer_supporter'].includes(user?.role);
+  const saveBtnClass = isAdvocate
+    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+    : 'bg-[#1B3A5F] hover:bg-[#2C5282] text-white';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [preferences, setPreferences] = useState({
@@ -277,7 +283,7 @@ export default function EngagementPreferences({ onSaved }) {
         </CardContent>
       </Card>
 
-      <Button onClick={handleSave} disabled={saving} className="w-full">
+      <Button onClick={handleSave} disabled={saving} className={`w-full ${saveBtnClass}`}>
         {saving ? 'Saving...' : 'Save Preferences'}
       </Button>
     </div>

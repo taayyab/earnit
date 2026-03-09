@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import IDmeFlowModal from '../components/IDmeFlowModal';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context';
 import { Button } from '../components/ui/button';
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { useCelebration } from '../components/Celebration';
 import { animateError, animateSuccess } from '../lib/uxFeedback';
-import { Shield, AlertCircle, CheckCircle2, Users, Briefcase, UserCheck, User, ChevronLeft, ChevronRight, Clock, Upload, Scale, FileCheck } from 'lucide-react';
+import { Shield, AlertCircle, CheckCircle2, Users, Briefcase, UserCheck, User, ChevronLeft, ChevronRight, Clock, Upload, Scale, FileCheck, Eye, EyeOff } from 'lucide-react';
 import logoImage from '../assets/logo.webp';
 import { toast } from 'sonner';
 import api from '../lib/api';
@@ -113,10 +114,28 @@ const ROLE_OPTIONS = [
     icon: User
   },
   {
+    id: 'advocate',
+    title: "I'm a Veteran Advocate",
+    description: 'Support fellow veterans through peer-to-peer guidance',
+    icon: UserCheck
+  },
+  {
     id: 'claims_agent',
     title: "I'm a Claims Agent",
     description: 'Provide professional representation services to veterans',
     icon: Briefcase
+  },
+  {
+    id: 'partner_admin',
+    title: "I'm a VSO / Partner Admin",
+    description: 'Manage your organization and oversee veteran support programs',
+    icon: Scale
+  },
+  {
+    id: 'provider',
+    title: "I'm a Community Provider",
+    description: 'Deliver medical evidence and wraparound services to veterans',
+    icon: Shield
   }
 ];
 
@@ -137,7 +156,10 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [credentialsSubmitted, setCredentialsSubmitted] = useState(false);
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showIdmeVerify, setShowIdmeVerify] = useState(false);
+
   const [accreditationType, setAccreditationType] = useState('');
   const [ogcNumber, setOgcNumber] = useState('');
   const [barNumber, setBarNumber] = useState('');
@@ -157,6 +179,7 @@ export default function Register() {
   useEffect(() => {
     if (error && errorRef.current) {
       animateError(errorRef.current);
+      errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [error]);
 
@@ -169,7 +192,8 @@ export default function Register() {
   const selectedOption = REPRESENTATION_OPTIONS.find(opt => opt.id === formData.representation_mode);
   const requiresCredentialsStep = selectedOption?.requiresCredentials === true;
   const isClaimsAgent = userRole === 'claims_agent';
-  const totalSteps = isClaimsAgent ? 3 : (requiresCredentialsStep ? 3 : 2);
+  const isVeteran = userRole === 'veteran';
+  const totalSteps = isClaimsAgent ? 3 : (requiresCredentialsStep ? 4 : isVeteran ? 3 : 2);
 
   const handleChange = (e) => {
     setFormData({
@@ -333,8 +357,6 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await api.get('/csrf-token');
-      
       const registrationData = {
         email: formData.email,
         password: formData.password,
@@ -344,22 +366,32 @@ export default function Register() {
         representation_mode: userRole === 'veteran' ? formData.representation_mode : null,
         agent_type: userRole === 'claims_agent' ? agentType : null
       };
-      
+
       await registerUser(registrationData);
-      
-      setSuccess(true);
-      celebrate('profile_complete', `Welcome aboard, ${formData.first_name}! Your account is ready.`);
-      
-      const redirectPath = userRole === 'claims_agent' ? '/agent/onboarding' : '/document-onboarding';
-      setTimeout(() => {
-        navigate(redirectPath);
-      }, 3500);
-      
+
+      if (userRole === 'veteran') {
+        // Veterans must verify identity with ID.me before accessing the dashboard
+        setLoading(false);
+        setShowIdmeVerify(true);
+      } else {
+        setSuccess(true);
+        celebrate('profile_complete', `Welcome aboard, ${formData.first_name}! Your account is ready.`);
+        const redirectPath = userRole === 'claims_agent' ? '/agent/onboarding' : '/dashboard';
+        setTimeout(() => navigate(redirectPath), 3500);
+      }
+
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+      setError(err.response?.data?.error?.message || err.response?.data?.detail || 'Registration failed. Please try again.');
       setLoading(false);
     }
+  };
+
+  const handleVeteranVerified = () => {
+    setShowIdmeVerify(false);
+    setSuccess(true);
+    celebrate('profile_complete', `Welcome, ${formData.first_name}! Your veteran status is confirmed.`);
+    setTimeout(() => navigate('/document-onboarding'), 2500);
   };
 
   const handleCredentialsSubmit = async (e) => {
@@ -374,8 +406,6 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await api.get('/csrf-token');
-      
       const registrationData = {
         email: formData.email,
         password: formData.password,
@@ -385,53 +415,73 @@ export default function Register() {
         representation_mode: userRole === 'veteran' ? formData.representation_mode : null,
         agent_type: userRole === 'claims_agent' ? agentType : null
       };
-      
+
       await registerUser(registrationData);
 
       await submitAccreditation();
-      
-      setSuccess(true);
-      celebrate('profile_complete', `Welcome aboard, ${formData.first_name}! Your credentials are pending verification.`);
-      
-      const redirectPath = userRole === 'claims_agent' ? '/agent/onboarding' : '/document-onboarding';
-      setTimeout(() => {
-        navigate(redirectPath);
-      }, 3500);
+
+      if (userRole === 'veteran') {
+        setLoading(false);
+        setShowIdmeVerify(true);
+      } else {
+        setSuccess(true);
+        celebrate('profile_complete', `Welcome aboard, ${formData.first_name}! Your credentials are pending verification.`);
+        const redirectPath = userRole === 'claims_agent' ? '/agent/onboarding' : '/dashboard';
+        setTimeout(() => navigate(redirectPath), 3500);
+      }
       
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+      setError(err.response?.data?.error?.message || err.response?.data?.detail || 'Registration failed. Please try again.');
       setLoading(false);
     }
   };
 
   const renderStepIndicator = () => {
-    const step2Label = isClaimsAgent ? 'Agent Type' : 'Representation';
+    const step2Label = isClaimsAgent ? 'Agent Type' : 'Role';
+    // Build steps array dynamically
+    const indicatorSteps = [{ label: 'Account Info' }, { label: step2Label }];
+    if (requiresCredentialsStep) indicatorSteps.push({ label: 'Credentials' });
+    if (isVeteran) indicatorSteps.push({ label: 'Verify ID', isVerify: true });
+    if (isClaimsAgent) indicatorSteps.push({ label: 'Credentials' });
+
     return (
-      <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center justify-center mb-10">
         <div className="flex items-center gap-2">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 1 ? 'bg-[hsl(var(--accent))] text-white' : 'bg-gray-200 text-gray-500'}`}>
-            1
-          </div>
-          <span className={`text-sm font-medium ${step >= 1 ? 'text-[#1B3A5F]' : 'text-gray-400'}`}>Account Info</span>
-          <div className="w-12 h-0.5 bg-gray-200 mx-2">
-            <div className={`h-full ${step >= 2 ? 'bg-[hsl(var(--accent))]' : 'bg-gray-200'}`} style={{ width: step >= 2 ? '100%' : '0%' }}></div>
-          </div>
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 2 ? 'bg-[hsl(var(--accent))] text-white' : 'bg-gray-200 text-gray-500'}`}>
-            2
-          </div>
-          <span className={`text-sm font-medium ${step >= 2 ? 'text-[#1B3A5F]' : 'text-gray-400'}`}>{step2Label}</span>
-          {totalSteps === 3 && (
-            <>
-              <div className="w-12 h-0.5 bg-gray-200 mx-2">
-                <div className={`h-full ${step >= 3 ? 'bg-[hsl(var(--accent))]' : 'bg-gray-200'}`} style={{ width: step >= 3 ? '100%' : '0%' }}></div>
-              </div>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 3 ? 'bg-[hsl(var(--accent))] text-white' : 'bg-gray-200 text-gray-500'}`}>
-                3
-              </div>
-              <span className={`text-sm font-medium ${step >= 3 ? 'text-[#1B3A5F]' : 'text-gray-400'}`}>Credentials</span>
-            </>
-          )}
+          {indicatorSteps.map((s, i) => {
+            const stepNum = i + 1;
+            const isActive = step >= stepNum;
+            const isDone = step > stepNum || (s.isVerify && showIdmeVerify);
+            return (
+              <React.Fragment key={i}>
+                {i > 0 && (
+                  <div className="w-12 h-0.5 mb-4 bg-gray-200 relative">
+                    <div className="absolute inset-0 bg-[#DC2626] transition-all duration-300" style={{ width: isActive ? '100%' : '0%' }} />
+                  </div>
+                )}
+                <div className="flex flex-col items-center gap-1">
+                  <div className={`flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold shadow-sm transition-all ${
+                    s.isVerify
+                      ? showIdmeVerify || success
+                        ? 'bg-[#DC2626] text-white'
+                        : isActive
+                        ? 'bg-[#DC2626]/30 text-[#DC2626] border-2 border-[#DC2626]'
+                        : 'bg-gray-200 text-gray-400'
+                      : isActive
+                      ? 'bg-[#DC2626] text-white'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}>
+                    {isDone && !s.isVerify
+                      ? <CheckCircle2 className="h-5 w-5" />
+                      : s.isVerify
+                      ? <Shield className="h-4 w-4" />
+                      : stepNum}
+                  </div>
+                  <span className={`text-xs font-medium whitespace-nowrap ${isActive ? 'text-[#1B3A5F]' : 'text-gray-400'}`}>{s.label}</span>
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
     );
@@ -688,35 +738,57 @@ export default function Register() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="At least 8 characters"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      autoComplete="new-password"
-                      data-testid="password-input"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="At least 8 characters"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                        autoComplete="new-password"
+                        data-testid="password-input"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm_password">Confirm Password</Label>
-                    <Input
-                      id="confirm_password"
-                      name="confirm_password"
-                      type="password"
-                      placeholder="Confirm your password"
-                      value={formData.confirm_password}
-                      onChange={handleChange}
-                      required
-                      autoComplete="new-password"
-                      data-testid="confirm-password-input"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="confirm_password"
+                        name="confirm_password"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Confirm your password"
+                        value={formData.confirm_password}
+                        onChange={handleChange}
+                        required
+                        autoComplete="new-password"
+                        data-testid="confirm-password-input"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                        tabIndex={-1}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-[hsl(var(--accent))] hover:bg-[#8F1B29]"
+                    className="w-full bg-[#DC2626] hover:bg-[#B91C1C]"
                     disabled={!canProceedToStep2()}
                     data-testid="next-step-button"
                   >
@@ -742,13 +814,19 @@ export default function Register() {
           )}
 
           {step === 2 && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-[#1B3A5F]">
-                  {!userRole ? 'Tell Us About Yourself' : (userRole === 'veteran' ? 'Choose Your Representation' : 'Select Your Agent Type')}
+                <h2 className="text-3xl font-bold text-[#1B3A5F] mb-2">
+                  {!userRole ? 'Tell Us About Yourself'
+                    : userRole === 'veteran' ? 'Choose Your Representation'
+                    : userRole === 'claims_agent' ? 'Select Your Agent Type'
+                    : 'Almost Done!'}
                 </h2>
-                <p className="text-muted-foreground mt-2">
-                  {!userRole ? 'Select the option that best describes you' : (userRole === 'veteran' ? "Select how you'd like to manage your VA disability claim" : 'Choose the type of accreditation you hold')}
+                <p className="text-slate-500 text-base">
+                  {!userRole ? 'Select the role that best describes you to personalize your experience'
+                    : userRole === 'veteran' ? "Select how you'd like to manage your VA disability claim"
+                    : userRole === 'claims_agent' ? 'Choose the type of accreditation you hold'
+                    : 'Click Create Account to complete your registration'}
                 </p>
               </div>
 
@@ -763,24 +841,23 @@ export default function Register() {
                 <Alert ref={successRef} className="mb-4 border-[hsl(var(--success))] bg-green-50 max-w-md mx-auto" data-testid="register-success">
                   <CheckCircle2 className="h-4 w-4 text-[hsl(var(--success))]" />
                   <AlertDescription>
-                    Account created! {userRole === 'claims_agent' ? 'Taking you to agent onboarding...' : 'Taking you to upload your documents...'}
+                    Account created! {userRole === 'claims_agent' ? 'Taking you to agent onboarding...' : userRole === 'veteran' ? 'Taking you to upload your documents...' : 'Taking you to your dashboard...'}
                   </AlertDescription>
                 </Alert>
               )}
 
               {!userRole && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
                   {ROLE_OPTIONS.map((option) => {
                     const IconComponent = option.icon;
                     const isSelected = userRole === option.id;
-                    
                     return (
-                      <Card 
+                      <div
                         key={option.id}
-                        className={`cursor-pointer transition-all hover:shadow-lg ${
-                          isSelected 
-                            ? 'ring-2 ring-[hsl(var(--accent))] border-[hsl(var(--accent))]' 
-                            : 'hover:border-[hsl(var(--accent))]/50'
+                        className={`relative cursor-pointer rounded-xl border-2 transition-all duration-200 overflow-hidden group focus:outline-none ${
+                          isSelected
+                            ? 'border-[#DC2626] bg-red-50/40 shadow-md'
+                            : 'border-slate-200 bg-white hover:border-[#1B3A5F]/30 hover:shadow-sm'
                         }`}
                         onClick={() => {
                           setUserRole(option.id);
@@ -789,19 +866,28 @@ export default function Register() {
                           setAcknowledgment(false);
                         }}
                         data-testid={`role-${option.id}`}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && setUserRole(option.id)}
                       >
-                        <CardHeader className="pb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-3 rounded-lg ${isSelected ? 'bg-[hsl(var(--accent))]/10' : 'bg-gray-100'}`}>
-                              <IconComponent className={`h-8 w-8 ${isSelected ? 'text-[hsl(var(--accent))]' : 'text-gray-600'}`} />
+                        {/* Theme accent bar */}
+                        <div className={`h-1 w-full ${isSelected ? 'bg-[#DC2626]' : 'bg-[#1B3A5F]'}`} />
+
+                        <div className="p-5">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className={`p-3 rounded-lg ${isSelected ? 'bg-[#DC2626]/10 text-[#DC2626]' : 'bg-[#1B3A5F]/8 text-[#1B3A5F]'}`}>
+                              <IconComponent className="h-6 w-6" />
                             </div>
-                            <div>
-                              <CardTitle className="text-lg">{option.title}</CardTitle>
-                              <CardDescription className="mt-1">{option.description}</CardDescription>
-                            </div>
+                            {isSelected && (
+                              <div className="w-6 h-6 rounded-full bg-[#DC2626] flex items-center justify-center shadow-sm">
+                                <CheckCircle2 className="h-4 w-4 text-white" />
+                              </div>
+                            )}
                           </div>
-                        </CardHeader>
-                      </Card>
+                          <h3 className={`font-semibold text-[15px] mb-1 leading-snug ${isSelected ? 'text-[#DC2626]' : 'text-slate-900'}`}>{option.title}</h3>
+                          <p className="text-sm text-slate-500 leading-relaxed">{option.description}</p>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
@@ -893,6 +979,30 @@ export default function Register() {
                 </>
               )}
 
+              {userRole && userRole !== 'veteran' && userRole !== 'claims_agent' && (
+                <div className="max-w-md mx-auto text-center py-6 space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="h-8 w-8 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-800">
+                      {ROLE_OPTIONS.find(r => r.id === userRole)?.title}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {ROLE_OPTIONS.find(r => r.id === userRole)?.description}
+                    </p>
+                  </div>
+                  {isVeteran ? (
+                    <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                      <Shield className="h-4 w-4 text-[#DC2626] flex-shrink-0" />
+                      <p className="text-xs text-[#DC2626] font-medium">Next: You'll verify your veteran status with ID.me before accessing your dashboard.</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Click "Create Account" to complete your registration.</p>
+                  )}
+                </div>
+              )}
+
               {userRole === 'claims_agent' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
                   {ACCREDITATION_TYPES.map((type) => {
@@ -953,12 +1063,12 @@ export default function Register() {
                 </Button>
                 <Button
                   type="button"
-                  className="bg-[hsl(var(--accent))] hover:bg-[#8F1B29]"
+                  className="bg-[#DC2626] hover:bg-[#B91C1C]"
                   disabled={!userRole || !canProceedToStep3() || loading || success}
                   onClick={handleStep2Next}
                   data-testid="register-submit-button"
                 >
-                  {loading ? 'Creating Account...' : success ? 'Account Created!' : (isClaimsAgent || requiresCredentialsStep) ? 'Continue' : 'Create Account'}
+                  {loading ? 'Creating Account...' : success ? 'Account Created!' : (isClaimsAgent || requiresCredentialsStep) ? 'Continue' : isVeteran ? 'Create Account & Verify Identity' : 'Create Account'}
                   {!loading && !success && <ChevronRight className="ml-2 h-4 w-4" />}
                 </Button>
               </div>
@@ -1080,7 +1190,7 @@ export default function Register() {
                 </Button>
                 <Button
                   type="button"
-                  className="bg-[hsl(var(--accent))] hover:bg-[#8F1B29]"
+                  className="bg-[#DC2626] hover:bg-[#B91C1C]"
                   disabled={!canSubmitCredentials() || loading || success}
                   onClick={handleCredentialsSubmit}
                   data-testid="submit-credentials-button"
@@ -1097,6 +1207,13 @@ export default function Register() {
         </div>
       </div>
       {CelebrationComponent}
+
+      <IDmeFlowModal
+        open={showIdmeVerify}
+        onClose={() => {}}
+        onSuccess={handleVeteranVerified}
+        userName={`${formData.first_name || ''} ${formData.last_name || ''}`.trim() || 'Verified Veteran'}
+      />
     </div>
   );
 }
