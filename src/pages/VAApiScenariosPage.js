@@ -20,19 +20,21 @@ const APP_RED  = '#DC2626';
 // ─────────────────────────────────────────────────────────────────────────────
 // VA SANDBOX TEST VETERANS  (source: developer.va.gov/explore/api/veteran-confirmation/test-users)
 // ─────────────────────────────────────────────────────────────────────────────
+// Source: VA Lighthouse sandbox test data — developer.va.gov
+// ICN shown for reference (used by OAuth service-history flow)
 const VA_TEST_USERS = [
-  // Confirmed veterans
-  { id: 'jones',     firstName: 'Travis',   middleName: 'Null',   lastName: 'Jones',     gender: 'M', birthDate: '1950-09-06', streetAddressLine1: '3020 Saint Charles Dr',            city: 'Tampa',          state: 'FL', zipCode: '33618', country: 'USA', confirmed: true,  avatarInitials: 'TJ', avatarColor: '#059669' },
-  { id: 'ford',      firstName: 'Wesley',   middleName: 'Watson', lastName: 'Ford',      gender: 'M', birthDate: '1986-05-06', streetAddressLine1: '1723 GOSNELL RD',                  city: 'Vienna',         state: 'VA', zipCode: '22182', country: 'USA', confirmed: true,  avatarInitials: 'WF', avatarColor: '#0369A1' },
-  { id: 'armstrong', firstName: 'Alfredo',  middleName: 'M',      lastName: 'Armstrong', gender: 'M', birthDate: '1993-06-08', streetAddressLine1: '17020 Tortoise St',                 city: 'Round Rock',     state: 'TX', zipCode: '78664', country: 'USA', confirmed: true,  avatarInitials: 'AA', avatarColor: '#C2410C' },
-  { id: 'ellis',     firstName: 'Tamara',   middleName: 'E',      lastName: 'Ellis',     gender: 'F', birthDate: '1967-06-19', streetAddressLine1: '2508 E Riverside Dr',               city: 'Austin',         state: 'TX', zipCode: '78741', country: 'USA', confirmed: true,  avatarInitials: 'TE', avatarColor: '#BE185D' },
-  // Not-confirmed veterans
-  { id: 'caldwell',  firstName: 'Eddie',    middleName: 'Joseph', lastName: 'Caldwell',  gender: 'M', birthDate: '1933-10-27', streetAddressLine1: 'WOW1',                              city: 'Alexandria',     state: 'VA', zipCode: '22309', country: 'USA', confirmed: false, avatarInitials: 'EC', avatarColor: '#1B3A5F' },
-  { id: 'roberts',   firstName: 'Theodore', middleName: 'Matthew',lastName: 'Roberts',   gender: 'M', birthDate: '1986-02-28', streetAddressLine1: '555 CANAL STREET',                  city: 'New Orleans',    state: 'LA', zipCode: '70130', country: 'USA', confirmed: false, avatarInitials: 'TR', avatarColor: '#1D4ED8' },
-  { id: 'sims',      firstName: 'Salvador', middleName: 'Jesus',  lastName: 'Sims',      gender: 'M', birthDate: '1933-12-28', streetAddressLine1: '2575 VALENCIA DR NE',               city: 'Marietta',       state: 'GA', zipCode: '30062', country: 'USA', confirmed: false, avatarInitials: 'SS', avatarColor: '#6D28D9' },
-  { id: 'arnold',    firstName: 'Frank',    middleName: 'L',      lastName: 'Arnold',    gender: 'M', birthDate: '1980-02-20', streetAddressLine1: '8131 DOVE COTTAGE CT',              city: 'Lorton',         state: 'VA', zipCode: '22079', country: 'USA', confirmed: false, avatarInitials: 'FA', avatarColor: '#0F766E' },
-  { id: 'riley',     firstName: 'Willard',  middleName: 'Tim',    lastName: 'Riley',     gender: 'M', birthDate: '1959-02-25', streetAddressLine1: '26455 PARADISE VALLEY RD SPC 80',   city: 'Warner Springs', state: 'CA', zipCode: '92086', country: 'USA', confirmed: false, avatarInitials: 'WR', avatarColor: '#B45309' },
-  { id: 'anderson',  firstName: 'Greg',     middleName: 'A',      lastName: 'Anderson',  gender: 'M', birthDate: '1933-04-05', streetAddressLine1: '6555 Little River Turnpike',        city: 'Alexandria',     state: 'VA', zipCode: '22312', country: 'USA', confirmed: false, avatarInitials: 'GA', avatarColor: '#475569' },
+  // ── Confirmed ─────────────────────────────────────────────────────────────
+  { id: 'ellis',     icn: '1012667145V762142', firstName: 'Tamara',   middleName: 'E',         lastName: 'Ellis',    gender: 'F', birthDate: '1967-06-19', streetAddressLine1: 'BEHIND TAHINI RIVER',    city: 'Austin',        state: 'TX', zipCode: '78741', country: 'USA', confirmed: true,  avatarInitials: 'TE', avatarColor: '#BE185D' },
+  { id: 'ford',      icn: '1012832025V743496', firstName: 'Wesley',   middleName: 'Watson',    lastName: 'Ford',     gender: 'M', birthDate: '1986-05-06', streetAddressLine1: '1723 GOSNELL RD',         city: 'Vienna',        state: 'VA', zipCode: '22182', country: 'USA', confirmed: true,  avatarInitials: 'WF', avatarColor: '#0369A1' },
+  { id: 'armstrong', icn: '1012667145V762142', firstName: 'Alfredo',  middleName: 'M',         lastName: 'Armstrong',gender: 'M', birthDate: '1993-06-08', streetAddressLine1: '17020 Tortoise St',       city: 'Round Rock',    state: 'TX', zipCode: '78664', country: 'USA', confirmed: true,  avatarInitials: 'AA', avatarColor: '#C2410C' },
+  { id: 'freeman',   icn: '1012829910V765228', firstName: 'Russell',  middleName: 'James',     lastName: 'Freeman',  gender: 'M', birthDate: '1969-11-05', streetAddressLine1: '100 BEACH BLVD',          city: 'Jacksonville',  state: 'FL', zipCode: '32207', country: 'USA', confirmed: true,  avatarInitials: 'RF', avatarColor: '#059669' },
+  { id: 'hayes',     icn: '1012845028V591200', firstName: 'Jeffery',  middleName: 'J',         lastName: 'Hayes',    gender: 'M', birthDate: '1937-09-25', streetAddressLine1: '2575 VALENCIA DR NE',     city: 'Marietta',      state: 'GA', zipCode: '30062', country: 'USA', confirmed: true,  avatarInitials: 'JH', avatarColor: '#7C3AED' },
+  { id: 'patterson', icn: '1012831012V063489', firstName: 'Christian',middleName: 'Fitzgerald', lastName: 'Patterson',gender: 'M', birthDate: '1964-03-04', streetAddressLine1: 'TRAIL',                   city: 'Silver Spring', state: 'MD', zipCode: '20902', country: 'USA', confirmed: true,  avatarInitials: 'CP', avatarColor: '#0891B2' },
+  { id: 'horton',    icn: '1012826664V603033', firstName: 'Everett',  middleName: 'Avery',     lastName: 'Horton',   gender: 'M', birthDate: '1982-04-23', streetAddressLine1: '2059 Homer Ave',          city: 'New York City', state: 'NY', zipCode: '10473', country: 'USA', confirmed: true,  avatarInitials: 'EH', avatarColor: '#D97706' },
+  { id: 'price',     icn: '1012845658V192434', firstName: 'Jessie',   middleName: 'F',         lastName: 'Price',    gender: 'M', birthDate: '1934-04-07', streetAddressLine1: '132 N South St',          city: 'Tampa',         state: 'FL', zipCode: '33616', country: 'USA', confirmed: true,  avatarInitials: 'JP', avatarColor: '#1B3A5F' },
+  // ── Not Confirmed ─────────────────────────────────────────────────────────
+  { id: 'anderson',  icn: '1012666182V203559', firstName: 'Greg',     middleName: 'A',         lastName: 'Anderson', gender: 'M', birthDate: '1933-04-05', streetAddressLine1: 'MILITARY ADDY 3',         city: 'DPO',           state: 'MI', zipCode: '22312', country: 'USA', confirmed: false, avatarInitials: 'GA', avatarColor: '#475569' },
+  { id: 'hunter',    icn: '1012666072V702345', firstName: 'Julio',    middleName: 'E',         lastName: 'Hunter',   gender: 'M', birthDate: '1951-11-18', streetAddressLine1: '111 SPRING ST',           city: 'Harned',        state: 'KY', zipCode: '40144', country: 'USA', confirmed: false, avatarInitials: 'JH', avatarColor: '#64748B' },
 ];
 
 const WORKFLOW_STEPS = [
@@ -43,6 +45,23 @@ const WORKFLOW_STEPS = [
   { id: 5, title: 'Appeals Status',       api: 'appeals-status',       path: '/va/appeals-status',       method: 'GET', authType: 'oauth',   color: '#6D28D9', description: 'Track active VA appeals through the Board docket' },
   { id: 6, title: 'Health Records',       api: 'patient-health',       path: '/va/patient-health',       method: 'GET', authType: 'oauth',   color: '#BE185D', description: 'Access VA health records and diagnosed conditions via FHIR R4' },
   { id: 7, title: 'VA Facilities',        api: 'facilities',           path: '/va/facilities',           method: 'GET', authType: 'api-key', color: '#0F766E', description: 'Locate nearby VA medical centers, CBOCs, and Vet Centers' },
+];
+
+// ── Service History OAuth test users (VA sandbox) ─────────────────────────────
+// All use ID.me login: email = va.api.user+{id}-2024@gmail.com, password = SandboxPassword2024!
+const SERVICE_HISTORY_TEST_USERS = [
+  { id: '001', firstName: 'Tamara',    lastName: 'Ellis',     branch: 'Air Force', activeStatus: 'Y', discharge: 'honorable', deployments: [],           initials: 'TE', color: '#BE185D', recommended: false },
+  { id: '006', firstName: 'Russell',   lastName: 'Freeman',   branch: 'Reserve',   activeStatus: 'N', discharge: 'honorable', deployments: [],           initials: 'RF', color: '#059669', recommended: false },
+  { id: '008', firstName: 'Greg',      lastName: 'Anderson',  branch: 'Air Force', activeStatus: 'Y', discharge: 'honorable', deployments: ['AFG'],      initials: 'GA', color: '#475569', recommended: false },
+  { id: '013', firstName: 'Kenneth',   lastName: 'Andrews',   branch: 'Air Force', activeStatus: 'Y', discharge: 'honorable', deployments: [],           initials: 'KA', color: '#C2410C', recommended: false },
+  { id: '025', firstName: 'Wesley',    lastName: 'Ford',      branch: 'Air Force', activeStatus: 'N', discharge: 'honorable', deployments: ['QAT','AX1'],initials: 'WF', color: '#0369A1', recommended: true  },
+  { id: '026', firstName: 'Melvin',    lastName: 'Freeman',   branch: 'Air Force', activeStatus: 'Y', discharge: 'honorable', deployments: ['KGZ'],      initials: 'MF', color: '#7C3AED', recommended: false },
+  { id: '027', firstName: 'Herbert',   lastName: 'Gardner',   branch: 'Air Force', activeStatus: 'N', discharge: 'honorable', deployments: [],           initials: 'HG', color: '#0891B2', recommended: false },
+  { id: '032', firstName: 'Jeffery',   lastName: 'Hayes',     branch: 'Air Force', activeStatus: 'N', discharge: 'unknown',   deployments: [],           initials: 'JH', color: '#D97706', recommended: false },
+  { id: '037', firstName: 'Daryl',     lastName: 'Lawrence',  branch: 'Army',      activeStatus: 'Y', discharge: 'unknown',   deployments: [],           initials: 'DL', color: '#065F46', recommended: false },
+  { id: '041', firstName: 'Christian', lastName: 'Patterson', branch: 'Air Force', activeStatus: 'Y', discharge: 'honorable', deployments: ['KGZ'],      initials: 'CP', color: '#1B3A5F', recommended: false },
+  { id: '042', firstName: 'Jessie',    lastName: 'Price',     branch: 'Air Force', activeStatus: 'N', discharge: 'honorable', deployments: [],           initials: 'JP', color: '#64748B', recommended: false },
+  { id: '046', firstName: 'Mattie',    lastName: 'Reid',      branch: 'Reserve',   activeStatus: 'N', discharge: 'honorable', deployments: [],           initials: 'MR', color: '#9D174D', recommended: false },
 ];
 
 // hex → rgba helper for subtle tinted backgrounds
@@ -315,14 +334,115 @@ function WorkflowResultDisplay({ apiKey, data, mode }) {
   );
 }
 
+// ── Service History test user picker ──────────────────────────────────────────
+function ServiceHistoryUserPicker({ onSignIn }) {
+  const [selected, setSelected] = useState(null);
+  const [copied, setCopied] = useState('');
+
+  const copy = (text, key) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(key);
+      setTimeout(() => setCopied(''), 1800);
+    });
+  };
+
+  const user = selected ? SERVICE_HISTORY_TEST_USERS.find(u => u.id === selected) : null;
+  const email = user ? `va.api.user+${user.id}-2024@gmail.com` : '';
+  const password = 'SandboxPassword2024!';
+
+  return (
+    <div className="bg-white rounded-xl border p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="font-semibold text-sm text-gray-800">Select a VA sandbox test veteran</p>
+        <span className="text-[10px] text-slate-400">12 test users · ID.me login</span>
+      </div>
+
+      {/* User grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {SERVICE_HISTORY_TEST_USERS.map(u => (
+          <button
+            key={u.id}
+            onClick={() => setSelected(u.id)}
+            className="flex items-center gap-2 p-2 rounded-lg border text-left transition-all hover:border-blue-300"
+            style={selected === u.id
+              ? { borderColor: u.color, background: `${u.color}12` }
+              : { borderColor: '#e5e7eb', background: '#fff' }}
+          >
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ background: u.color }}>
+              {u.initials}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-gray-800 truncate">{u.firstName} {u.lastName}</p>
+              <div className="flex items-center gap-1 flex-wrap">
+                <span className="text-[9px] text-slate-500">{u.branch}</span>
+                {u.recommended && <span className="text-[8px] px-1 rounded bg-green-100 text-green-700 font-medium">Best</span>}
+                {u.deployments.length > 0 && (
+                  <span className="text-[8px] px-1 rounded bg-orange-100 text-orange-700 font-medium">
+                    {u.deployments.join(' · ')}
+                  </span>
+                )}
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Credentials panel */}
+      {user && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 space-y-2">
+          <p className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide">ID.me credentials for {user.firstName} {user.lastName}</p>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 bg-white rounded border px-2 py-1.5">
+              <span className="text-[10px] text-slate-400 w-14 shrink-0">Email</span>
+              <span className="text-xs text-slate-700 flex-1 font-mono truncate">{email}</span>
+              <button onClick={() => copy(email, 'email')} className="text-[10px] text-blue-600 hover:underline shrink-0">
+                {copied === 'email' ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+            <div className="flex items-center gap-2 bg-white rounded border px-2 py-1.5">
+              <span className="text-[10px] text-slate-400 w-14 shrink-0">Password</span>
+              <span className="text-xs text-slate-700 flex-1 font-mono">{password}</span>
+              <button onClick={() => copy(password, 'pass')} className="text-[10px] text-blue-600 hover:underline shrink-0">
+                {copied === 'pass' ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+          </div>
+          <p className="text-[9px] text-blue-600">On the VA login page: click ID.me → enter these credentials → click Continue</p>
+        </div>
+      )}
+
+      <button
+        onClick={onSignIn}
+        disabled={!user}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold text-sm hover:opacity-90 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{ background: APP_NAVY }}
+      >
+        <LogIn className="h-4 w-4" /> Sign in with VA {user ? `as ${user.firstName} ${user.lastName}` : '— select a user first'} <ExternalLink className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
 // ── OAuth / step panel (no technical details) ─────────────────────────────────
 function WorkflowStepPanel({ step, result, status, onRun, userId }) {
   const [oauthWaiting, setOauthWaiting] = useState(false);
   const color = step.color;
   const isOAuth = step.authType === 'oauth';
 
+  // Listen for the popup to post VA_OAUTH_SUCCESS after token exchange completes
+  useEffect(() => {
+    const handler = (event) => {
+      if (event.data?.type === 'VA_OAUTH_SUCCESS') {
+        setOauthWaiting(false);
+        onRun();
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [onRun]);
+
   const openOAuthPopup = () => {
-    const url = `http://localhost:4000/api/va/oauth/authorize?userId=${userId}&api=${step.api}`;
+    const url = `/api/va/oauth/authorize?userId=${userId}&api=${step.api}`;
     window.open(url, 'va_oauth', 'width=600,height=700,left=200,top=100');
     setOauthWaiting(true);
   };
@@ -363,17 +483,20 @@ function WorkflowStepPanel({ step, result, status, onRun, userId }) {
                   <p className="font-semibold text-amber-800">VA Authentication Required</p>
                   <p className="text-xs text-amber-700 mt-1">
                     This step requires you to sign in through the VA to authorize access.
-                    A sign-in window will open automatically.
                   </p>
                 </div>
               </div>
-              <button
-                onClick={openOAuthPopup}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold text-sm hover:opacity-90 shadow-sm"
-                style={{ background: APP_NAVY }}
-              >
-                <LogIn className="h-4 w-4" /> Sign in with VA <ExternalLink className="h-3.5 w-3.5" />
-              </button>
+              {step.api === 'service-history'
+                ? <ServiceHistoryUserPicker onSignIn={openOAuthPopup} />
+                : (
+                  <button
+                    onClick={openOAuthPopup}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold text-sm hover:opacity-90 shadow-sm"
+                    style={{ background: APP_NAVY }}
+                  >
+                    <LogIn className="h-4 w-4" /> Sign in with VA <ExternalLink className="h-3.5 w-3.5" />
+                  </button>
+                )}
             </>
           ) : (
             <>
@@ -407,9 +530,13 @@ function WorkflowStepPanel({ step, result, status, onRun, userId }) {
       )}
 
       {status === 'idle' && (
-        <button onClick={onRun} className="w-full py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 shadow-sm" style={{ background: APP_NAVY }}>
-          <Play className="h-4 w-4" /> {step.title} <ChevronRight className="h-4 w-4" />
-        </button>
+        step.api === 'service-history'
+          ? <ServiceHistoryUserPicker onSignIn={openOAuthPopup} />
+          : (
+            <button onClick={onRun} className="w-full py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 shadow-sm" style={{ background: APP_NAVY }}>
+              <Play className="h-4 w-4" /> {step.title} <ChevronRight className="h-4 w-4" />
+            </button>
+          )
       )}
 
       {status === 'loading' && (
@@ -453,8 +580,8 @@ function VeteranVerificationPanel({ result, status, selectedUser, onSelectUser, 
           <div className="flex items-center justify-between">
             <p className="font-semibold text-sm text-gray-800">VA Sandbox Test Veterans</p>
             <div className="flex items-center gap-3 text-[10px] text-slate-400">
-              <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full bg-green-500"></span> Confirmed (4)</span>
-              <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full bg-slate-300"></span> Not Confirmed (6)</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full bg-green-500"></span> Confirmed (8)</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full bg-slate-300"></span> Not Confirmed (2)</span>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -603,7 +730,7 @@ function VAWorkflowDemo() {
               />
             : <WorkflowStepPanel step={activeStep} result={stepResults[activeStep.id]} status={stepStatuses[activeStep.id] || 'idle'} onRun={() => runStep(activeStep)} userId={userId} />
           }
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-between mt-4 pt-4 pb-24 border-t border-slate-100">
             <button onClick={() => setCurrentStep(Math.max(1, currentStep - 1))} disabled={currentStep === 1}
               className="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">
               <ChevronLeft className="h-4 w-4" /> Previous

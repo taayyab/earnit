@@ -53,9 +53,9 @@ export default defineConfig(({ mode }) => {
       open: false,
       proxy: {
         '/api': {
-          target: env.REACT_APP_API_URL || 'http://localhost:4000',
+          target: env.REACT_APP_API_URL || 'https://127.0.0.1:4000',
           changeOrigin: true,
-          secure: false,
+          secure: false, // accept self-signed / mkcert certs
         },
       },
     },

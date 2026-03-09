@@ -146,6 +146,7 @@ const ProviderRequests = lazyWithRetry(() => import('./pages/provider/ProviderRe
 const ProviderVerification = lazyWithRetry(() => import('./pages/admin/ProviderVerification'));
 const ProviderSearch = lazyWithRetry(() => import('./pages/veteran/ProviderSearch'));
 const VeteranRequests = lazyWithRetry(() => import('./pages/veteran/VeteranRequests'));
+const VAOAuthCallback = lazyWithRetry(() => import('./pages/VAOAuthCallback'));
 
 const SSDIDashboard = lazyWithRetry(() => import('./pages/ssdi/SSDIDashboard'));
 const SSDIStart = lazyWithRetry(() => import('./pages/ssdi/SSDIStart'));
@@ -280,6 +281,8 @@ function App() {
           <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Landing />} />
+            {/* VA OAuth callback — must be public, runs in popup window */}
+            <Route path="/auth/callback" element={<VAOAuthCallback />} />
             <Route path="/login" element={<Login />} />
             <Route path="/demo-login" element={<Suspense fallback={<PageLoader />}><DemoLogin /></Suspense>} />
             <Route path="/register" element={<Register />} />
