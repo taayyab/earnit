@@ -433,7 +433,7 @@ function WorkflowStepPanel({ step, result, status, onRun, userId }) {
 }
 
 // ── Step 1 — Veteran Verification with test user selection ────────────────────
-function VeteranVerificationPanel({ result, status, selectedUser, onSelectUser, onRun, dobOverrides, onDobChange }) {
+function VeteranVerificationPanel({ result, status, selectedUser, onSelectUser, onRun }) {
   return (
     <div className="space-y-4">
       <div className="rounded-xl border-2 p-4" style={{ borderColor: hex8('#1B3A5F', 0.3), background: hex20('#1B3A5F') }}>
@@ -443,7 +443,7 @@ function VeteranVerificationPanel({ result, status, selectedUser, onSelectUser, 
           </div>
           <div className="flex-1">
             <p className="font-bold text-gray-900">Veteran Verification</p>
-            <p className="text-xs text-slate-500 mt-0.5">Select a test veteran below to verify their status with the VA</p>
+            <p className="text-xs text-slate-500 mt-0.5">Select a VA sandbox test veteran to verify their status</p>
           </div>
         </div>
       </div>
@@ -452,18 +452,14 @@ function VeteranVerificationPanel({ result, status, selectedUser, onSelectUser, 
         <div className="bg-white rounded-xl border p-4 space-y-4">
           <div className="flex items-center justify-between">
             <p className="font-semibold text-sm text-gray-800">VA Sandbox Test Veterans</p>
-            <span className="text-[10px] text-slate-400">Enter date of birth to unlock additional veterans</span>
+            <div className="flex items-center gap-3 text-[10px] text-slate-400">
+              <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full bg-green-500"></span> Confirmed (4)</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full bg-slate-300"></span> Not Confirmed (6)</span>
+            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {VA_TEST_USERS.map(user => (
-              <VeteranUserCard
-                key={user.id}
-                user={user}
-                selected={selectedUser?.id === user.id}
-                onSelect={onSelectUser}
-                dobOverride={dobOverrides?.[user.id]}
-                onDobChange={onDobChange}
-              />
+              <VeteranUserCard key={user.id} user={user} selected={selectedUser?.id === user.id} onSelect={onSelectUser} />
             ))}
           </div>
           {status === 'error' && (
@@ -488,8 +484,8 @@ function VeteranVerificationPanel({ result, status, selectedUser, onSelectUser, 
         <div className="space-y-3">
           <WorkflowResultDisplay apiKey="veteran-confirmation" data={result} mode={result.mode} />
           <div className="flex items-center justify-between bg-slate-50 border rounded-lg px-4 py-2.5 text-xs text-slate-500">
-            <span>Verified: <strong className="text-slate-700">{selectedUser?.firstName} {selectedUser?.lastName}</strong></span>
-            <button onClick={() => onSelectUser(null)} className="text-blue-600 hover:underline">Change veteran</button>
+            <span>Tested: <strong className="text-slate-700">{selectedUser?.firstName} {selectedUser?.lastName}</strong></span>
+            <button onClick={() => onSelectUser(null)} className="text-blue-600 hover:underline">Try another</button>
           </div>
         </div>
       )}
@@ -503,17 +499,11 @@ function VAWorkflowDemo() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [stepStatuses, setStepStatuses] = useState({});
   const [stepResults, setStepResults] = useState({});
-  const [dobOverrides, setDobOverrides] = useState({});
-
   const userId = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}').id || 'demo'; } catch { return 'demo'; } })();
 
   const setStep = (id, status, result = null) => {
     setStepStatuses(prev => ({ ...prev, [id]: status }));
     if (result !== null) setStepResults(prev => ({ ...prev, [id]: result }));
-  };
-
-  const handleDobChange = (uid, dob) => {
-    setDobOverrides(prev => ({ ...prev, [uid]: dob }));
   };
 
   const handleSelectUser = (user) => {
@@ -531,7 +521,7 @@ function VAWorkflowDemo() {
       const params = new URLSearchParams();
       const fields = ['firstName', 'middleName', 'lastName', 'birthDate', 'gender',
                       'streetAddressLine1', 'city', 'state', 'zipCode', 'country'];
-      fields.forEach(f => { if (selectedUser[f]) params.set(f, selectedUser[f]); });
+      fields.forEach(f => { if (selectedUser[f] && selectedUser[f] !== 'Null') params.set(f, selectedUser[f]); });
       const res = await api.get(`/va/veteran-confirmation?${params}`);
       setStep(1, 'success', res.data);
       const raw = res.data?.data || res.data;
@@ -610,8 +600,6 @@ function VAWorkflowDemo() {
                 selectedUser={selectedUser}
                 onSelectUser={handleSelectUser}
                 onRun={runStep1}
-                dobOverrides={dobOverrides}
-                onDobChange={handleDobChange}
               />
             : <WorkflowStepPanel step={activeStep} result={stepResults[activeStep.id]} status={stepStatuses[activeStep.id] || 'idle'} onRun={() => runStep(activeStep)} userId={userId} />
           }
