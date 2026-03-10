@@ -442,7 +442,10 @@ function WorkflowStepPanel({ step, result, status, onRun, userId }) {
   }, [onRun]);
 
   const openOAuthPopup = () => {
-    const url = `/api/va/oauth/authorize?userId=${userId}&api=${step.api}`;
+    const backendBase = process.env.NODE_ENV === 'production'
+      ? (process.env.REACT_APP_API_URL_PROD || process.env.REACT_APP_API_URL || '')
+      : (process.env.REACT_APP_API_URL || '');
+    const url = `${backendBase}/api/va/oauth/authorize?userId=${userId}&api=${step.api}`;
     window.open(url, 'va_oauth', 'width=600,height=700,left=200,top=100');
     setOauthWaiting(true);
   };
