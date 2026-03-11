@@ -54,6 +54,21 @@ api.interceptors.request.use((config) => {
     }
   }
 
+  // Attach VA OAuth token for VA API requests
+  if (config.url && config.url.startsWith('/va/')) {
+    try {
+      const vaTokenRaw = localStorage.getItem('va_token');
+      if (vaTokenRaw) {
+        const vaToken = JSON.parse(vaTokenRaw);
+        if (vaToken.access_token && vaToken.expires_at > Date.now()) {
+          config.headers['x-va-token'] = vaToken.access_token;
+        }
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+  }
+
   return config;
 });
 

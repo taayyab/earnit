@@ -238,15 +238,44 @@ function WorkflowResultDisplay({ apiKey, data, mode }) {
           </div>
           {modeBadge}
         </div>
-        {claims.length > 0 ? claims.slice(0, 3).map((c, i) => (
-          <div key={i} className="rounded-lg border border-amber-100 bg-amber-50 p-3 text-xs">
-            <div className="flex justify-between gap-2">
-              <span className="font-bold text-amber-800">{c.attributes?.claimType || 'Disability Claim'}</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${c.attributes?.status === 'COMPLETE' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{c.attributes?.status || '—'}</span>
+        {claims.length > 0 ? claims.slice(0, 3).map((c, i) => {
+          const attr = c.attributes || {};
+          const claimType = attr.claimType || attr.claim_type || 'Disability Claim';
+          const status = attr.status || '—';
+          const dateFiled = attr.dateFiled || attr.claim_date || '—';
+          const phase = attr.claim_phase_dates?.phase_type || null;
+          const docNeeded = attr.documents_needed;
+          return (
+            <div key={i} className="rounded-lg border border-amber-100 bg-amber-50 p-3 text-xs space-y-2">
+              <div className="flex justify-between gap-2">
+                <span className="font-bold text-amber-800">{claimType}</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${status.toLowerCase().includes('complete') ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{status}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-white rounded border p-2">
+                  <p className="text-slate-400 text-[10px]">Date Filed</p>
+                  <p className="font-medium text-slate-700">{dateFiled}</p>
+                </div>
+                {phase && (
+                  <div className="bg-white rounded border p-2">
+                    <p className="text-slate-400 text-[10px]">Current Phase</p>
+                    <p className="font-medium text-slate-700">{phase}</p>
+                  </div>
+                )}
+              </div>
+              {docNeeded === true && (
+                <div className="flex items-center gap-1 text-orange-600 font-medium">
+                  <AlertTriangle className="h-3 w-3" /> Documents needed
+                </div>
+              )}
+              {docNeeded === false && (
+                <div className="flex items-center gap-1 text-green-600 font-medium">
+                  <CheckCircle className="h-3 w-3" /> No additional documents required
+                </div>
+              )}
             </div>
-            <p className="text-slate-500 mt-1">Filed: {c.attributes?.dateFiled || '—'}</p>
-          </div>
-        )) : (
+          );
+        }) : (
           <div className="rounded-lg bg-slate-50 border p-3 text-xs text-slate-500">
             Benefits claims data received — no active claims found
           </div>
@@ -255,29 +284,126 @@ function WorkflowResultDisplay({ apiKey, data, mode }) {
     );
   }
 
-  if (['appealable-issues', 'appeals-status', 'legacy-appeals'].includes(apiKey)) {
+  if (apiKey === 'appealable-issues') {
     const raw = data.data || {};
     const items = raw?.data || [];
-    const label = apiKey === 'appealable-issues' ? 'Appealable Issues' : apiKey === 'legacy-appeals' ? 'Legacy Appeals' : 'Appeals Status';
-    const stepDef = WORKFLOW_STEPS.find(s => s.api === apiKey);
-    const color = stepDef?.color || '#C2410C';
+    const color = '#C2410C';
+    return (
+      <div className="rounded-xl border bg-white p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Gavel className="h-5 w-5" style={{ color }} />
+            <p className="font-semibold text-gray-900">Appealable Issues</p>
+            {items.length > 0 && <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: hex20(color), color }}>{items.length} issue{items.length !== 1 ? 's' : ''}</span>}
+          </div>
+          {modeBadge}
+        </div>
+        {items.length > 0 ? items.slice(0, 4).map((item, i) => {
+          const attr = item.attributes || {};
+          return (
+            <div key={i} className="rounded-lg border p-3 text-xs space-y-2" style={{ borderColor: hex8(color, 0.2), background: hex20(color) }}>
+              <div className="flex justify-between items-center">
+                <p className="font-bold" style={{ color }}>{attr.description || 'Issue details'}</p>
+                {attr.is_rating && <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-medium">Rating Issue</span>}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {attr.rating_issue_diagnostic_code && (
+                  <div className="bg-white rounded border p-2">
+                    <p className="text-slate-400 text-[10px]">Diagnostic Code</p>
+                    <p className="font-medium text-slate-700">{attr.rating_issue_diagnostic_code}</p>
+                  </div>
+                )}
+                {attr.rating_issue_profile_date && (
+                  <div className="bg-white rounded border p-2">
+                    <p className="text-slate-400 text-[10px]">Decision Date</p>
+                    <p className="font-medium text-slate-700">{attr.rating_issue_profile_date}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }) : (
+          <div className="rounded-lg bg-slate-50 border p-3 text-xs text-slate-500">
+            Appealable issues data received — no issues found
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (['appeals-status', 'legacy-appeals'].includes(apiKey)) {
+    const raw = data.data || {};
+    const topItems = raw?.data || [];
+    const label = apiKey === 'legacy-appeals' ? 'Legacy Appeals' : 'Appeals Status';
+    const color = apiKey === 'legacy-appeals' ? '#C2410C' : '#6D28D9';
+
+    // Each appeal has attributes.issues[], attributes.status, attributes.docket
+    const allIssues = [];
+    const appealMeta = [];
+    topItems.forEach(item => {
+      const attr = item.attributes || {};
+      if (attr.issues?.length) {
+        attr.issues.forEach(iss => allIssues.push(iss));
+      }
+      appealMeta.push({
+        programArea: attr.program_area || attr.programArea || '—',
+        statusType: attr.status?.type || '—',
+        docketType: attr.docket?.type || '—',
+        docketMonth: attr.docket?.month || null,
+        active: attr.active,
+      });
+    });
+
     return (
       <div className="rounded-xl border bg-white p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Gavel className="h-5 w-5" style={{ color }} />
             <p className="font-semibold text-gray-900">{label}</p>
-            {items.length > 0 && <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: hex20(color), color }}>{items.length} issue{items.length !== 1 ? 's' : ''}</span>}
+            {topItems.length > 0 && <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: hex20(color), color }}>{topItems.length} appeal{topItems.length !== 1 ? 's' : ''}</span>}
           </div>
           {modeBadge}
         </div>
-        {items.length > 0 ? items.slice(0, 3).map((item, i) => (
-          <div key={i} className="rounded-lg border p-3 text-xs" style={{ borderColor: hex8(color, 0.2), background: hex20(color) }}>
-            <p className="font-bold" style={{ color }}>{item.attributes?.description || item.attributes?.issue || item.attributes?.programArea || 'Issue details'}</p>
+
+        {/* Appeal metadata */}
+        {appealMeta.length > 0 && appealMeta[0].statusType !== '—' && (
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className="bg-white rounded border p-2">
+              <p className="text-slate-400 text-[10px]">Status</p>
+              <p className="font-medium text-slate-700 capitalize">{appealMeta[0].statusType.replace(/_/g, ' ')}</p>
+            </div>
+            <div className="bg-white rounded border p-2">
+              <p className="text-slate-400 text-[10px]">Docket</p>
+              <p className="font-medium text-slate-700 capitalize">{appealMeta[0].docketType.replace(/([A-Z])/g, ' $1').trim()}</p>
+            </div>
+            <div className="bg-white rounded border p-2">
+              <p className="text-slate-400 text-[10px]">Program</p>
+              <p className="font-medium text-slate-700 capitalize">{appealMeta[0].programArea}</p>
+            </div>
           </div>
-        )) : (
+        )}
+
+        {/* Issues from this appeal */}
+        {allIssues.length > 0 ? allIssues.slice(0, 4).map((iss, i) => (
+          <div key={i} className="rounded-lg border p-3 text-xs space-y-1" style={{ borderColor: hex8(color, 0.2), background: hex20(color) }}>
+            <div className="flex justify-between items-center">
+              <p className="font-bold" style={{ color }}>{iss.description || 'Issue'}</p>
+              {iss.active !== undefined && (
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${iss.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {iss.active ? 'Active' : 'Closed'}
+                </span>
+              )}
+            </div>
+            {iss.diagnostic_code && <p className="text-slate-500">Diagnostic Code: {iss.diagnostic_code}</p>}
+            {iss.date && <p className="text-slate-500">Last Action: {iss.date}</p>}
+          </div>
+        )) : topItems.length > 0 ? (
+          <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-xs text-green-700 font-medium flex items-center gap-1.5">
+            <CheckCircle className="h-3.5 w-3.5" /> Appeals data retrieved — {topItems.length} appeal record{topItems.length !== 1 ? 's' : ''} found
+          </div>
+        ) : (
           <div className="rounded-lg bg-slate-50 border p-3 text-xs text-slate-500">
-            {label} data received — no items found
+            {label} data received — no appeals found
           </div>
         )}
       </div>
@@ -297,15 +423,35 @@ function WorkflowResultDisplay({ apiKey, data, mode }) {
           </div>
           {modeBadge}
         </div>
-        {facilities.length > 0 ? facilities.slice(0, 3).map((f, i) => (
-          <div key={i} className="rounded-lg border border-teal-100 bg-teal-50 p-3 text-xs">
-            <p className="font-bold text-teal-800">{f.attributes?.name || f.name || 'VA Facility'}</p>
-            <p className="text-slate-500 mt-0.5 flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {f.attributes?.address?.physical?.city || ''}{f.attributes?.address?.physical?.state ? `, ${f.attributes.address.physical.state}` : ''}
-            </p>
-          </div>
-        )) : (
+        {facilities.length > 0 ? facilities.slice(0, 3).map((f, i) => {
+          const attr = f.attributes || {};
+          const addr = attr.address?.physical || {};
+          const phone = attr.phone?.main || null;
+          const classification = attr.classification || attr.facility_type || null;
+          return (
+            <div key={i} className="rounded-lg border border-teal-100 bg-teal-50 p-3 text-xs space-y-2">
+              <div className="flex justify-between items-center">
+                <p className="font-bold text-teal-800">{attr.name || f.name || 'VA Facility'}</p>
+                {classification && <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 font-medium">{classification}</span>}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-white rounded border p-2">
+                  <p className="text-slate-400 text-[10px]">Address</p>
+                  <p className="font-medium text-slate-700">
+                    {addr.address_1 || '—'}
+                  </p>
+                  <p className="text-slate-500">{addr.city || ''}{addr.state ? `, ${addr.state}` : ''} {addr.zip || ''}</p>
+                </div>
+                {phone && (
+                  <div className="bg-white rounded border p-2">
+                    <p className="text-slate-400 text-[10px]">Phone</p>
+                    <p className="font-medium text-slate-700">{phone}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }) : (
           <div className="rounded-lg bg-slate-50 border p-3 text-xs text-slate-500">
             Facilities data received — showing nearby VA locations
           </div>
@@ -314,7 +460,71 @@ function WorkflowResultDisplay({ apiKey, data, mode }) {
     );
   }
 
-  // Generic (FHIR health, etc.) — visual, no JSON
+  if (apiKey === 'patient-health') {
+    const raw = data.data || data;
+    // Handle both FHIR Bundle (entry[]) and single Patient resource
+    const entries = raw?.entry || [];
+    const isSingleResource = raw?.resourceType && !raw?.entry;
+    const patient = isSingleResource ? raw : null;
+
+    const renderPatientCard = (resource, i) => {
+      const name = resource?.name?.[0] ? `${(resource.name[0].given || []).join(' ')} ${resource.name[0].family || ''}`.trim() : null;
+      const resourceType = resource?.resourceType || 'Resource';
+      const identifiers = resource?.identifier || [];
+      const mpiId = identifiers.find(id => id.system?.includes('mpi'))?.value || null;
+      return (
+        <div key={i} className="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-rose-800 text-sm">{name || resourceType}</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-100 text-rose-700">{resourceType}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {resource?.birthDate && (
+              <div className="bg-white rounded border p-2">
+                <p className="text-slate-400 text-[10px]">Date of Birth</p>
+                <p className="font-medium text-slate-700">{resource.birthDate}</p>
+              </div>
+            )}
+            {resource?.gender && (
+              <div className="bg-white rounded border p-2">
+                <p className="text-slate-400 text-[10px]">Gender</p>
+                <p className="font-medium text-slate-700 capitalize">{resource.gender}</p>
+              </div>
+            )}
+          </div>
+          {mpiId && <p className="text-slate-400 text-[10px]">MPI: {mpiId}</p>}
+          {resource?.meta?.lastUpdated && <p className="text-slate-400 text-[10px]">Last Updated: {new Date(resource.meta.lastUpdated).toLocaleDateString()}</p>}
+        </div>
+      );
+    };
+
+    return (
+      <div className="rounded-xl border bg-white p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Stethoscope className="h-5 w-5 text-rose-600" />
+            <p className="font-semibold text-gray-900">Health Records (FHIR)</p>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-medium">
+              {isSingleResource ? '1 record' : `${entries.length} record${entries.length !== 1 ? 's' : ''}`}
+            </span>
+          </div>
+          {modeBadge}
+        </div>
+        {isSingleResource
+          ? renderPatientCard(patient, 0)
+          : entries.length > 0
+            ? entries.slice(0, 4).map((entry, i) => renderPatientCard(entry.resource || entry, i))
+            : (
+              <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-xs text-green-700 font-medium flex items-center gap-1.5">
+                <CheckCircle className="h-3.5 w-3.5" /> Health records data retrieved successfully from VA
+              </div>
+            )
+        }
+      </div>
+    );
+  }
+
+  // Generic fallback — visual, no JSON
   const raw = data.data || data;
   const entryCount = raw?.entry?.length || raw?.data?.length || 0;
   return (
@@ -424,7 +634,7 @@ function ServiceHistoryUserPicker({ onSignIn }) {
 }
 
 // ── OAuth / step panel (no technical details) ─────────────────────────────────
-function WorkflowStepPanel({ step, result, status, onRun, userId }) {
+function WorkflowStepPanel({ step, result, status, onRun, onOAuthComplete, userId }) {
   const [oauthWaiting, setOauthWaiting] = useState(false);
   const color = step.color;
   const isOAuth = step.authType === 'oauth';
@@ -433,13 +643,28 @@ function WorkflowStepPanel({ step, result, status, onRun, userId }) {
   useEffect(() => {
     const handler = (event) => {
       if (event.data?.type === 'VA_OAUTH_SUCCESS') {
+        // Save VA OAuth token to localStorage for subsequent requests
+        if (event.data.access_token) {
+          const vaTokenData = {
+            access_token: event.data.access_token,
+            expires_at: Date.now() + (event.data.expires_in || 3600) * 1000,
+            scope: event.data.scope || '',
+            api: event.data.apiName || '',
+          };
+          localStorage.setItem('va_token', JSON.stringify(vaTokenData));
+        }
         setOauthWaiting(false);
-        onRun();
+        // After OAuth, run current step then advance to benefits claims
+        if (onOAuthComplete) {
+          onOAuthComplete();
+        } else {
+          onRun();
+        }
       }
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [onRun]);
+  }, [onRun, onOAuthComplete]);
 
   const openOAuthPopup = () => {
     const backendBase = process.env.NODE_ENV === 'production'
@@ -452,7 +677,11 @@ function WorkflowStepPanel({ step, result, status, onRun, userId }) {
 
   const handleCompletedSignIn = () => {
     setOauthWaiting(false);
-    onRun();
+    if (onOAuthComplete) {
+      onOAuthComplete();
+    } else {
+      onRun();
+    }
   };
 
   return (
@@ -661,42 +890,66 @@ function VAWorkflowDemo() {
     }
   };
 
-  const runStep = async (step) => {
+  // Run a single step — returns true if succeeded
+  const executeStep = async (step) => {
+    setCurrentStep(step.id);
     setStep(step.id, 'loading');
     try {
       const res = step.method === 'POST' ? await api.post(step.path, {}) : await api.get(step.path);
       setStep(step.id, 'success', res.data);
-      if (step.id < WORKFLOW_STEPS.length) setTimeout(() => setCurrentStep(step.id + 1), 1800);
+      return true;
     } catch (err) {
-      const httpStatus = err.response?.status;
-      if (httpStatus === 401 || httpStatus === 403) {
-        setStep(step.id, 'auth-required', { message: 'VA OAuth token required' });
-      } else {
-        setStep(step.id, 'error', { message: err.response?.data?.message || err.message || 'Request failed' });
+      const msg = err.response?.data?.message || err.message || 'Request failed';
+      setStep(step.id, 'error', { message: msg });
+      return false;
+    }
+  };
+
+  // Chain through all steps starting from a given step id
+  const runAllStepsFrom = async (startId) => {
+    const steps = WORKFLOW_STEPS.filter(s => s.id >= startId);
+    for (const step of steps) {
+      await executeStep(step);
+      // Brief pause between steps so the user can see each tab light up
+      if (step.id < WORKFLOW_STEPS.length) {
+        await new Promise(resolve => setTimeout(resolve, 1200));
       }
+    }
+  };
+
+  // Run a single step (used by manual "Test" / "Run" button clicks)
+  const runStep = async (step) => {
+    const success = await executeStep(step);
+    if (success && step.id < WORKFLOW_STEPS.length) {
+      setTimeout(() => setCurrentStep(step.id + 1), 1800);
     }
   };
 
   const resetWorkflow = () => { setCurrentStep(1); setSelectedUser(null); setStepStatuses({}); setStepResults({}); };
 
   const activeStep = WORKFLOW_STEPS.find(s => s.id === currentStep);
-  const allDone = WORKFLOW_STEPS.every(s => stepStatuses[s.id] === 'success');
-  const completedSteps = WORKFLOW_STEPS.filter(s => stepStatuses[s.id] === 'success' && s.id !== currentStep);
+  const allDone = WORKFLOW_STEPS.every(s => stepStatuses[s.id] === 'success' || stepStatuses[s.id] === 'error');
+  const allPassed = WORKFLOW_STEPS.every(s => stepStatuses[s.id] === 'success');
+  const completedSteps = WORKFLOW_STEPS.filter(s => (stepStatuses[s.id] === 'success' || stepStatuses[s.id] === 'error') && s.id !== currentStep);
 
   return (
     <div className="space-y-5">
       <WorkflowStepper steps={WORKFLOW_STEPS} currentStep={currentStep} stepStatuses={stepStatuses} />
 
       {allDone && (
-        <div className="rounded-xl border-2 border-green-400 bg-green-50 p-5 flex items-center justify-between gap-4">
+        <div className={`rounded-xl border-2 p-5 flex items-center justify-between gap-4 ${allPassed ? 'border-green-400 bg-green-50' : 'border-amber-400 bg-amber-50'}`}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center"><CheckCircle className="h-6 w-6 text-white" /></div>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${allPassed ? 'bg-green-600' : 'bg-amber-500'}`}><CheckCircle className="h-6 w-6 text-white" /></div>
             <div>
-              <p className="font-bold text-green-800 text-lg">Full Workflow Complete</p>
-              <p className="text-sm text-green-700">All 7 VA API integrations executed successfully.</p>
+              <p className={`font-bold text-lg ${allPassed ? 'text-green-800' : 'text-amber-800'}`}>Full Workflow Complete</p>
+              <p className={`text-sm ${allPassed ? 'text-green-700' : 'text-amber-700'}`}>
+                {allPassed
+                  ? 'All 7 VA API integrations executed successfully.'
+                  : `${WORKFLOW_STEPS.filter(s => stepStatuses[s.id] === 'success').length} of ${WORKFLOW_STEPS.length} APIs returned data successfully.`}
+              </p>
             </div>
           </div>
-          <button onClick={resetWorkflow} className="flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-green-400 text-green-700 text-sm font-medium hover:bg-green-100">
+          <button onClick={resetWorkflow} className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-sm font-medium ${allPassed ? 'border-green-400 text-green-700 hover:bg-green-100' : 'border-amber-400 text-amber-700 hover:bg-amber-100'}`}>
             <RefreshCw className="h-4 w-4" /> Reset
           </button>
         </div>
@@ -706,14 +959,17 @@ function VAWorkflowDemo() {
         <div className="space-y-2">
           {completedSteps.map(s => {
             const color = s.color;
+            const isError = stepStatuses[s.id] === 'error';
             return (
-              <div key={s.id} className="rounded-xl border px-4 py-2.5 flex items-center justify-between" style={{ borderColor: hex8(color, 0.25), background: hex20(color) }}>
+              <div key={s.id} className="rounded-xl border px-4 py-2.5 flex items-center justify-between" style={{ borderColor: isError ? '#fca5a5' : hex8(color, 0.25), background: isError ? '#fef2f2' : hex20(color) }}>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" style={{ color }} />
-                  <span className="text-sm font-medium" style={{ color }}>Step {s.id}: {s.title}</span>
+                  {isError
+                    ? <XCircle className="h-4 w-4 text-red-500" />
+                    : <CheckCircle className="h-4 w-4" style={{ color }} />}
+                  <span className="text-sm font-medium" style={{ color: isError ? '#dc2626' : color }}>Step {s.id}: {s.title}</span>
                 </div>
-                <button onClick={() => setCurrentStep(s.id)} className="text-xs hover:underline flex items-center gap-1" style={{ color }}>
-                  View result <ChevronRight className="h-3 w-3" />
+                <button onClick={() => setCurrentStep(s.id)} className="text-xs hover:underline flex items-center gap-1" style={{ color: isError ? '#dc2626' : color }}>
+                  {isError ? 'View error' : 'View result'} <ChevronRight className="h-3 w-3" />
                 </button>
               </div>
             );
@@ -731,7 +987,16 @@ function VAWorkflowDemo() {
                 onSelectUser={handleSelectUser}
                 onRun={runStep1}
               />
-            : <WorkflowStepPanel step={activeStep} result={stepResults[activeStep.id]} status={stepStatuses[activeStep.id] || 'idle'} onRun={() => runStep(activeStep)} userId={userId} />
+            : <WorkflowStepPanel
+                step={activeStep}
+                result={stepResults[activeStep.id]}
+                status={stepStatuses[activeStep.id] || 'idle'}
+                onRun={() => runStep(activeStep)}
+                onOAuthComplete={activeStep.id === 2
+                  ? () => runAllStepsFrom(2)
+                  : undefined}
+                userId={userId}
+              />
           }
           <div className="flex items-center justify-between mt-4 pt-4 pb-24 border-t border-slate-100">
             <button onClick={() => setCurrentStep(Math.max(1, currentStep - 1))} disabled={currentStep === 1}
